@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-france-blue: #1e40af;
+  --color-france-blue-dark: #1e3a8a;
+  --color-france-cyan: #0891b2;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

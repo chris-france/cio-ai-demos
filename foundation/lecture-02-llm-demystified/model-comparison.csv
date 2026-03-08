@@ -1,0 +1,8 @@
+model_name,parameters,ram_required,disk_size,speed,quality,cost_to_run,best_for,runs_on_laptop,data_leaves_building
+llama3.2:1b,1B,2GB,1.3GB,Very Fast,Basic,Free (local),Simple summaries and Q&A,Yes,No
+llama3.2:3b,3B,4GB,2.0GB,Fast,Good,Free (local),Business writing and analysis,Yes,No
+llama3.1:8b,8B,8GB,4.7GB,Moderate,Very Good,Free (local),Complex reasoning and planning,Most laptops,No
+llama3.1:70b,70B,48GB,40GB,Slow,Excellent,Free (local) but needs GPU server,$500K+ decisions and strategy,No — needs server,No
+claude-sonnet,Unknown,N/A,N/A,Fast,Excellent,$20/month subscription,Daily productivity and coding,Yes (cloud),Yes
+claude-opus,Unknown,N/A,N/A,Moderate,Best available,$20/month subscription,Complex analysis and writing,Yes (cloud),Yes
+gpt-4o,Unknown,N/A,N/A,Fast,Excellent,$20/month subscription,General purpose,Yes (cloud),Yes

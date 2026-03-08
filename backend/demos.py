@@ -1,0 +1,409 @@
+"""Demo data for all lectures."""
+
+from __future__ import annotations
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).parent.parent
+
+FOUNDATION_DEMOS = [
+    {
+        "num": "1",
+        "title": "The AI Inflection Point",
+        "subtitle": "Watch Claude Code build a complete data analysis from a single sentence",
+        "tool": "Claude Code",
+        "time": "~5 min",
+        "folder": "foundation/lecture-01-inflection-point",
+        "description": (
+            "You paste one prompt. Claude Code finds the repo on your machine, "
+            "reads the CSV, writes a Python script, installs dependencies, runs the "
+            "analysis, and produces a professional chart. You never type a command. "
+            "This is the moment it clicks."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — that's it, CC does everything else",
+            "Watch CC find the repo, read the CSV, write code, run it, produce the chart",
+            "When it's done, ask CC to open the chart for you",
+            "Keep going — paste the follow-up prompts below",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "foundation/lecture-01-inflection-point and read sample-employees.csv. "
+            "Calculate the average salary by department. Generate a professional bar "
+            "chart saved as chart.png in that folder with department labels, formatted "
+            "salary values, and a clean title. Use matplotlib — install it if needed. "
+            "When you're done, open the chart for me."
+        ),
+        "takeaway": (
+            "This is the inflection point. You described what you wanted in plain English "
+            "and a working application appeared. No Stack Overflow, no developer ticket, "
+            "no two-week sprint. This changes everything about how technology gets built."
+        ),
+        "followups": [
+            "Now add a second chart showing headcount by location as a pie chart",
+            "Add a salary distribution histogram with a median line",
+            "Create an HTML report with all three charts embedded and open it in my browser",
+        ],
+    },
+    {
+        "num": "2",
+        "title": "LLMs Demystified",
+        "subtitle": "See the difference between small and large models with your own eyes",
+        "tool": "Claude Code + Ollama",
+        "time": "~10 min",
+        "folder": "foundation/lecture-02-llm-demystified",
+        "description": (
+            "You paste one prompt. Claude Code installs Ollama, pulls a small model "
+            "and a medium model, runs the same prompt on both, and shows you the "
+            "difference in speed, quality, and resource usage. You'll understand "
+            "parameters, inference, and the cost tradeoff every CIO needs to know."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "At least 8GB RAM (for running small local models)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "Watch CC install Ollama and pull two models of different sizes",
+            "CC runs the same prompt on both and compares speed, quality, and resource usage",
+            "Paste follow-up prompts to explore larger models and cost questions",
+        ],
+        "cc_prompt": (
+            "I want to understand LLMs hands-on. Here's what I need:\n"
+            "1. Check if Ollama is installed on my machine. If not, install it.\n"
+            "2. Pull two models: a small one (llama3.2:1b) and a medium one "
+            "(llama3.2:3b).\n"
+            "3. Run the exact same prompt on both: \"Explain cloud computing to a "
+            "CEO in 3 sentences.\"\n"
+            "4. Show me the results side by side — the response text, how long each "
+            "took, and tokens per second.\n"
+            "5. Show me how much memory and disk each model uses.\n"
+            "6. Now run a harder prompt on both: \"Write a 90-day IT modernization "
+            "plan for a mid-size company. Include milestones, risks, and budget "
+            "considerations.\"\n"
+            "7. Compare the quality of both responses and explain the tradeoff "
+            "between model size, speed, cost, and quality in plain CIO language "
+            "— no data science jargon."
+        ),
+        "takeaway": (
+            "You don't need to be a data scientist. But you need to know enough to "
+            "call BS when a vendor says their model is 'enterprise-grade.' After this "
+            "demo, you can."
+        ),
+        "followups": [
+            "Now pull a larger model like llama3.1:8b and run the same hard prompt. Show me how quality improves with size.",
+            "Explain the difference between training and inference. What does each cost? Which one am I paying for when I use Claude or ChatGPT?",
+            "If I wanted to run AI locally so no data leaves my building, what hardware would I need? Give me a budget for small, medium, and enterprise setups.",
+        ],
+    },
+    {
+        "num": "3",
+        "title": "Finding Your $250K Moment",
+        "subtitle": "Use an AI-built cost calculator to find where your budget is bleeding",
+        "tool": "Inference Cost Calculator",
+        "time": "~7 min",
+        "folder": "ai-inference-cost-calculator",
+        "link": "http://localhost:8601",
+        "description": (
+            "This demo uses the AI Inference Cost Calculator — a tool Chris built entirely "
+            "with Claude Code. The tool itself IS the demo: AI built a tool that finds "
+            "$250K in cost savings. You'll ask CC to find it, launch it, and then "
+            "add a new feature — all without leaving the conversation."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "CC finds the project, explains it, and launches it for you",
+            "Explore the calculator in your browser",
+            "Come back to CC and paste a follow-up prompt to add a feature",
+        ],
+        "cc_prompt": (
+            "Find the ai-inference-cost-calculator project on my machine. "
+            "Read the codebase and explain what it does in 2 sentences. "
+            "Then launch it so I can use it in my browser."
+        ),
+        "takeaway": (
+            "The $250K moment is when someone approves infrastructure changes without "
+            "running the numbers. This calculator was built by AI in hours, not months. "
+            "The tool that finds the savings was itself a savings."
+        ),
+        "followups": [
+            "Add a new 'Export PDF Report' button that generates a one-page executive summary with the comparison results and a recommendation paragraph",
+            "Add a scenario where I can compare 3 cloud providers side by side instead of just 2",
+        ],
+    },
+    {
+        "num": "4",
+        "title": "Legacy Code is Not a Dead End",
+        "subtitle": "Watch Claude Code convert a 1985 COBOL program to modern Python in minutes",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "foundation/lecture-04-legacy-code",
+        "description": (
+            "You paste one prompt. Claude Code finds a real COBOL accounting program "
+            "on your machine, reads it, understands the business logic, converts it to "
+            "clean Python with type hints, writes unit tests, adds a REST API, and runs "
+            "the tests to prove it works. You don't touch a single file."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "Watch CC find the COBOL file, convert it, write tests, and run them",
+            "CC reports the test results — all should pass",
+            "Paste follow-up prompts to add more features",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "foundation/lecture-04-legacy-code and read accounting.cob. This is a "
+            "COBOL accounting system from 1985 with view balance, credit, and debit "
+            "operations. Convert it to modern Python in that same folder with:\n"
+            "1. A clean Account class with type hints\n"
+            "2. All original functionality preserved (balance check, credit, debit, "
+            "transaction limits, account status enforcement)\n"
+            "3. Unit tests in test_accounting.py that verify each operation\n"
+            "4. A simple Flask REST API in api.py with endpoints for "
+            "/balance, /credit, /debit\n"
+            "Install any packages you need. Run the tests and tell me the results."
+        ),
+        "takeaway": (
+            "Code nobody has touched for 40 years just became a modern web service in "
+            "5 minutes. Your IBM rep will tell you this is impossible. Show them this demo."
+        ),
+        "followups": [
+            "Add a /transactions endpoint that returns the last 10 transactions for an account",
+            "Add JWT authentication to the API",
+            "Generate Swagger API documentation and open it in my browser",
+        ],
+    },
+    {
+        "num": "5",
+        "title": "The Shadow IT Time Bomb",
+        "subtitle": "Claude Code audits a complex spreadsheet and finds the risks nobody knew about",
+        "tool": "Claude Code",
+        "time": "~7 min",
+        "folder": "foundation/lecture-05-shadow-it",
+        "description": (
+            "Somewhere in your organization, a $50M decision runs in a spreadsheet nobody "
+            "has audited. You paste one prompt. Claude Code finds the workbook on your "
+            "machine, analyzes every sheet, discovers hardcoded values, stale assumptions, "
+            "cross-sheet dependency chains, nested formulas — then generates an HTML risk "
+            "report and opens it for you."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC handles everything",
+            "Watch CC generate the sample workbook, then analyze every sheet and formula",
+            "CC generates risk-report.html and opens it in your browser",
+            "Paste follow-up prompts to go deeper",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "foundation/lecture-05-shadow-it. First run generate-workbook.py to create "
+            "the sample Excel file (install openpyxl if needed). Then analyze "
+            "sample-workbook.xlsx — this is a financial planning spreadsheet that a "
+            "finance team has been using for years. Perform a full audit:\n"
+            "1. Map all sheets, their purposes, and cross-references\n"
+            "2. Find circular references, external links, and hardcoded values\n"
+            "3. Measure formula complexity (nesting depth, volatile functions)\n"
+            "4. Identify stale assumptions (check the 'last updated' dates)\n"
+            "5. Identify business logic that should be in a real application\n"
+            "6. Generate a risk-report.html in that folder with findings, severity "
+            "ratings, and recommendations. Open it in my browser when done."
+        ),
+        "takeaway": (
+            "Every finding in that report exists right now in your organization. The question "
+            "isn't whether you have shadow IT — it's whether you discover the risks before "
+            "they discover you."
+        ),
+        "followups": [
+            "Now convert the spreadsheet logic to a proper Python application with a web dashboard",
+            "Create a data flow diagram showing all cross-sheet dependencies",
+            "Write a monitoring script that alerts when assumptions are more than 6 months old",
+        ],
+    },
+    {
+        "num": "6",
+        "title": "The Death of Offshore Labor Arbitrage",
+        "subtitle": "Claude Code completes a developer sprint ticket in 90 seconds",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "foundation/lecture-06-offshore-death",
+        "description": (
+            "There's a Flask app with no input validation — that's the sprint ticket. "
+            "You paste one prompt. Claude Code finds the app on your machine, reads every "
+            "file, installs dependencies, runs the existing tests, implements validation "
+            "across multiple files, writes new tests, runs them, and reports results. "
+            "A typical 2-hour offshore ticket done in 90 seconds."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — this is your 'sprint ticket'",
+            "Watch CC find the app, install deps, run tests, implement the feature",
+            "CC runs the new tests and reports results — all should pass",
+            "Paste follow-up prompts to keep building on the app",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "foundation/lecture-06-offshore-death. Read the entire codebase — this is a "
+            "Flask user registration app. Install the requirements and run the existing "
+            "tests to confirm they pass. Then implement this sprint ticket:\n\n"
+            "TICKET: Add input validation to user registration\n"
+            "- Email must be valid format (contains @ and a domain)\n"
+            "- Password must be 8+ characters with at least one number\n"
+            "- Username must be 3-20 characters, alphanumeric only\n"
+            "- Show clear error messages on the registration form\n"
+            "- Update existing tests and add new test cases for all validation rules\n\n"
+            "Run all tests when done and report the results."
+        ),
+        "takeaway": (
+            "That was a 2-hour offshore ticket at $40/hour. AI did it in 90 seconds "
+            "for about $0.15. The math on labor arbitrage just broke permanently."
+        ),
+        "followups": [
+            "Add a password strength meter to the registration form using JavaScript",
+            "Add rate limiting — max 5 registration attempts per IP per minute",
+            "Launch the app so I can test the registration form in my browser",
+        ],
+    },
+    {
+        "num": "7",
+        "title": "Renegotiating Your SaaS Stack",
+        "subtitle": "Claude Code builds a SaaS audit dashboard that shows where you're overpaying",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "foundation/lecture-07-saas-renegotiation",
+        "description": (
+            "You paste one prompt. Claude Code finds the SaaS inventory CSV on your "
+            "machine, reads it, calculates per-user costs, flags overpriced and underutilized "
+            "tools, detects duplicates, suggests open-source alternatives, totals the savings, "
+            "builds a complete HTML dashboard with charts, and opens it for you."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "Watch CC find the CSV, analyze the data, build charts, generate the dashboard",
+            "CC opens saas-audit.html in your browser",
+            "Paste follow-up prompts to generate negotiation emails or consolidation plans",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "foundation/lecture-07-saas-renegotiation. Read saas-inventory.csv. "
+            "Build a complete SaaS audit tool:\n"
+            "1. Calculate cost per user per month for every tool\n"
+            "2. Flag tools over $50/user/month as 'overpriced'\n"
+            "3. Flag tools with under 40% utilization as 'underutilized'\n"
+            "4. Detect overlapping tools (e.g., multiple project management or "
+            "messaging tools)\n"
+            "5. Suggest open-source alternatives for the top 5 most expensive tools\n"
+            "6. Calculate total potential annual savings\n"
+            "7. Generate a professional saas-audit.html dashboard in that folder with "
+            "charts and a summary table\n"
+            "Use pandas for analysis and matplotlib for charts — install if needed. "
+            "Save charts as embedded base64 in the HTML. Open it in my browser when done."
+        ),
+        "takeaway": (
+            "Every SaaS vendor assumed their tool was sticky. AI just gave you a credible "
+            "alternative to half your stack — and the audit tool itself cost nothing to build."
+        ),
+        "followups": [
+            "Write a negotiation email for the 3 worst-value contracts — firm but professional",
+            "Create a renewal calendar showing which contracts expire in the next 6 months",
+            "Build a consolidation roadmap — which tools to eliminate first and what replaces them",
+        ],
+    },
+]
+
+ADVANCED_DEMOS = [
+    {
+        "num": "8",
+        "title": "Build vs Buy Just Changed",
+        "subtitle": "Build a production AI app from scratch with Claude Code",
+        "tool": "Claude Code + Ollama",
+        "time": "~10 min",
+    },
+    {
+        "num": "9",
+        "title": "Leading Teams Through AI Disruption",
+        "subtitle": "Build a skills gap analyzer for your team",
+        "tool": "Claude Code",
+        "time": "~7 min",
+    },
+    {
+        "num": "10",
+        "title": "AI Governance and IP Protection",
+        "subtitle": "Scan an LLM for security vulnerabilities with Model Security Scanner",
+        "tool": "Model Security Scanner",
+        "time": "~8 min",
+    },
+    {
+        "num": "11",
+        "title": "Your 90-Day AI Leadership Roadmap",
+        "subtitle": "Build a visual 90-day plan with Claude Code",
+        "tool": "Claude Code",
+        "time": "~8 min",
+    },
+    {
+        "num": "12",
+        "title": "Building Your AI-Era IT Team",
+        "subtitle": "Build an AI-powered triage agent with local models",
+        "tool": "Claude Code + Ollama",
+        "time": "~8 min",
+    },
+    {
+        "num": "13",
+        "title": "AI Tools, Dependency, and Vendor Risk",
+        "subtitle": "Compare LLM providers and benchmark for vendor independence",
+        "tool": "Claude Code + Ollama",
+        "time": "~8 min",
+    },
+]
+
+
+def get_demo_status(folder: str | None) -> str:
+    """Return 'ready' if demo folder has real content."""
+    if not folder:
+        return "stub"
+    demo_dir = PROJECT_ROOT / folder
+    # Also check sibling directories (e.g., ai-inference-cost-calculator)
+    if not demo_dir.exists():
+        demo_dir = PROJECT_ROOT.parent / folder
+    if not demo_dir.exists():
+        return "stub"
+    # Check for at least a README or data file beyond .gitkeep
+    files = [f for f in demo_dir.iterdir() if f.name != '.gitkeep' and not f.name.startswith('.')]
+    return "ready" if len(files) >= 2 else "stub"
+
+
+def enrich_demos(demos: list[dict]) -> list[dict]:
+    """Add status to each demo."""
+    result = []
+    for d in demos:
+        enriched = {**d}
+        enriched["status"] = get_demo_status(d.get("folder"))
+        result.append(enriched)
+    return result

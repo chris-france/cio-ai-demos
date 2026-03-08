@@ -1,0 +1,26 @@
+tool_name,category,annual_cost,licensed_users,active_users,contract_end,auto_renew,notes
+Salesforce Enterprise,CRM,285000,150,108,2025-12-31,Yes,3-year deal signed 2022
+HubSpot Marketing Hub,Marketing/CRM,72000,40,22,2025-11-30,Yes,Overlap with Salesforce marketing features
+Microsoft 365 E5,Productivity,187200,300,289,2026-03-15,Yes,Includes Teams and security suite
+Google Workspace,Productivity,43200,300,45,2025-09-30,Yes,Legacy from acquisition — most users on M365
+Slack Business+,Messaging,64800,300,265,2025-09-30,Yes,Overlaps with Teams
+Zoom Business,Video/Meetings,33600,300,142,2025-08-15,Yes,Overlaps with Teams and Google Meet
+Jira Software Premium,Project Management,54000,150,98,2026-01-31,Yes,Dev teams only
+Asana Business,Project Management,39600,80,35,2025-10-31,Yes,Marketing uses instead of Jira
+Monday.com Enterprise,Project Management,62400,60,28,2025-07-31,Yes,Ops team bought independently
+AWS,Cloud Infrastructure,576000,45,45,2025-06-30,No,Primary cloud — usage-based
+Azure,Cloud Infrastructure,192000,30,18,2026-02-28,No,Secondary cloud — some legacy workloads
+Datadog Pro,Monitoring,115200,25,22,2026-02-28,No,Engineering only
+Splunk Cloud,Monitoring/SIEM,168000,15,12,2025-12-31,Yes,Overlap with Datadog for log analysis
+ServiceNow ITSM,IT Service Mgmt,144000,50,42,2026-06-30,Yes,Help desk and CMDB
+Zendesk Suite Pro,Customer Support,96000,60,48,2025-11-30,Yes,Some overlap with ServiceNow
+DocuSign Business Pro,E-Signature,21600,100,35,2025-07-31,Yes,Low utilization
+Adobe Creative Cloud,Design,28800,20,14,2025-10-31,Yes,Design team
+Figma Organization,Design,28800,15,14,2025-10-31,Yes,Dev team uses instead of Adobe
+Snowflake,Data Warehouse,240000,20,18,2026-01-31,No,Usage-based pricing
+Tableau Creator,BI/Analytics,84000,35,22,2025-12-31,Yes,Some users also have Power BI via M365
+Okta Workforce Identity,Identity/SSO,72000,300,300,2026-03-31,Yes,Critical — SSO for all apps
+CrowdStrike Falcon,Endpoint Security,96000,300,300,2026-06-30,Yes,Critical — EDR
+Workday HCM,HR/Payroll,180000,300,45,2026-12-31,Yes,HR admin users only
+Coupa Procurement,Procurement,120000,50,28,2025-09-30,Yes,Finance team
+Miro Business,Collaboration,18000,40,12,2025-08-31,Yes,Workshop tool — sporadic use

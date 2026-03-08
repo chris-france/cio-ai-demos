@@ -1,0 +1,26 @@
+employee_id,name,department,title,salary,hire_date,location
+1001,Sarah Chen,Engineering,Senior Developer,145000,2019-03-15,Austin
+1002,Marcus Johnson,Engineering,Staff Engineer,172000,2017-06-01,Austin
+1003,Priya Patel,Engineering,Junior Developer,92000,2023-01-10,Remote
+1004,James Wilson,Engineering,Engineering Manager,168000,2018-09-20,Austin
+1005,Lisa Wang,Engineering,DevOps Engineer,138000,2020-11-05,Denver
+1006,Ahmed Hassan,Sales,Account Executive,95000,2021-04-12,Chicago
+1007,Maria Rodriguez,Sales,Sales Director,155000,2016-08-30,Chicago
+1008,David Kim,Sales,SDR,65000,2024-02-01,Remote
+1009,Rachel Green,Sales,Account Manager,88000,2022-06-15,New York
+1010,Tom Bradley,Sales,VP Sales,195000,2015-01-20,Chicago
+1011,Jennifer Liu,Finance,Financial Analyst,87000,2022-03-08,New York
+1012,Robert Taylor,Finance,Controller,142000,2017-12-01,New York
+1013,Amanda Foster,Finance,CFO,225000,2014-05-15,New York
+1014,Chris Martinez,Finance,Staff Accountant,72000,2023-07-22,Remote
+1015,Diana Park,Marketing,Content Manager,85000,2021-09-14,Austin
+1016,Michael Brown,Marketing,VP Marketing,178000,2016-03-10,Austin
+1017,Katie O'Brien,Marketing,Digital Specialist,78000,2023-04-01,Remote
+1018,Steve Nakamura,Marketing,Brand Director,135000,2019-01-28,Austin
+1019,Laura Adams,HR,HR Manager,105000,2020-02-17,Denver
+1020,Paul Singh,HR,Recruiter,72000,2023-08-05,Remote
+1021,Nancy Thompson,HR,VP People,165000,2018-04-22,Denver
+1022,Alex Rivera,Operations,Operations Analyst,82000,2022-11-30,Chicago
+1023,Beth Cooper,Operations,VP Operations,175000,2016-07-14,Chicago
+1024,Frank Lee,Operations,Logistics Manager,98000,2019-10-01,Denver
+1025,Grace Kim,Operations,Supply Chain Analyst,79000,2023-05-20,Remote
