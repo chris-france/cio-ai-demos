@@ -11,9 +11,9 @@ def get_demos():
     return {
         "foundation": {
             "title": "Foundation Course",
-            "subtitle": "Lectures 1-6",
+            "subtitle": "Lectures 1-7",
             "description": (
-                "All demos use Claude Code only. No local models, no Ollama, no UI tools. "
+                "All demos use Claude Code. Lecture 2 introduces Ollama for local model comparison. "
                 "Pure terminal + CC."
             ),
             "demos": enrich_demos(FOUNDATION_DEMOS),
