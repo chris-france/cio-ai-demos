@@ -11,6 +11,7 @@ saas-audit.html
 users.db
 test_users.db
 feedback.db
+workbook.db
 
 # OS
 .DS_Store
