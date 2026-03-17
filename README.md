@@ -27,7 +27,7 @@ I'm taking the "CIO in the AI World" Udemy course by Chris France and I need you
 After everything is done, give me a summary of what was installed and confirm all 7 foundation demos are ready.
 ```
 
-That's it. CC checks your system, installs what's missing, clones the repos, sets up everything, and opens the demo menu at [http://localhost:8802](http://localhost:8802).
+That's it. CC checks your system, installs what's missing, clones the repos, sets up everything, and opens the demo menu at [http://localhost:18802](http://localhost:18802).
 
 ## How to Use
 

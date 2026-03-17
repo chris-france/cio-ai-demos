@@ -17,7 +17,7 @@ export default function CourseSection({ course, badge, badgeColor }) {
         <span className="text-sm text-gray-600">{course.description}</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 max-w-2xl">
         {course.demos?.map(demo => (
           <DemoCard key={demo.num} demo={demo} />
         ))}
