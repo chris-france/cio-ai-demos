@@ -9,15 +9,16 @@ FOUNDATION_DEMOS = [
     {
         "num": "1",
         "title": "The AI Inflection Point",
-        "subtitle": "Watch Claude Code build a complete data analysis from a single sentence",
+        "subtitle": "Watch Claude Code build an enterprise backup dashboard from a single prompt",
         "tool": "Claude Code",
         "time": "~5 min",
         "folder": "foundation/lecture-01-inflection-point",
         "description": (
-            "You paste one prompt. Claude Code finds the repo on your machine, "
-            "reads the CSV, writes a Python script, installs dependencies, runs the "
-            "analysis, and produces a professional chart. You never type a command. "
-            "This is the moment it clicks."
+            "You paste one prompt describing what a new CIO needs to audit backup "
+            "routines. Claude Code builds a complete interactive dashboard with KPI "
+            "cards, sortable tables, charts, a compliance matrix, and a glossary — "
+            "all in a single HTML file. You never type a command. This is the moment "
+            "it clicks."
         ),
         "prerequisites": [
             "Claude Code installed with Claude Pro/Max subscription ($20/month)",
@@ -26,27 +27,44 @@ FOUNDATION_DEMOS = [
         "steps": [
             "Open any terminal and type: claude",
             "Paste the prompt below — that's it, CC does everything else",
-            "Watch CC find the repo, read the CSV, write code, run it, produce the chart",
-            "When it's done, ask CC to open the chart for you",
-            "Keep going — paste the follow-up prompts below",
+            "Watch CC build the entire dashboard from scratch",
+            "CC opens the dashboard in your browser — explore the tables, charts, and filters",
+            "Keep going — paste the follow-up prompts below to add features live",
         ],
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
-            "foundation/lecture-01-inflection-point and read sample-employees.csv. "
-            "Calculate the average salary by department. Generate a professional bar "
-            "chart saved as chart.png in that folder with department labels, formatted "
-            "salary values, and a clean title. Use matplotlib — install it if needed. "
-            "When you're done, open the chart for me."
+            "foundation/lecture-01-inflection-point.\n\n"
+            "I'm a new CIO and I need to audit our backup routines for all mission-critical "
+            "data. Build me a Backup Audit Dashboard as a single index.html file using "
+            "Tailwind CSS and Chart.js from CDN (no build step).\n\n"
+            "Generate realistic test data for about 14 enterprise systems — things like "
+            "SAP ERP, Salesforce CRM, Oracle HCM, SQL Server for financials, a data lake, "
+            "a data warehouse, Active Directory, email, etc. Each system needs: data store "
+            "type, environment, backup method, schedule, RPO and RTO targets, last backup "
+            "time, status (Success/Warning/Failed), backup size, retention policy, and "
+            "compliance tags like SOX, HIPAA, PCI-DSS, GDPR. Make 2-3 systems overdue or "
+            "failed so the dashboard shows real risk.\n\n"
+            "I want to see:\n"
+            "- KPI cards across the top: total systems, success rate, overdue count, "
+            "total storage, RPO compliance percentage\n"
+            "- A sortable, searchable status table with color-coded status badges and "
+            "red-highlighted rows for RPO breaches\n"
+            "- A line chart showing backup success rate over the last 30 days\n"
+            "- A bar chart showing storage consumed by system\n"
+            "- A compliance coverage matrix so I can spot gaps\n"
+            "- An acronym glossary — define every acronym you use\n\n"
+            "White background, vibrant colors that pop, executive-ready look. "
+            "When you're done, open it in my browser."
         ),
         "takeaway": (
-            "This is the inflection point. You described what you wanted in plain English "
-            "and a working application appeared. No Stack Overflow, no developer ticket, "
-            "no two-week sprint. This changes everything about how technology gets built."
+            "This is the inflection point. You described a business need in plain English "
+            "and a board-ready dashboard appeared. No developer ticket, no two-week sprint, "
+            "no vendor demo. This changes everything about how technology gets built."
         ),
         "followups": [
-            "Now add a second chart showing headcount by location as a pie chart",
-            "Add a salary distribution histogram with a median line",
-            "Create an HTML report with all three charts embedded and open it in my browser",
+            "Add a filter dropdown so I can view systems by compliance framework — show me only SOX-tagged systems",
+            "Add an alert panel at the top that flags the 3 highest-risk systems with a recommended action for each",
+            "Export the dashboard data as a CSV report I can email to my IT director",
         ],
     },
     {

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIO Backup Audit Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Inter', sans-serif; }
+  .sortable { cursor: pointer; user-select: none; }
+  .sortable:hover { background-color: #f0f4ff; }
+  .sort-arrow { opacity: 0.3; margin-left: 4px; font-size: 0.7em; }
+  .sort-arrow.active { opacity: 1; }
+  .status-pill { padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; display: inline-block; min-width: 70px; text-align: center; }
+  .status-success { background-color: #d1fae5; color: #065f46; }
+  .status-warning { background-color: #fef3c7; color: #92400e; }
+  .status-failed { background-color: #fee2e2; color: #991b1b; }
+  .row-overdue { background-color: #fff5f5; }
+  .compliance-check { color: #10b981; font-weight: 700; font-size: 1.1rem; }
+  .compliance-gap { background-color: #fef2f2; }
+  .kpi-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+  table th { position: sticky; top: 0; z-index: 10; }
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr !important; }
+    .table-scroll { overflow-x: auto; }
+  }
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr !important; }
+  }
+</style>
+</head>
+<body class="bg-white text-gray-800">
+
+<script>
+// ============================================================
+// TEST DATA — 14 Enterprise Data Stores
+// ============================================================
+const now = new Date();
+function hoursAgo(h) { return new Date(now.getTime() - h * 3600000); }
+function formatTS(d) {
+  return d.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+}
+
+const dataStores = [
+  {
+    system: "SAP ERP (Enterprise Resource Planning)",
+    type: "RDBMS (Relational Database Management System)",
+    typeShort: "RDBMS",
+    environment: "Production",
+    backupMethod: "Full",
+    schedule: "Daily 2:00 AM",
+    rpoHours: 24,
+    rtoHours: 4,
+    lastBackup: hoursAgo(6),
+    status: "Success",
+    sizeGB: 2840,
+    retention: "7 years (regulatory)",
+    compliance: ["SOX", "GDPR"]
+  },
+  {
+    system: "Salesforce CRM (Customer Relationship Management)",
+    type: "Object Storage",
+    typeShort: "Object Storage",
+    environment: "Production",
+    backupMethod: "Incremental",
+    schedule: "Every 6 hours",
+    rpoHours: 6,
+    rtoHours: 2,
+    lastBackup: hoursAgo(3),
+    status: "Success",
+    sizeGB: 680,
+    retention: "90 days",
+    compliance: ["SOX", "GDPR"]
+  },
+  {
+    system: "Oracle HCM (Human Capital Management)",
+    type: "RDBMS (Relational Database Management System)",
+    typeShort: "RDBMS",
+    environment: "Production",
+    backupMethod: "Differential",
+    schedule: "Daily 3:00 AM",
+    rpoHours: 24,
+    rtoHours: 4,
+    lastBackup: hoursAgo(8),
+    status: "Success",
+    sizeGB: 1250,
+    retention: "7 years (regulatory)",
+    compliance: ["SOX", "HIPAA", "GDPR"]
+  },
+  {
+    system: "SQL Server (Financial Reporting)",
+    type: "RDBMS (Relational Database Management System)",
+    typeShort: "RDBMS",
+    environment: "Production",
+    backupMethod: "Full",
+    schedule: "Daily 1:00 AM",
+    rpoHours: 24,
+    rtoHours: 2,
+    lastBackup: hoursAgo(5),
+    status: "Success",
+    sizeGB: 1580,
+    retention: "7 years (regulatory)",
+    compliance: ["SOX", "PCI-DSS"]
+  },
+  {
+    system: "PostgreSQL (Web Application Platform)",
+    type: "RDBMS (Relational Database Management System)",
+    typeShort: "RDBMS",
+    environment: "Production",
+    backupMethod: "Incremental",
+    schedule: "Every 4 hours",
+    rpoHours: 4,
+    rtoHours: 1,
+    lastBackup: hoursAgo(2),
+    status: "Success",
+    sizeGB: 340,
+    retention: "30 days",
+    compliance: ["PCI-DSS", "GDPR"]
+  },
+  {
+    system: "MongoDB (IoT Telemetry Platform)",
+    type: "NoSQL",
+    typeShort: "NoSQL",
+    environment: "Production",
+    backupMethod: "Snapshot",
+    schedule: "Every 12 hours",
+    rpoHours: 12,
+    rtoHours: 2,
+    lastBackup: hoursAgo(36),
+    status: "Failed",
+    sizeGB: 4200,
+    retention: "60 days",
+    compliance: []
+  },
+  {
+    system: "SharePoint Online (Document Management)",
+    type: "Object Storage",
+    typeShort: "Object Storage",
+    environment: "Production",
+    backupMethod: "Incremental",
+    schedule: "Daily 4:00 AM",
+    rpoHours: 24,
+    rtoHours: 8,
+    lastBackup: hoursAgo(10),
+    status: "Success",
+    sizeGB: 1820,
+    retention: "90 days",
+    compliance: ["GDPR"]
+  },
+  {
+    system: "AWS S3 (Data Lake)",
+    type: "Object Storage",
+    typeShort: "Object Storage",
+    environment: "Production",
+    backupMethod: "CDC (Change Data Capture) Replication",
+    schedule: "Continuous",
+    rpoHours: 1,
+    rtoHours: 1,
+    lastBackup: hoursAgo(0.5),
+    status: "Success",
+    sizeGB: 12400,
+    retention: "365 days",
+    compliance: ["SOX", "HIPAA", "PCI-DSS", "GDPR"]
+  },
+  {
+    system: "Snowflake (Enterprise Data Warehouse)",
+    type: "Data Warehouse",
+    typeShort: "Data Warehouse",
+    environment: "Production",
+    backupMethod: "Snapshot",
+    schedule: "Every 8 hours",
+    rpoHours: 8,
+    rtoHours: 2,
+    lastBackup: hoursAgo(4),
+    status: "Success",
+    sizeGB: 5600,
+    retention: "90 days",
+    compliance: ["SOX", "HIPAA"]
+  },
+  {
+    system: "Exchange Online (Corporate Email)",
+    type: "Object Storage",
+    typeShort: "Object Storage",
+    environment: "Production",
+    backupMethod: "Incremental",
+    schedule: "Every 6 hours",
+    rpoHours: 6,
+    rtoHours: 4,
+    lastBackup: hoursAgo(5),
+    status: "Warning",
+    sizeGB: 890,
+    retention: "7 years (regulatory)",
+    compliance: ["SOX", "HIPAA", "GDPR"]
+  },
+  {
+    system: "Active Directory (Identity & Access)",
+    type: "RDBMS (Relational Database Management System)",
+    typeShort: "RDBMS",
+    environment: "DR (Disaster Recovery)",
+    backupMethod: "Full",
+    schedule: "Daily 12:00 AM",
+    rpoHours: 24,
+    rtoHours: 1,
+    lastBackup: hoursAgo(14),
+    status: "Success",
+    sizeGB: 45,
+    retention: "180 days",
+    compliance: ["SOX"]
+  },
+  {
+    system: "Splunk SIEM (Security Information & Event Management)",
+    type: "NoSQL",
+    typeShort: "NoSQL",
+    environment: "Production",
+    backupMethod: "Incremental",
+    schedule: "Daily 5:00 AM",
+    rpoHours: 24,
+    rtoHours: 4,
+    lastBackup: hoursAgo(52),
+    status: "Failed",
+    sizeGB: 3200,
+    retention: "365 days",
+    compliance: ["SOX", "PCI-DSS"]
+  },
+  {
+    system: "NetApp SAN (Primary Storage Array)",
+    type: "SAN (Storage Area Network)",
+    typeShort: "SAN",
+    environment: "Production",
+    backupMethod: "Snapshot",
+    schedule: "Every 4 hours",
+    rpoHours: 4,
+    rtoHours: 1,
+    lastBackup: hoursAgo(2),
+    status: "Success",
+    sizeGB: 8500,
+    retention: "30 days",
+    compliance: ["SOX"]
+  },
+  {
+    system: "Isilon NAS (Engineering File Shares)",
+    type: "NAS (Network-Attached Storage)",
+    typeShort: "NAS",
+    environment: "Staging",
+    backupMethod: "Differential",
+    schedule: "Daily 6:00 AM",
+    rpoHours: 24,
+    rtoHours: 8,
+    lastBackup: hoursAgo(30),
+    status: "Warning",
+    sizeGB: 6700,
+    retention: "60 days",
+    compliance: []
+  }
+];
+
+// Computed helpers
+function isOverdue(store) {
+  const elapsed = (now - store.lastBackup) / 3600000;
+  return elapsed > store.rpoHours;
+}
+
+function timeSinceBackup(store) {
+  const h = Math.round((now - store.lastBackup) / 3600000 * 10) / 10;
+  if (h < 1) return `${Math.round(h * 60)}m ago`;
+  if (h < 48) return `${h}h ago`;
+  return `${Math.round(h / 24)}d ago`;
+}
+
+// KPI Computations
+const totalStores = dataStores.length;
+const successCount = dataStores.filter(d => d.status === 'Success').length;
+const warningCount = dataStores.filter(d => d.status === 'Warning').length;
+const failedCount = dataStores.filter(d => d.status === 'Failed').length;
+const successRate = Math.round((successCount / totalStores) * 100);
+const overdueCount = dataStores.filter(isOverdue).length;
+const totalStorageTB = Math.round(dataStores.reduce((sum, d) => sum + d.sizeGB, 0) / 1024 * 10) / 10;
+const rpoCompliant = dataStores.filter(d => !isOverdue(d)).length;
+const rpoComplianceRate = Math.round((rpoCompliant / totalStores) * 100);
+
+// ============================================================
+// Backup Health Over Time — 30 days of simulated data
+// ============================================================
+const healthDays = [];
+const healthRates = [];
+for (let i = 29; i >= 0; i--) {
+  const d = new Date(now);
+  d.setDate(d.getDate() - i);
+  healthDays.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+  let rate;
+  if (i === 22) rate = 85.7;
+  else if (i === 14) rate = 88.2;
+  else if (i === 5) rate = 89.5;
+  else rate = 95 + Math.random() * 5;
+  healthRates.push(Math.round(rate * 10) / 10);
+}
+
+// ============================================================
+// Compliance frameworks
+// ============================================================
+const frameworks = ['SOX', 'HIPAA', 'PCI-DSS', 'GDPR'];
+
+// ============================================================
+// Acronym Glossary
+// ============================================================
+const glossary = [
+  ["AD", "Active Directory"],
+  ["AWS", "Amazon Web Services"],
+  ["CDC", "Change Data Capture"],
+  ["CRM", "Customer Relationship Management"],
+  ["DR", "Disaster Recovery"],
+  ["ERP", "Enterprise Resource Planning"],
+  ["GB", "Gigabyte"],
+  ["GDPR", "General Data Protection Regulation (EU)"],
+  ["HCM", "Human Capital Management"],
+  ["HIPAA", "Health Insurance Portability and Accountability Act"],
+  ["IoT", "Internet of Things"],
+  ["NAS", "Network-Attached Storage"],
+  ["NoSQL", "Non-Relational Database"],
+  ["PCI-DSS", "Payment Card Industry Data Security Standard"],
+  ["RDBMS", "Relational Database Management System"],
+  ["RPO", "Recovery Point Objective — maximum acceptable data loss measured in time"],
+  ["RTO", "Recovery Time Objective — maximum acceptable downtime after a failure"],
+  ["S3", "Simple Storage Service (AWS)"],
+  ["SAN", "Storage Area Network"],
+  ["SIEM", "Security Information and Event Management"],
+  ["SOX", "Sarbanes-Oxley Act"],
+  ["SQL", "Structured Query Language"],
+  ["TB", "Terabyte"]
+];
+</script>
+
+<!-- ============================================================ -->
+<!-- HEADER -->
+<!-- ============================================================ -->
+<header class="border-b border-gray-200 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex items-center gap-4">
+      <div class="w-1.5 h-12 bg-blue-600 rounded-full"></div>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-800 text-gray-900 tracking-tight">CIO Backup Audit Dashboard</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Enterprise Data Protection Overview</p>
+      </div>
+      <div class="ml-auto text-right hidden sm:block">
+        <p class="text-xs text-gray-400">Last refreshed</p>
+        <p class="text-sm font-semibold text-gray-600" id="lastRefreshed"></p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+  <!-- ============================================================ -->
+  <!-- KPI CARDS -->
+  <!-- ============================================================ -->
+  <section>
+    <div class="kpi-grid grid grid-cols-2 lg:grid-cols-5 gap-4" id="kpiCards"></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 1 — BACKUP STATUS TABLE -->
+  <!-- ============================================================ -->
+  <section>
+    <div class="flex items-center gap-3 mb-4">
+      <div class="border-l-4 border-blue-600 pl-3">
+        <h2 class="text-xl font-bold text-gray-900">Backup Status — All Systems</h2>
+        <p class="text-sm text-gray-500">Click column headers to sort. Highlighted rows indicate RPO breach.</p>
+      </div>
+    </div>
+    <div class="mb-3">
+      <input id="tableSearch" type="text" placeholder="Search systems, types, environments..."
+        class="w-full sm:w-80 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+    </div>
+    <div class="table-scroll bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+      <table class="min-w-full text-sm" id="statusTable">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr id="tableHeader"></tr>
+        </thead>
+        <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 2 — BACKUP HEALTH OVER TIME -->
+  <!-- ============================================================ -->
+  <section>
+    <div class="border-l-4 border-blue-600 pl-3 mb-4">
+      <h2 class="text-xl font-bold text-gray-900">Backup Health Over Time</h2>
+      <p class="text-sm text-gray-500">Daily backup success rate (%) — trailing 30 days</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">
+      <canvas id="healthChart" height="100"></canvas>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 3 — STORAGE BY SYSTEM -->
+  <!-- ============================================================ -->
+  <section>
+    <div class="border-l-4 border-blue-600 pl-3 mb-4">
+      <h2 class="text-xl font-bold text-gray-900">Backup Storage by System</h2>
+      <p class="text-sm text-gray-500">Total backup storage footprint per data store (GB)</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">
+      <canvas id="storageChart" height="140"></canvas>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 4 — COMPLIANCE COVERAGE MATRIX -->
+  <!-- ============================================================ -->
+  <section>
+    <div class="border-l-4 border-blue-600 pl-3 mb-4">
+      <h2 class="text-xl font-bold text-gray-900">Compliance Coverage Matrix</h2>
+      <p class="text-sm text-gray-500">Green = compliant tagging in place. Red highlight = gap requiring review.</p>
+    </div>
+    <div class="table-scroll bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+      <table class="min-w-full text-sm" id="complianceTable">
+        <thead class="bg-gray-50 border-b border-gray-200"></thead>
+        <tbody class="divide-y divide-gray-100"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 5 — ACRONYM GLOSSARY -->
+  <!-- ============================================================ -->
+  <section>
+    <div class="border-l-4 border-blue-600 pl-3 mb-4">
+      <h2 class="text-xl font-bold text-gray-900">Acronym Glossary</h2>
+      <p class="text-sm text-gray-500">Reference for all abbreviations used in this dashboard</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+      <table class="min-w-full text-sm" id="glossaryTable">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-5 py-3 text-left font-semibold text-gray-700 w-36">Acronym</th>
+            <th class="px-5 py-3 text-left font-semibold text-gray-700">Definition</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100" id="glossaryBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================================================ -->
+<!-- FOOTER -->
+<!-- ============================================================ -->
+<footer class="border-t border-gray-200 bg-gray-50 mt-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
+    <p class="text-sm font-semibold text-gray-600">CIO AI Course &mdash; Backup Audit Dashboard Demo</p>
+    <p class="text-xs text-gray-400 mt-1">In production, connect to live APIs (AWS Backup, Veeam, Commvault, Azure Backup, etc.)</p>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+
+// Last refreshed timestamp
+document.getElementById('lastRefreshed').textContent = now.toLocaleString('en-US', {
+  month: 'short', day: 'numeric', year: 'numeric',
+  hour: '2-digit', minute: '2-digit', second: '2-digit'
+});
+
+// --- KPI CARDS ---
+(function renderKPIs() {
+  const cards = [
+    { label: 'Total Data Stores', value: totalStores, color: '#2563eb', icon: '&#x1F5C4;' },
+    { label: 'Backup Success Rate', value: successRate + '%', color: successRate >= 95 ? '#10b981' : successRate >= 90 ? '#f59e0b' : '#ef4444', icon: '&#x2714;' },
+    { label: 'Overdue Backups', value: overdueCount, color: overdueCount > 0 ? '#ef4444' : '#10b981', icon: '&#x26A0;' },
+    { label: 'Total Backup Storage', value: totalStorageTB + ' TB', color: '#2563eb', icon: '&#x1F4BE;' },
+    { label: 'RPO Compliance', value: rpoComplianceRate + '%', color: rpoComplianceRate >= 95 ? '#10b981' : rpoComplianceRate >= 85 ? '#f59e0b' : '#ef4444', icon: '&#x1F6E1;' }
+  ];
+  const container = document.getElementById('kpiCards');
+  cards.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'kpi-card bg-white rounded-xl shadow-md border border-gray-200 p-5 flex flex-col justify-between';
+    el.style.borderLeft = `4px solid ${c.color}`;
+    el.innerHTML = `
+      <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">${c.label}</p>
+      <p class="text-3xl font-800 tracking-tight" style="color:${c.color}">${c.value}</p>
+    `;
+    container.appendChild(el);
+  });
+})();
+
+// --- STATUS TABLE ---
+(function renderTable() {
+  const columns = [
+    { key: 'system', label: 'System', align: 'left' },
+    { key: 'typeShort', label: 'Type', align: 'left' },
+    { key: 'environment', label: 'Env', align: 'left' },
+    { key: 'backupMethod', label: 'Method', align: 'left' },
+    { key: 'schedule', label: 'Schedule', align: 'left' },
+    { key: 'rpoHours', label: 'RPO (h)', align: 'center' },
+    { key: 'rtoHours', label: 'RTO (h)', align: 'center' },
+    { key: 'lastBackup', label: 'Last Backup', align: 'left' },
+    { key: 'status', label: 'Status', align: 'center' },
+    { key: 'sizeGB', label: 'Size (GB)', align: 'right' },
+    { key: 'retention', label: 'Retention', align: 'left' },
+    { key: 'compliance', label: 'Compliance', align: 'left' }
+  ];
+
+  let sortKey = null;
+  let sortDir = 1;
+  let filtered = [...dataStores];
+
+  function renderHeader() {
+    const tr = document.getElementById('tableHeader');
+    tr.innerHTML = '';
+    columns.forEach(col => {
+      const th = document.createElement('th');
+      th.className = `sortable px-4 py-3 text-${col.align} font-semibold text-gray-700 whitespace-nowrap`;
+      th.innerHTML = `${col.label}<span class="sort-arrow ${sortKey === col.key ? 'active' : ''}">${sortKey === col.key ? (sortDir === 1 ? '&#x25B2;' : '&#x25BC;') : '&#x25B2;'}</span>`;
+      th.addEventListener('click', () => {
+        if (sortKey === col.key) sortDir *= -1;
+        else { sortKey = col.key; sortDir = 1; }
+        renderHeader();
+        renderRows();
+      });
+      tr.appendChild(th);
+    });
+  }
+
+  function renderRows() {
+    const tbody = document.getElementById('tableBody');
+    const query = document.getElementById('tableSearch').value.toLowerCase();
+    let rows = filtered;
+    if (query) {
+      rows = rows.filter(d => {
+        const searchable = [d.system, d.typeShort, d.type, d.environment, d.backupMethod, d.schedule, d.status, d.retention, d.compliance.join(' ')].join(' ').toLowerCase();
+        return searchable.includes(query);
+      });
+    }
+    if (sortKey) {
+      rows = [...rows].sort((a, b) => {
+        let va = a[sortKey], vb = b[sortKey];
+        if (sortKey === 'lastBackup') { va = va.getTime(); vb = vb.getTime(); }
+        if (sortKey === 'compliance') { va = va.length; vb = vb.length; }
+        if (typeof va === 'string') return va.localeCompare(vb) * sortDir;
+        return (va - vb) * sortDir;
+      });
+    }
+    tbody.innerHTML = '';
+    rows.forEach(d => {
+      const overdue = isOverdue(d);
+      const tr = document.createElement('tr');
+      tr.className = overdue ? 'row-overdue hover:bg-red-50' : 'hover:bg-gray-50';
+
+      const statusClass = d.status === 'Success' ? 'status-success' : d.status === 'Warning' ? 'status-warning' : 'status-failed';
+      const compTags = d.compliance.length > 0
+        ? d.compliance.map(c => `<span class="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded mr-1 mb-0.5">${c}</span>`).join('')
+        : '<span class="text-gray-400 text-xs">None</span>';
+      const backupDisplay = `<span class="${overdue ? 'text-red-600 font-semibold' : ''}">${timeSinceBackup(d)}</span>`;
+
+      const shortSystem = d.system.split('(')[0].trim();
+      const systemParen = d.system.includes('(') ? `<span class="text-gray-400 text-xs block">(${d.system.split('(')[1]}</span>` : '';
+
+      tr.innerHTML = `
+        <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">${shortSystem}${systemParen}</td>
+        <td class="px-4 py-3 text-gray-600 whitespace-nowrap">${d.typeShort}</td>
+        <td class="px-4 py-3 text-gray-600 whitespace-nowrap">${d.environment}</td>
+        <td class="px-4 py-3 text-gray-600 whitespace-nowrap">${d.backupMethod}</td>
+        <td class="px-4 py-3 text-gray-600 whitespace-nowrap">${d.schedule}</td>
+        <td class="px-4 py-3 text-center text-gray-600">${d.rpoHours}</td>
+        <td class="px-4 py-3 text-center text-gray-600">${d.rtoHours}</td>
+        <td class="px-4 py-3 whitespace-nowrap">${backupDisplay}</td>
+        <td class="px-4 py-3 text-center"><span class="status-pill ${statusClass}">${d.status}</span></td>
+        <td class="px-4 py-3 text-right text-gray-600 font-mono">${d.sizeGB.toLocaleString()}</td>
+        <td class="px-4 py-3 text-gray-600 whitespace-nowrap">${d.retention}</td>
+        <td class="px-4 py-3">${compTags}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('tableSearch').addEventListener('input', renderRows);
+  renderHeader();
+  renderRows();
+})();
+
+// --- BACKUP HEALTH CHART ---
+(function renderHealthChart() {
+  const ctx = document.getElementById('healthChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: healthDays,
+      datasets: [{
+        label: 'Backup Success Rate (%)',
+        data: healthRates,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37, 99, 235, 0.08)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+        pointBackgroundColor: healthRates.map(r => r < 92 ? '#ef4444' : '#2563eb'),
+        pointBorderColor: healthRates.map(r => r < 92 ? '#ef4444' : '#2563eb'),
+        pointRadius: healthRates.map(r => r < 92 ? 6 : 3),
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          titleFont: { family: 'Inter' },
+          bodyFont: { family: 'Inter' },
+          callbacks: {
+            label: ctx => `${ctx.parsed.y}%`
+          }
+        }
+      },
+      scales: {
+        y: {
+          min: 80, max: 100,
+          ticks: { callback: v => v + '%', font: { family: 'Inter', size: 12 } },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 45 },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+})();
+
+// --- STORAGE BAR CHART ---
+(function renderStorageChart() {
+  const sorted = [...dataStores].sort((a, b) => b.sizeGB - a.sizeGB);
+  const ctx = document.getElementById('storageChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(d => d.system.split('(')[0].trim()),
+      datasets: [{
+        label: 'Backup Size (GB)',
+        data: sorted.map(d => d.sizeGB),
+        backgroundColor: sorted.map((_, i) => {
+          const colors = ['#2563eb', '#3b82f6', '#60a5fa', '#93bbfd'];
+          return colors[i % colors.length];
+        }),
+        borderRadius: 4,
+        barPercentage: 0.7
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          titleFont: { family: 'Inter' },
+          bodyFont: { family: 'Inter' },
+          callbacks: {
+            label: ctx => `${ctx.parsed.x.toLocaleString()} GB`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { callback: v => v >= 1000 ? (v/1000) + ' TB' : v + ' GB', font: { family: 'Inter', size: 12 } },
+          grid: { color: '#f1f5f9' }
+        },
+        y: {
+          ticks: { font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+})();
+
+// --- COMPLIANCE MATRIX ---
+(function renderComplianceMatrix() {
+  const table = document.getElementById('complianceTable');
+  const thead = table.querySelector('thead');
+  const tbody = table.querySelector('tbody');
+
+  let headerHTML = '<tr><th class="px-5 py-3 text-left font-semibold text-gray-700">System</th>';
+  frameworks.forEach(f => {
+    headerHTML += `<th class="px-5 py-3 text-center font-semibold text-gray-700">${f}</th>`;
+  });
+  headerHTML += '</tr>';
+  thead.innerHTML = headerHTML;
+
+  dataStores.forEach(d => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50';
+    let cells = `<td class="px-5 py-3 font-medium text-gray-900 whitespace-nowrap">${d.system.split('(')[0].trim()}</td>`;
+    frameworks.forEach(f => {
+      const has = d.compliance.includes(f);
+      cells += `<td class="px-5 py-3 text-center ${has ? '' : 'compliance-gap'}">${has ? '<span class="compliance-check">&#10003;</span>' : '<span class="text-gray-300">&mdash;</span>'}</td>`;
+    });
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+})();
+
+// --- GLOSSARY ---
+(function renderGlossary() {
+  const tbody = document.getElementById('glossaryBody');
+  glossary.forEach(([acr, def]) => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50';
+    tr.innerHTML = `
+      <td class="px-5 py-2.5 font-semibold text-blue-700">${acr}</td>
+      <td class="px-5 py-2.5 text-gray-600">${def}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+
+</body>
+</html>
