@@ -1,0 +1,11 @@
+Vendor Name,Annual Cost ($),Category,Zone,Notes
+Accenture Custom Dev,250000,Software Development,Quick Win,Legacy system maintenance — AI tools could replace 80% of this
+ServiceNow,180000,IT Service Management,Optimize,Core platform but only using 40% of modules
+Salesforce Enterprise,144000,CRM,Optimize,120 licenses only 67 active users
+Offshore QA Team (TCS),96000,Quality Assurance,Quick Win,AI testing tools available at fraction of cost
+Microsoft 365 E5,86400,Productivity Suite,Keep,Well-utilized enterprise standard
+Datadog,72000,Monitoring,Optimize,Overlaps with CloudWatch — consolidate
+Tableau Server,60000,Analytics & BI,Strategic,Evaluate AI-powered dashboards as replacement
+Custom Report Generator,48000,Internal Reporting,Quick Win,Monthly reports — CC could build this in a day
+Jira + Confluence,42000,Project Management,Keep,Team depends on it well-adopted
+Workday Integration,36000,HR Integration,Keep,Critical HR pipeline no good alternative

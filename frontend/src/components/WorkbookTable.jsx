@@ -2,7 +2,7 @@ import { Plus, Trash2 } from 'lucide-react'
 
 export default function WorkbookTable({ schema, data = [], onChange }) {
   const columns = schema.columns || []
-  const rows = data.length > 0 ? data : Array.from({ length: schema.initial_rows || 5 }, () => ({}))
+  const rows = data.length > 0 ? data : (schema.default_data || Array.from({ length: schema.initial_rows || 5 }, () => ({})))
 
   const updateCell = (rowIdx, colName, value) => {
     const updated = rows.map((row, i) => i === rowIdx ? { ...row, [colName]: value } : row)

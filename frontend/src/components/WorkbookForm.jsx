@@ -15,7 +15,7 @@ export default function WorkbookForm({ section, data, onChange }) {
 
   // Simple form fields
   const fields = section.fields || []
-  const formData = data || {}
+  const formData = data || section.default_data || {}
 
   const updateField = (name, value) => {
     onChange({ ...formData, [name]: value })

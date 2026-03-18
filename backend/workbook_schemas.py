@@ -25,12 +25,54 @@ WORKBOOK_SECTIONS = {
                      "min": 1, "max": 10},
                     {"name": "quick_win", "label": "One Process AI Could Improve Tomorrow", "type": "textarea"},
                 ],
+                "default_data": {
+                    "ai_maturity": "Experimenting",
+                    "top_priorities": "1. Reduce vendor software costs\n2. Automate manual reporting and data aggregation\n3. Modernize legacy systems that are expensive to maintain",
+                    "biggest_concern": "Vendor lock-in and paying for AI wrappers when the underlying models cost pennies",
+                    "budget_available": "$50,000",
+                    "executive_support": 6,
+                    "quick_win": "Monthly board reporting — currently takes 3 people 2 days to compile from 6 different systems",
+                },
             }
         ],
     },
     2: {
-        "title": "Tech Spend Audit",
+        "title": "LLM Landscape Comparison",
         "lecture_title": "LLMs Demystified",
+        "sections": [
+            {
+                "key": "llm_comparison",
+                "title": "AI Model Comparison — What Your Ollama Demo Revealed",
+                "type": "table",
+                "columns": [
+                    {"name": "model", "label": "Model", "type": "text"},
+                    {"name": "provider", "label": "Provider", "type": "text"},
+                    {"name": "parameters", "label": "Parameters", "type": "text"},
+                    {"name": "monthly_cost", "label": "Monthly Cost", "type": "text"},
+                    {"name": "speed", "label": "Speed", "type": "select",
+                     "options": ["Very Fast", "Fast", "Medium", "Slow"]},
+                    {"name": "quality", "label": "Quality (1-10)", "type": "number"},
+                    {"name": "best_use", "label": "Best Use Case", "type": "text"},
+                    {"name": "data_leaves", "label": "Data Leaves Building?", "type": "select",
+                     "options": ["Yes", "No"]},
+                ],
+                "initial_rows": 8,
+                "default_data": [
+                    {"model": "Llama 3.2 1B", "provider": "Meta (local)", "parameters": "1B", "monthly_cost": "$0 (your hardware)", "speed": "Very Fast", "quality": 4, "best_use": "Simple categorization, routing, basic text", "data_leaves": "No"},
+                    {"model": "Llama 3.2 3B", "provider": "Meta (local)", "parameters": "3B", "monthly_cost": "$0 (your hardware)", "speed": "Fast", "quality": 6, "best_use": "Summaries, basic code, decent writing", "data_leaves": "No"},
+                    {"model": "Llama 3.1 8B", "provider": "Meta (local)", "parameters": "8B", "monthly_cost": "$0 (your hardware)", "speed": "Medium", "quality": 7, "best_use": "Good reasoning, code review, analysis", "data_leaves": "No"},
+                    {"model": "Llama 3.1 70B", "provider": "Meta (local)", "parameters": "70B", "monthly_cost": "$0 (GPU server needed)", "speed": "Slow", "quality": 8, "best_use": "Complex analysis, nuanced writing", "data_leaves": "No"},
+                    {"model": "Claude Sonnet 4", "provider": "Anthropic", "parameters": "Undisclosed", "monthly_cost": "$20/user (Pro)", "speed": "Fast", "quality": 9, "best_use": "Complex reasoning, coding, long documents", "data_leaves": "Yes"},
+                    {"model": "GPT-4o", "provider": "OpenAI", "parameters": "Undisclosed", "monthly_cost": "$20/user (Plus)", "speed": "Fast", "quality": 9, "best_use": "General purpose, multimodal, vision", "data_leaves": "Yes"},
+                    {"model": "Gemini 2.0 Pro", "provider": "Google", "parameters": "Undisclosed", "monthly_cost": "$20/user", "speed": "Fast", "quality": 8, "best_use": "Long documents, search integration", "data_leaves": "Yes"},
+                    {"model": "Mistral Large", "provider": "Mistral", "parameters": "123B", "monthly_cost": "API pricing", "speed": "Fast", "quality": 7, "best_use": "European data compliance, multilingual", "data_leaves": "Yes"},
+                ],
+            }
+        ],
+    },
+    3: {
+        "title": "Tech Spend Audit",
+        "lecture_title": "Finding Your $250K Moment",
         "sections": [
             {
                 "key": "vendor_invoices",
@@ -45,16 +87,28 @@ WORKBOOK_SECTIONS = {
                     {"name": "notes", "label": "Notes", "type": "text"},
                 ],
                 "initial_rows": 10,
+                "default_data": [
+                    {"vendor": "Accenture Custom Dev", "annual_cost": 250000, "category": "Software Development", "zone": "Quick Win", "notes": "Legacy system maintenance — AI tools could replace 80% of this"},
+                    {"vendor": "ServiceNow", "annual_cost": 180000, "category": "IT Service Management", "zone": "Optimize", "notes": "Core platform but only using 40% of modules"},
+                    {"vendor": "Salesforce Enterprise", "annual_cost": 144000, "category": "CRM", "zone": "Optimize", "notes": "120 licenses, only 67 active users"},
+                    {"vendor": "Offshore QA Team (TCS)", "annual_cost": 96000, "category": "Quality Assurance", "zone": "Quick Win", "notes": "AI testing tools available at fraction of cost"},
+                    {"vendor": "Microsoft 365 E5", "annual_cost": 86400, "category": "Productivity Suite", "zone": "Keep", "notes": "Well-utilized, enterprise standard"},
+                    {"vendor": "Datadog", "annual_cost": 72000, "category": "Monitoring", "zone": "Optimize", "notes": "Overlaps with CloudWatch — consolidate"},
+                    {"vendor": "Tableau Server", "annual_cost": 60000, "category": "Analytics & BI", "zone": "Strategic", "notes": "Evaluate AI-powered dashboards as replacement"},
+                    {"vendor": "Custom Report Generator", "annual_cost": 48000, "category": "Internal Reporting", "zone": "Quick Win", "notes": "Monthly reports — CC could build this in a day"},
+                    {"vendor": "Jira + Confluence", "annual_cost": 42000, "category": "Project Management", "zone": "Keep", "notes": "Team depends on it, well-adopted"},
+                    {"vendor": "Workday Integration", "annual_cost": 36000, "category": "HR Integration", "zone": "Keep", "notes": "Critical HR pipeline, no good alternative"},
+                ],
             }
         ],
     },
-    3: {
-        "title": "Legacy System Inventory",
-        "lecture_title": "Finding Your $250K Moment",
+    4: {
+        "title": "Legacy System Assessment",
+        "lecture_title": "Legacy Code is Not a Dead End",
         "sections": [
             {
                 "key": "legacy_systems",
-                "title": "Legacy System Inventory — Four-Quadrant Assessment",
+                "title": "Legacy System Inventory",
                 "type": "table",
                 "columns": [
                     {"name": "system_name", "label": "System Name", "type": "text"},
@@ -67,16 +121,17 @@ WORKBOOK_SECTIONS = {
                      "options": ["Low", "Medium", "High", "Critical"]},
                 ],
                 "initial_rows": 5,
-            }
-        ],
-    },
-    4: {
-        "title": "Legacy Code Conversion Plan",
-        "lecture_title": "Legacy Code is Not a Dead End",
-        "sections": [
+                "default_data": [
+                    {"system_name": "Accounts Payable", "language": "COBOL/CICS", "maintainer": "Bob (retiring 2027)", "last_modified": "2019", "quadrant": "Modernize", "risk_level": "Critical"},
+                    {"system_name": "Inventory Tracker", "language": "Visual Basic 6", "maintainer": "None — original dev left", "last_modified": "2016", "quadrant": "Wrap with API", "risk_level": "High"},
+                    {"system_name": "Customer Portal", "language": "Classic ASP", "maintainer": "Contract developer", "last_modified": "2021", "quadrant": "Modernize", "risk_level": "Medium"},
+                    {"system_name": "Payroll Calculator", "language": "Fortran", "maintainer": "Finance team (manual)", "last_modified": "2012", "quadrant": "Retire", "risk_level": "High"},
+                    {"system_name": "Shipping Integration", "language": "Perl CGI", "maintainer": "IT ops team", "last_modified": "2020", "quadrant": "Wrap with API", "risk_level": "Medium"},
+                ],
+            },
             {
                 "key": "conversion_candidates",
-                "title": "COBOL/Legacy Code Conversion Candidates",
+                "title": "Code Conversion Candidates",
                 "type": "table",
                 "columns": [
                     {"name": "system", "label": "System/Module", "type": "text"},
@@ -88,6 +143,11 @@ WORKBOOK_SECTIONS = {
                      "options": ["Low", "Medium", "High", "Critical"]},
                 ],
                 "initial_rows": 5,
+                "default_data": [
+                    {"system": "Accounts Payable", "language": "COBOL", "loc": 12000, "business_logic": "Invoice matching, 3-way PO validation, payment scheduling", "target": "Python + FastAPI", "priority": "Critical"},
+                    {"system": "Inventory Tracker", "language": "Visual Basic 6", "loc": 8500, "business_logic": "Stock levels, reorder points, warehouse locations", "target": "Python + React", "priority": "High"},
+                    {"system": "Payroll Calculator", "language": "Fortran", "loc": 3200, "business_logic": "Tax brackets, deductions, overtime rules", "target": "Python", "priority": "Medium"},
+                ],
             }
         ],
     },
@@ -110,6 +170,16 @@ WORKBOOK_SECTIONS = {
                      "options": ["Accept", "Monitor", "Migrate", "Retire"]},
                 ],
                 "initial_rows": 8,
+                "default_data": [
+                    {"tool": "Finance Planning Master.xlsx", "owner": "CFO Office", "sensitivity": "Confidential", "criticality": "Mission Critical", "action": "Migrate"},
+                    {"tool": "HR Headcount Tracker.xlsx", "owner": "HR Director", "sensitivity": "Restricted", "criticality": "High", "action": "Migrate"},
+                    {"tool": "Marketing Campaign ROI.gsheet", "owner": "Marketing VP", "sensitivity": "Internal", "criticality": "Medium", "action": "Monitor"},
+                    {"tool": "Sales Commission Calculator.xlsx", "owner": "Sales Ops", "sensitivity": "Confidential", "criticality": "High", "action": "Migrate"},
+                    {"tool": "Vendor Contact Database.accdb", "owner": "Procurement", "sensitivity": "Internal", "criticality": "Medium", "action": "Migrate"},
+                    {"tool": "Project Budget Tracker.xlsx", "owner": "PMO", "sensitivity": "Confidential", "criticality": "High", "action": "Monitor"},
+                    {"tool": "Customer Escalation Log.gsheet", "owner": "Support Manager", "sensitivity": "Confidential", "criticality": "Medium", "action": "Migrate"},
+                    {"tool": "IT Asset Inventory.xlsx", "owner": "IT Ops", "sensitivity": "Internal", "criticality": "High", "action": "Monitor"},
+                ],
             }
         ],
     },
@@ -131,6 +201,13 @@ WORKBOOK_SECTIONS = {
                      "options": ["Yes", "Partially", "No", "Unsure"]},
                 ],
                 "initial_rows": 5,
+                "default_data": [
+                    {"vendor": "TCS Application Support", "monthly_invoice": 8000, "coordination_hours": 15, "rework_pct": 22, "true_cost": 12400, "ai_replacement": "Yes"},
+                    {"vendor": "Infosys QA Testing", "monthly_invoice": 6500, "coordination_hours": 10, "rework_pct": 18, "true_cost": 9200, "ai_replacement": "Yes"},
+                    {"vendor": "Wipro Data Entry", "monthly_invoice": 4000, "coordination_hours": 8, "rework_pct": 12, "true_cost": 5600, "ai_replacement": "Yes"},
+                    {"vendor": "HCL DevOps", "monthly_invoice": 12000, "coordination_hours": 20, "rework_pct": 15, "true_cost": 17000, "ai_replacement": "Partially"},
+                    {"vendor": "Cognizant Analytics", "monthly_invoice": 9000, "coordination_hours": 12, "rework_pct": 8, "true_cost": 11000, "ai_replacement": "Partially"},
+                ],
             }
         ],
     },
@@ -152,6 +229,18 @@ WORKBOOK_SECTIONS = {
                      "options": ["Keep", "Renegotiate", "Replace", "Cut"]},
                 ],
                 "initial_rows": 10,
+                "default_data": [
+                    {"tool": "Salesforce Enterprise", "annual_cost": 144000, "active_users": 67, "licensed_users": 120, "renewal_date": "2026-09", "action": "Renegotiate"},
+                    {"tool": "Slack Business+", "annual_cost": 36000, "active_users": 180, "licensed_users": 250, "renewal_date": "2026-06", "action": "Renegotiate"},
+                    {"tool": "Microsoft 365 E5", "annual_cost": 86400, "active_users": 190, "licensed_users": 200, "renewal_date": "2027-01", "action": "Keep"},
+                    {"tool": "Zoom Enterprise", "annual_cost": 24000, "active_users": 45, "licensed_users": 200, "renewal_date": "2026-08", "action": "Cut"},
+                    {"tool": "Jira + Confluence", "annual_cost": 42000, "active_users": 85, "licensed_users": 100, "renewal_date": "2026-12", "action": "Keep"},
+                    {"tool": "Datadog", "annual_cost": 72000, "active_users": 12, "licensed_users": 25, "renewal_date": "2026-07", "action": "Replace"},
+                    {"tool": "Tableau Server", "annual_cost": 60000, "active_users": 28, "licensed_users": 50, "renewal_date": "2026-11", "action": "Replace"},
+                    {"tool": "HubSpot Marketing", "annual_cost": 18000, "active_users": 8, "licensed_users": 15, "renewal_date": "2026-10", "action": "Renegotiate"},
+                    {"tool": "DocuSign Enterprise", "annual_cost": 9600, "active_users": 40, "licensed_users": 50, "renewal_date": "2026-08", "action": "Keep"},
+                    {"tool": "Monday.com", "annual_cost": 14400, "active_users": 22, "licensed_users": 40, "renewal_date": "2026-05", "action": "Cut"},
+                ],
             }
         ],
     },

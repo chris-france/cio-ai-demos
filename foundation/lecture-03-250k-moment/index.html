@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Four-Zone Cost Displacement Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .zone-quick-win { background: #10b981; }
+        .zone-strategic { background: #3b82f6; }
+        .zone-optimize { background: #f59e0b; }
+        .zone-keep { background: #6b7280; }
+        th.sortable { cursor: pointer; user-select: none; }
+        th.sortable:hover { background: #e5e7eb; }
+        th.sortable::after { content: ' ↕'; opacity: 0.3; }
+        th.sortable.asc::after { content: ' ↑'; opacity: 1; }
+        th.sortable.desc::after { content: ' ↓'; opacity: 1; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<div class="max-w-7xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-2">
+        <div class="flex items-center gap-3 mb-1">
+            <div class="w-2 h-10 bg-gradient-to-b from-emerald-500 to-blue-600 rounded-full"></div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">Four-Zone Cost Displacement Dashboard</h1>
+        </div>
+        <p class="text-sm text-gray-500 ml-5">CIO AI Curriculum — Lecture 03: The $250K Moment</p>
+    </div>
+
+    <!-- Executive Summary -->
+    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8 mt-6">
+        <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Executive Summary</h2>
+        <p class="text-gray-700 leading-relaxed">
+            This dashboard maps <strong>10 vendor contracts totaling $1,014,400/year</strong> across four strategic zones based on cost and AI displacement potential.
+            Three vendors representing <strong>$394,000 in annual spend</strong> fall in the <strong class="text-emerald-600">Quick Win</strong> zone — high-cost contracts where AI alternatives exist today and can be deployed within 90 days.
+            The single largest opportunity is <strong>$250,000 in custom development work</strong> that modern AI coding tools can reduce by up to 80%.
+            Two additional vendors in the <strong class="text-blue-600">Strategic</strong> and <strong class="text-amber-600">Optimize</strong> zones offer medium-term savings through consolidation and AI-powered replacements.
+            Action on Quick Wins alone could fund your entire AI transformation program.
+        </p>
+    </div>
+
+    <!-- $250K Moment Callout -->
+    <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl p-6 mb-8 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+        <div class="absolute bottom-0 right-20 w-24 h-24 bg-white/5 rounded-full translate-y-8"></div>
+        <div class="relative">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="text-3xl">💡</span>
+                <h2 class="text-2xl font-extrabold tracking-tight">YOUR $250K MOMENT</h2>
+            </div>
+            <p class="text-emerald-50 leading-relaxed max-w-4xl">
+                <strong>Accenture Custom Dev — $250,000/year</strong> is your single biggest displacement opportunity.
+                This contract covers legacy system maintenance where AI-assisted development tools (GitHub Copilot, Claude Code, Cursor) can replace roughly 80% of the work.
+                That's <strong>$200,000 in potential annual savings</strong> — enough to fund an internal AI Center of Excellence, purchase enterprise AI licenses for your entire engineering team,
+                and still have budget left over. This one contract, renegotiated or displaced, pays for your AI transformation.
+            </p>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Annual Spend</p>
+            <p class="text-3xl font-extrabold text-gray-900" id="kpi-total">—</p>
+            <p class="text-xs text-gray-400 mt-1">Across 10 vendor contracts</p>
+        </div>
+        <div class="bg-white border-2 border-emerald-200 rounded-xl p-5 shadow-sm bg-emerald-50/30">
+            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Quick Win Savings</p>
+            <p class="text-3xl font-extrabold text-emerald-600" id="kpi-quickwin">—</p>
+            <p class="text-xs text-gray-400 mt-1">Actionable within 90 days</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Biggest Single Opportunity</p>
+            <p class="text-3xl font-extrabold text-gray-900" id="kpi-biggest">—</p>
+            <p class="text-xs text-gray-400 mt-1" id="kpi-biggest-name">—</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Displacement Candidates</p>
+            <p class="text-3xl font-extrabold text-gray-900" id="kpi-candidates">—</p>
+            <p class="text-xs text-gray-400 mt-1">Quick Win + Strategic zones</p>
+        </div>
+    </div>
+
+    <!-- Quadrant Chart -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Vendor Displacement Quadrant</h2>
+        <p class="text-sm text-gray-500 mb-4">X: Annual Cost → Y: AI Displacement Potential. Bubble size = contract value.</p>
+        <div class="relative" style="height: 480px;">
+            <canvas id="quadrantChart"></canvas>
+        </div>
+        <div class="flex items-center justify-center gap-6 mt-4 text-sm">
+            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Quick Win</span>
+            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Strategic</span>
+            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Optimize</span>
+            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-gray-400 inline-block"></span> Keep</span>
+        </div>
+    </div>
+
+    <!-- Contract Renewal Timeline -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Contract Renewal Timeline</h2>
+        <p class="text-sm text-gray-500 mb-5">Next 12 months — challenge displacement candidates at renewal. Red flags mark notice deadlines.</p>
+        <div id="timelineContainer"></div>
+    </div>
+
+    <!-- Vendor Table -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-10">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-bold text-gray-900">Vendor Detail</h2>
+            <p class="text-sm text-gray-500">Click column headers to sort</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="vendorTable">
+                <thead class="bg-gray-50 text-left">
+                    <tr>
+                        <th class="sortable px-6 py-3 font-semibold text-gray-600" data-col="0">Vendor</th>
+                        <th class="sortable px-6 py-3 font-semibold text-gray-600" data-col="1">Category</th>
+                        <th class="sortable px-6 py-3 font-semibold text-gray-600 text-right" data-col="2">Annual Cost</th>
+                        <th class="sortable px-6 py-3 font-semibold text-gray-600" data-col="3">Zone</th>
+                        <th class="px-6 py-3 font-semibold text-gray-600">Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody id="vendorTableBody" class="divide-y divide-gray-100">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Foundation Module — Built with Tailwind CSS & Chart.js</p>
+
+</div>
+
+<script>
+// Vendor data
+const vendors = [
+    {
+        name: "Accenture Custom Dev",
+        cost: 250000,
+        category: "Software Development",
+        zone: "Quick Win",
+        displacementPotential: 90,
+        renewalDate: "2026-06-30",
+        termNotice: "60 days",
+        recommendation: "Highest-value target. AI coding tools (GitHub Copilot, Claude Code, Cursor) can replace ~80% of legacy maintenance work. Renegotiate contract scope down or transition to internal AI-augmented team. Savings potential: $200K/year."
+    },
+    {
+        name: "ServiceNow",
+        cost: 180000,
+        category: "IT Service Management",
+        zone: "Optimize",
+        displacementPotential: 45,
+        renewalDate: "2026-11-15",
+        termNotice: "90 days",
+        recommendation: "Core platform but only utilizing 40% of available modules. Conduct a license audit, eliminate unused modules, and negotiate a right-sized contract. AI won't replace ITSM — but you're overpaying for what you use."
+    },
+    {
+        name: "Salesforce Enterprise",
+        cost: 144000,
+        category: "CRM",
+        zone: "Optimize",
+        displacementPotential: 40,
+        renewalDate: "2027-01-31",
+        termNotice: "60 days",
+        recommendation: "120 licenses purchased but only 67 active users. Immediate action: reclaim 53 unused licenses for ~$64K savings. Longer-term: evaluate if Einstein AI features justify Enterprise tier or if Professional suffices."
+    },
+    {
+        name: "Offshore QA Team (TCS)",
+        cost: 96000,
+        category: "Quality Assurance",
+        zone: "Quick Win",
+        displacementPotential: 85,
+        renewalDate: "2026-04-30",
+        termNotice: "30 days (month-to-month)",
+        recommendation: "AI testing tools (Testim, Mabl, Katalon AI) can automate 70-90% of regression testing at a fraction of the cost. Transition to AI-first QA with one senior QA engineer overseeing. Savings potential: $75K/year."
+    },
+    {
+        name: "Microsoft 365 E5",
+        cost: 86400,
+        category: "Productivity Suite",
+        zone: "Keep",
+        displacementPotential: 10,
+        renewalDate: "2027-03-01",
+        termNotice: "30 days",
+        recommendation: "Well-utilized enterprise standard. No action needed — M365 is the backbone of productivity. Consider leveraging Copilot for M365 to extract more value from existing investment."
+    },
+    {
+        name: "Datadog",
+        cost: 72000,
+        category: "Monitoring",
+        zone: "Optimize",
+        displacementPotential: 55,
+        renewalDate: "2026-08-31",
+        termNotice: "30 days",
+        recommendation: "Significant overlap with AWS CloudWatch capabilities you already pay for. Consolidate monitoring into CloudWatch + Grafana (open-source) and eliminate Datadog. Savings potential: $50-60K/year."
+    },
+    {
+        name: "Tableau Server",
+        cost: 60000,
+        category: "Analytics & BI",
+        zone: "Strategic",
+        displacementPotential: 70,
+        renewalDate: "2026-09-30",
+        termNotice: "60 days",
+        recommendation: "AI-powered dashboarding tools are maturing rapidly. Evaluate replacements like Evidence, Metabase with AI, or LLM-generated reports. Not an immediate swap — run a 90-day pilot alongside Tableau before committing."
+    },
+    {
+        name: "Custom Report Generator",
+        cost: 48000,
+        category: "Internal Reporting",
+        zone: "Quick Win",
+        displacementPotential: 95,
+        renewalDate: "2026-07-15",
+        termNotice: "30 days",
+        recommendation: "Monthly report generation is exactly what LLMs excel at. Claude or GPT-4 can generate these reports from data in minutes, not days. Build a simple automation pipeline and eliminate this contract entirely. Savings potential: $48K/year."
+    },
+    {
+        name: "Jira + Confluence",
+        cost: 42000,
+        category: "Project Management",
+        zone: "Keep",
+        displacementPotential: 15,
+        renewalDate: "2026-12-31",
+        termNotice: "30 days",
+        recommendation: "Well-adopted across teams with established workflows. Switching cost is high and alternatives offer marginal improvement. Keep, but explore Atlassian Intelligence features to boost productivity."
+    },
+    {
+        name: "Workday Integration",
+        cost: 36000,
+        category: "HR Integration",
+        zone: "Keep",
+        displacementPotential: 8,
+        renewalDate: "2026-10-01",
+        termNotice: "60 days",
+        recommendation: "Critical HR data pipeline with no viable AI alternative. Integration middleware is essential infrastructure. Keep — this is not a displacement candidate."
+    }
+];
+
+// Zone colors
+const zoneColors = {
+    "Quick Win": { bg: "rgba(16, 185, 129, 0.7)", border: "#10b981", label: "bg-emerald-100 text-emerald-700" },
+    "Strategic": { bg: "rgba(59, 130, 246, 0.7)", border: "#3b82f6", label: "bg-blue-100 text-blue-700" },
+    "Optimize": { bg: "rgba(245, 158, 11, 0.7)", border: "#f59e0b", label: "bg-amber-100 text-amber-700" },
+    "Keep": { bg: "rgba(107, 114, 128, 0.5)", border: "#6b7280", label: "bg-gray-100 text-gray-600" }
+};
+
+// --- KPI Cards ---
+const totalSpend = vendors.reduce((s, v) => s + v.cost, 0);
+const quickWins = vendors.filter(v => v.zone === "Quick Win");
+const quickWinTotal = quickWins.reduce((s, v) => s + v.cost, 0);
+const biggest = vendors.reduce((a, b) => a.cost > b.cost ? a : b);
+const candidates = vendors.filter(v => v.zone === "Quick Win" || v.zone === "Strategic").length;
+
+const fmt = n => "$" + n.toLocaleString("en-US");
+
+document.getElementById("kpi-total").textContent = fmt(totalSpend);
+document.getElementById("kpi-quickwin").textContent = fmt(quickWinTotal);
+document.getElementById("kpi-biggest").textContent = fmt(biggest.cost);
+document.getElementById("kpi-biggest-name").textContent = biggest.name;
+document.getElementById("kpi-candidates").textContent = candidates;
+
+// --- Quadrant Chart ---
+const ctx = document.getElementById("quadrantChart").getContext("2d");
+
+// Build datasets grouped by zone
+const zones = ["Quick Win", "Strategic", "Optimize", "Keep"];
+const datasets = zones.map(zone => {
+    const items = vendors.filter(v => v.zone === zone);
+    return {
+        label: zone,
+        data: items.map(v => ({
+            x: v.cost,
+            y: v.displacementPotential,
+            r: Math.max(8, Math.sqrt(v.cost / 800)),
+            vendorName: v.name
+        })),
+        backgroundColor: zoneColors[zone].bg,
+        borderColor: zoneColors[zone].border,
+        borderWidth: 2,
+    };
+});
+
+new Chart(ctx, {
+    type: "bubble",
+    data: { datasets },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: { display: true, text: "Annual Cost ($)", font: { size: 13, weight: "600" } },
+                ticks: {
+                    callback: v => "$" + (v / 1000) + "K",
+                    font: { size: 11 }
+                },
+                min: 0,
+                max: 280000,
+                grid: { color: "#f3f4f6" }
+            },
+            y: {
+                title: { display: true, text: "AI Displacement Potential (%)", font: { size: 13, weight: "600" } },
+                min: 0,
+                max: 100,
+                ticks: {
+                    callback: v => v + "%",
+                    font: { size: 11 }
+                },
+                grid: { color: "#f3f4f6" }
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: ctx => {
+                        const d = ctx.raw;
+                        return `${d.vendorName}: ${fmt(d.x)} — ${d.y}% displacement potential`;
+                    }
+                }
+            },
+            legend: { display: false }
+        }
+    },
+    plugins: [{
+        afterDraw(chart) {
+            const { ctx, chartArea: { left, right, top, bottom }, scales: { x, y } } = chart;
+
+            // Draw quadrant lines at midpoints
+            const midX = x.getPixelForValue(140000);
+            const midY = y.getPixelForValue(50);
+
+            ctx.save();
+            ctx.setLineDash([6, 4]);
+            ctx.strokeStyle = "#d1d5db";
+            ctx.lineWidth = 1.5;
+
+            ctx.beginPath();
+            ctx.moveTo(midX, top);
+            ctx.lineTo(midX, bottom);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(left, midY);
+            ctx.lineTo(right, midY);
+            ctx.stroke();
+
+            // Quadrant labels
+            ctx.setLineDash([]);
+            ctx.font = "600 11px Inter, sans-serif";
+            ctx.textAlign = "center";
+
+            ctx.fillStyle = "#10b981";
+            ctx.fillText("QUICK WIN", (left + midX) / 2, top + 18);
+
+            ctx.fillStyle = "#3b82f6";
+            ctx.fillText("STRATEGIC", (midX + right) / 2, top + 18);
+
+            ctx.fillStyle = "#6b7280";
+            ctx.fillText("KEEP", (left + midX) / 2, bottom - 8);
+
+            ctx.fillStyle = "#f59e0b";
+            ctx.fillText("OPTIMIZE", (midX + right) / 2, bottom - 8);
+
+            // Vendor labels
+            chart.data.datasets.forEach(ds => {
+                ds.data.forEach((point, i) => {
+                    const meta = chart.getDatasetMeta(chart.data.datasets.indexOf(ds));
+                    const elem = meta.data[i];
+                    if (elem) {
+                        ctx.font = "500 10px Inter, sans-serif";
+                        ctx.fillStyle = "#374151";
+                        ctx.textAlign = "center";
+                        const shortName = point.vendorName.length > 18
+                            ? point.vendorName.substring(0, 16) + "…"
+                            : point.vendorName;
+                        ctx.fillText(shortName, elem.x, elem.y - point.r - 5);
+                    }
+                });
+            });
+
+            ctx.restore();
+        }
+    }]
+});
+
+// --- Contract Renewal Timeline ---
+(function buildTimeline() {
+    const today = new Date("2026-03-17");
+    const timelineEnd = new Date("2027-03-17");
+    const totalDays = (timelineEnd - today) / (1000 * 60 * 60 * 24);
+
+    // Sort vendors by renewal date
+    const sorted = [...vendors].sort((a, b) => new Date(a.renewalDate) - new Date(b.renewalDate));
+
+    // Month markers
+    const months = [];
+    const startMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    for (let d = new Date(startMonth); d <= timelineEnd; d.setMonth(d.getMonth() + 1)) {
+        months.push(new Date(d));
+    }
+
+    const container = document.getElementById("timelineContainer");
+
+    // Month header bar
+    const monthBar = document.createElement("div");
+    monthBar.className = "relative h-8 mb-2 border-b border-gray-200";
+    monthBar.style.marginLeft = "240px";
+    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    months.forEach(m => {
+        const dayOffset = (m - today) / (1000 * 60 * 60 * 24);
+        const pct = (dayOffset / totalDays) * 100;
+        if (pct >= 0 && pct <= 100) {
+            const label = document.createElement("div");
+            label.className = "absolute text-xs font-medium text-gray-400";
+            label.style.left = pct + "%";
+            label.style.top = "0";
+            label.textContent = monthNames[m.getMonth()] + " " + String(m.getFullYear()).slice(2);
+            monthBar.appendChild(label);
+
+            const tick = document.createElement("div");
+            tick.className = "absolute w-px h-full bg-gray-100";
+            tick.style.left = pct + "%";
+            tick.style.top = "0";
+            monthBar.appendChild(tick);
+        }
+    });
+
+    // Today marker label
+    const todayLabel = document.createElement("div");
+    todayLabel.className = "absolute text-xs font-bold text-red-500";
+    todayLabel.style.left = "0%";
+    todayLabel.style.top = "14px";
+    todayLabel.textContent = "TODAY";
+    monthBar.appendChild(todayLabel);
+
+    container.appendChild(monthBar);
+
+    // Vendor rows
+    sorted.forEach(v => {
+        const renewDate = new Date(v.renewalDate);
+        const daysToRenewal = (renewDate - today) / (1000 * 60 * 60 * 24);
+        const renewPct = Math.min(100, Math.max(0, (daysToRenewal / totalDays) * 100));
+
+        // Parse notice period
+        const noticeMatch = v.termNotice.match(/(\d+)/);
+        const noticeDays = noticeMatch ? parseInt(noticeMatch[1]) : 30;
+        const noticeDate = new Date(renewDate);
+        noticeDate.setDate(noticeDate.getDate() - noticeDays);
+        const daysToNotice = (noticeDate - today) / (1000 * 60 * 60 * 24);
+        const noticePct = Math.min(100, Math.max(0, (daysToNotice / totalDays) * 100));
+
+        const zoneColorMap = {
+            "Quick Win": { dot: "bg-emerald-500", bar: "bg-emerald-100", border: "border-emerald-300", text: "text-emerald-700" },
+            "Strategic": { dot: "bg-blue-500", bar: "bg-blue-100", border: "border-blue-300", text: "text-blue-700" },
+            "Optimize": { dot: "bg-amber-500", bar: "bg-amber-100", border: "border-amber-300", text: "text-amber-700" },
+            "Keep": { dot: "bg-gray-400", bar: "bg-gray-100", border: "border-gray-200", text: "text-gray-500" }
+        };
+        const zc = zoneColorMap[v.zone];
+        const isUrgent = daysToNotice <= 60;
+        const isDisplaceable = v.zone === "Quick Win" || v.zone === "Strategic";
+
+        const row = document.createElement("div");
+        row.className = "flex items-center mb-3 group";
+
+        // Label column
+        const label = document.createElement("div");
+        label.className = "w-60 flex-shrink-0 pr-4";
+        label.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full ${zc.dot} flex-shrink-0"></span>
+                <span class="text-sm font-semibold text-gray-800 truncate">${v.name}</span>
+            </div>
+            <div class="text-xs text-gray-400 ml-5">${fmt(v.cost)}/yr</div>
+        `;
+
+        // Timeline bar column
+        const barWrap = document.createElement("div");
+        barWrap.className = "flex-1 relative h-10";
+
+        // Background track
+        const track = document.createElement("div");
+        track.className = "absolute inset-y-3 left-0 right-0 bg-gray-50 rounded-full";
+        barWrap.appendChild(track);
+
+        // Today line
+        const todayLine = document.createElement("div");
+        todayLine.className = "absolute w-0.5 h-full bg-red-300 z-10";
+        todayLine.style.left = "0%";
+        barWrap.appendChild(todayLine);
+
+        // Active contract bar (from today to renewal)
+        const activeBar = document.createElement("div");
+        activeBar.className = `absolute inset-y-3 rounded-full ${zc.bar} border ${zc.border}`;
+        activeBar.style.left = "0%";
+        activeBar.style.width = renewPct + "%";
+        barWrap.appendChild(activeBar);
+
+        // Notice deadline flag
+        if (noticePct > 0 && noticePct < 100) {
+            const noticeFlag = document.createElement("div");
+            noticeFlag.className = `absolute z-20 flex flex-col items-center`;
+            noticeFlag.style.left = noticePct + "%";
+            noticeFlag.style.top = "0";
+            noticeFlag.style.transform = "translateX(-50%)";
+            noticeFlag.innerHTML = `
+                <div class="w-0.5 h-10 ${isUrgent && isDisplaceable ? 'bg-red-400' : 'bg-gray-300'}"></div>
+                <div class="text-xs font-medium mt-0.5 whitespace-nowrap ${isUrgent && isDisplaceable ? 'text-red-500 font-bold' : 'text-gray-400'}">${isUrgent && isDisplaceable ? '⚠ ' : ''}Notice</div>
+            `;
+            barWrap.appendChild(noticeFlag);
+        }
+
+        // Renewal dot
+        if (renewPct > 0 && renewPct <= 100) {
+            const dot = document.createElement("div");
+            dot.className = `absolute z-20 flex flex-col items-center`;
+            dot.style.left = renewPct + "%";
+            dot.style.top = "0";
+            dot.style.transform = "translateX(-50%)";
+
+            const renewDateStr = renewDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            const urgentBadge = isUrgent && isDisplaceable
+                ? `<span class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded mt-0.5">ACT NOW</span>`
+                : "";
+
+            dot.innerHTML = `
+                <div class="w-3.5 h-3.5 rounded-full ${isDisplaceable ? zc.dot : 'bg-gray-300'} border-2 border-white shadow-sm" style="margin-top:5px;"></div>
+                <div class="text-xs font-semibold ${zc.text} mt-0.5 whitespace-nowrap">${renewDateStr}</div>
+                ${urgentBadge}
+            `;
+            barWrap.appendChild(dot);
+        }
+
+        row.appendChild(label);
+        row.appendChild(barWrap);
+        container.appendChild(row);
+    });
+
+    // Legend
+    const legend = document.createElement("div");
+    legend.className = "flex items-center gap-6 mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500";
+    legend.innerHTML = `
+        <span class="flex items-center gap-1.5"><span class="w-0.5 h-4 bg-red-300 inline-block"></span> Today</span>
+        <span class="flex items-center gap-1.5"><span class="w-0.5 h-4 bg-gray-300 inline-block"></span> Notice deadline</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Renewal date</span>
+        <span class="flex items-center gap-1.5"><span class="text-red-500 font-bold">⚠ ACT NOW</span> Notice deadline within 60 days</span>
+    `;
+    container.appendChild(legend);
+})();
+
+// --- Vendor Table ---
+let sortCol = 2;
+let sortDir = "desc";
+
+function renderTable() {
+    const sorted = [...vendors].sort((a, b) => {
+        let va, vb;
+        switch (sortCol) {
+            case 0: va = a.name; vb = b.name; break;
+            case 1: va = a.category; vb = b.category; break;
+            case 2: va = a.cost; vb = b.cost; break;
+            case 3: va = a.zone; vb = b.zone; break;
+            default: va = a.name; vb = b.name;
+        }
+        if (typeof va === "string") {
+            return sortDir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
+        }
+        return sortDir === "asc" ? va - vb : vb - va;
+    });
+
+    const tbody = document.getElementById("vendorTableBody");
+    tbody.innerHTML = sorted.map(v => {
+        const zc = zoneColors[v.zone].label;
+        const highlight = v.name === "Accenture Custom Dev" ? "bg-emerald-50/50" : "";
+        return `<tr class="${highlight} hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-3 font-medium text-gray-900">${v.name}</td>
+            <td class="px-6 py-3 text-gray-600">${v.category}</td>
+            <td class="px-6 py-3 text-right font-mono font-semibold text-gray-900">${fmt(v.cost)}</td>
+            <td class="px-6 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${zc}">${v.zone}</span></td>
+            <td class="px-6 py-3 text-gray-600 text-xs leading-relaxed max-w-md">${v.recommendation}</td>
+        </tr>`;
+    }).join("");
+
+    // Update header sort indicators
+    document.querySelectorAll("th.sortable").forEach(th => {
+        th.classList.remove("asc", "desc");
+        if (parseInt(th.dataset.col) === sortCol) {
+            th.classList.add(sortDir);
+        }
+    });
+}
+
+document.querySelectorAll("th.sortable").forEach(th => {
+    th.addEventListener("click", () => {
+        const col = parseInt(th.dataset.col);
+        if (sortCol === col) {
+            sortDir = sortDir === "asc" ? "desc" : "asc";
+        } else {
+            sortCol = col;
+            sortDir = col === 2 ? "desc" : "asc";
+        }
+        renderTable();
+    });
+});
+
+renderTable();
+</script>
+
+</body>
+</html>

@@ -106,7 +106,13 @@ FOUNDATION_DEMOS = [
             "considerations.\"\n"
             "7. Compare the quality of both responses and explain the tradeoff "
             "between model size, speed, cost, and quality in plain CIO language "
-            "— no data science jargon."
+            "— no data science jargon.\n"
+            "8. Save your comparison results to the course workbook by sending a PUT "
+            "request to http://localhost:18801/api/workbook/2/llm_comparison with the "
+            "data as JSON. Format: {\"data\": [{\"model\": \"...\", \"provider\": \"...\", "
+            "\"parameters\": \"...\", \"monthly_cost\": \"...\", \"speed\": \"...\", "
+            "\"quality\": N, \"best_use\": \"...\", \"data_leaves\": \"Yes/No\"}, ...]}. "
+            "Include all models you tested plus the major cloud models (Claude, GPT-4, Gemini)."
         ),
         "takeaway": (
             "You don't need to be a data scientist. But you need to know enough to "
@@ -117,46 +123,67 @@ FOUNDATION_DEMOS = [
             "Now pull a larger model like llama3.1:8b and run the same hard prompt. Show me how quality improves with size.",
             "Explain the difference between training and inference. What does each cost? Which one am I paying for when I use Claude or ChatGPT?",
             "If I wanted to run AI locally so no data leaves my building, what hardware would I need? Give me a budget for small, medium, and enterprise setups.",
+            "Open the CIO AI Demos app at http://localhost:18802, go to the Workbook tab, and expand Lecture 2. Verify your comparison data was saved. Add any models you want to research further.",
         ],
     },
     {
         "num": "3",
         "title": "Finding Your $250K Moment",
-        "subtitle": "Use an AI-built cost calculator to find where your budget is bleeding",
-        "tool": "Inference Cost Calculator",
-        "time": "~7 min",
-        "folder": "ai-inference-cost-calculator",
-        "link": "http://localhost:8601",
+        "subtitle": "AI builds a cost displacement dashboard from your vendor data",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "foundation/lecture-03-250k-moment",
         "description": (
-            "This demo uses the AI Inference Cost Calculator — a tool Chris built entirely "
-            "with Claude Code. The tool itself IS the demo: AI built a tool that finds "
-            "$250K in cost savings. You'll ask CC to find it, launch it, and then "
-            "add a new feature — all without leaving the conversation."
+            "Your workbook has vendor invoices pre-loaded with sample data. You paste one "
+            "prompt. Claude Code reads your vendor data, classifies each into the Four-Zone "
+            "Framework (Quick Win, Strategic, Optimize, Keep), builds an interactive "
+            "dashboard with a quadrant visualization, and highlights your biggest AI "
+            "displacement opportunity — the $250K moment hiding in your budget."
         ),
         "prerequisites": [
             "Claude Code installed with Claude Pro/Max subscription ($20/month)",
             "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+            "CIO AI Demos app running (for workbook data)",
         ],
         "steps": [
+            "First, open http://localhost:18802 and go to the Workbook tab",
+            "Expand Lecture 3 — review the sample vendor data (or replace with your own)",
             "Open any terminal and type: claude",
-            "Paste the prompt below",
-            "CC finds the project, explains it, and launches it for you",
-            "Explore the calculator in your browser",
-            "Come back to CC and paste a follow-up prompt to add a feature",
+            "Paste the prompt below — CC reads your workbook data and builds the dashboard",
+            "Explore the Four-Zone quadrant chart and displacement recommendations",
         ],
         "cc_prompt": (
-            "Find the ai-inference-cost-calculator project on my machine. "
-            "Read the codebase and explain what it does in 2 sentences. "
-            "Then launch it so I can use it in my browser."
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "foundation/lecture-03-250k-moment.\n\n"
+            "First, fetch my vendor invoice data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/3/vendor_invoices\n\n"
+            "If the API returns data, use it. If not, read vendor-invoices.csv in that "
+            "folder as fallback.\n\n"
+            "Build a Four-Zone Cost Displacement Dashboard as a single index.html file "
+            "using Tailwind CSS and Chart.js from CDN (no build step):\n\n"
+            "1. Parse all vendor invoices with their annual costs, categories, and zones\n"
+            "2. Create a 2x2 quadrant scatter chart — X axis: Annual Cost, Y axis: "
+            "AI Displacement Potential. Plot each vendor as a labeled bubble sized by cost\n"
+            "3. Color code by zone: Quick Win (green), Strategic (blue), Optimize (amber), "
+            "Keep (gray)\n"
+            "4. Add KPI cards: Total Annual Spend, Quick Win Savings (sum of Quick Win "
+            "vendors), Biggest Single Opportunity, Number of Displacement Candidates\n"
+            "5. Add a sortable table of all vendors with zone, cost, and a recommendation "
+            "column explaining WHY each is in its zone and what to do about it\n"
+            "6. Highlight the single biggest displacement opportunity with a callout box: "
+            "'YOUR $250K MOMENT' — explain the savings potential\n"
+            "7. Add an executive summary paragraph at the top\n\n"
+            "White background, vibrant colors, executive-ready. Open it in my browser."
         ),
         "takeaway": (
-            "The $250K moment is when someone approves infrastructure changes without "
-            "running the numbers. This calculator was built by AI in hours, not months. "
-            "The tool that finds the savings was itself a savings."
+            "Every organization has a $250K moment hiding in plain sight. You just used AI "
+            "to find it in 5 minutes. The audit tool that found the savings was itself "
+            "built by AI — for about $0.15 in inference costs."
         ),
         "followups": [
-            "Add a new 'Export PDF Report' button that generates a one-page executive summary with the comparison results and a recommendation paragraph",
-            "Add a scenario where I can compare 3 cloud providers side by side instead of just 2",
+            "Generate a one-page executive memo I can send to the CFO recommending we cut the top 3 Quick Win vendors. Include the dollar amounts and what replaces each one.",
+            "Add a timeline view showing which vendor contracts expire in the next 12 months — I want to know which renewals to challenge first",
+            "Create a risk assessment for each Quick Win displacement — what could go wrong and what's the mitigation plan?",
         ],
     },
     {
