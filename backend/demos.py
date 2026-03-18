@@ -157,8 +157,7 @@ FOUNDATION_DEMOS = [
             "foundation/lecture-03-250k-moment.\n\n"
             "First, fetch my vendor invoice data from the course workbook API:\n"
             "curl -s http://localhost:18801/api/workbook/3/vendor_invoices\n\n"
-            "If the API returns data, use it. If not, read vendor-invoices.csv in that "
-            "folder as fallback.\n\n"
+            "Use this data to "
             "Build a Four-Zone Cost Displacement Dashboard as a single index.html file "
             "using Tailwind CSS and Chart.js from CDN (no build step):\n\n"
             "1. Parse all vendor invoices with their annual costs, categories, and zones\n"
@@ -281,6 +280,22 @@ FOUNDATION_DEMOS = [
             "Now convert the spreadsheet logic to a proper Python application with a web dashboard",
             "Create a data flow diagram showing all cross-sheet dependencies",
             "Write a monitoring script that alerts when assumptions are more than 6 months old",
+            (
+                "DEMO 2 — Shadow IT Triage Dashboard:\n"
+                "Fetch my shadow IT inventory from the course workbook API:\n"
+                "curl -s http://localhost:18801/api/workbook/5/shadow_it\n\n"
+            "Use this data to "
+                "Build a Shadow IT Triage Dashboard as shadow-it-triage.html in the "
+                "foundation/lecture-05-shadow-it folder:\n"
+                "1. Risk score each item (0-100) based on data sensitivity and business criticality\n"
+                "2. Create a risk matrix scatter chart — X: Business Criticality, Y: Data Sensitivity, "
+                "bubble size = risk score\n"
+                "3. Color code: red (Migrate immediately), amber (Monitor closely), green (Acceptable risk)\n"
+                "4. Add a prioritized action table sorted by risk score with recommended triage action\n"
+                "5. Add KPI cards: Total Shadow Systems, Critical Risk Count, Estimated Migration Effort\n"
+                "6. Executive summary paragraph at top\n\n"
+                "White background, vibrant colors. Open it in my browser."
+            ),
         ],
     },
     {
@@ -339,10 +354,10 @@ FOUNDATION_DEMOS = [
         "time": "~8 min",
         "folder": "foundation/lecture-07-saas-renegotiation",
         "description": (
-            "You paste one prompt. Claude Code finds the SaaS inventory CSV on your "
-            "machine, reads it, calculates per-user costs, flags overpriced and underutilized "
-            "tools, detects duplicates, suggests open-source alternatives, totals the savings, "
-            "builds a complete HTML dashboard with charts, and opens it for you."
+            "Your workbook has your SaaS inventory pre-loaded. You paste one prompt. "
+            "Claude Code reads your workbook data, calculates per-user costs, flags overpriced "
+            "and underutilized tools, detects duplicates, suggests open-source alternatives, "
+            "totals the savings, builds a complete HTML dashboard with charts, and opens it for you."
         ),
         "prerequisites": [
             "Claude Code installed with Claude Pro/Max subscription ($20/month)",
@@ -351,14 +366,16 @@ FOUNDATION_DEMOS = [
         "steps": [
             "Open any terminal and type: claude",
             "Paste the prompt below",
-            "Watch CC find the CSV, analyze the data, build charts, generate the dashboard",
+            "Watch CC fetch your workbook data, analyze it, build charts, generate the dashboard",
             "CC opens saas-audit.html in your browser",
             "Paste follow-up prompts to generate negotiation emails or consolidation plans",
         ],
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
-            "foundation/lecture-07-saas-renegotiation. Read saas-inventory.csv. "
-            "Build a complete SaaS audit tool:\n"
+            "foundation/lecture-07-saas-renegotiation.\n\n"
+            "Fetch my SaaS inventory from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/7/saas_audit\n\n"
+            "Use this data to build a complete SaaS audit tool:\n"
             "1. Calculate cost per user per month for every tool\n"
             "2. Flag tools over $50/user/month as 'overpriced'\n"
             "3. Flag tools with under 40% utilization as 'underutilized'\n"
