@@ -1,11 +1,11 @@
 tool_name,vendor,category,department,data_access_level,data_types_accessed,deployment_type,approval_status,approved_by,monthly_cost,users,last_security_review
-ChatGPT Enterprise,OpenAI,Generative AI,Engineering,High,"Source code, internal docs, architecture diagrams",Cloud SaaS,Approved,CISO,8000,45,2025-12-15
-GitHub Copilot,Microsoft/OpenAI,Code Assistant,Engineering,High,"Source code, API keys (risk), internal libraries",Cloud SaaS,Approved,CTO,4500,30,2026-01-20
-Grammarly Business,Grammarly Inc,Writing Assistant,Marketing,Medium,"Emails, proposals, client communications",Cloud SaaS,Approved,CMO,600,25,2025-06-10
-Jasper AI,Jasper AI Inc,Content Generation,Marketing,Medium,"Brand guidelines, campaign data, customer personas",Cloud SaaS,Approved,CMO,2400,8,2025-09-30
-Midjourney,Midjourney Inc,Image Generation,Marketing,Low,"Text prompts only, no company data",Cloud SaaS,Shadow IT,None,200,3,Never
-Claude Pro,Anthropic,Generative AI,Executive Team,Medium,"Strategy docs, board materials, financial summaries",Cloud SaaS,Approved,CIO,100,5,2026-02-01
-Otter.ai,Otter.ai Inc,Meeting Transcription,Sales,High,"All meeting audio, client conversations, deal terms",Cloud SaaS,Shadow IT,None,400,12,Never
-Notion AI,Notion Labs,Knowledge Management,Product,Medium,"Product roadmaps, internal wikis, meeting notes",Cloud SaaS,Approved,CTO,1200,40,2025-11-15
-Cursor,Anysphere Inc,Code Editor/AI,Engineering,High,"Source code, database schemas, env variables (risk)",Cloud SaaS,Pilot,CTO,800,5,2026-01-10
-HuggingFace Inference,HuggingFace,ML Model Hosting,Data Science,High,"Training data, customer datasets, PII (risk)",Cloud SaaS,Approved,CDO,1500,6,2025-08-20
+Claude Team,Anthropic,Generative AI,All Departments,Medium,"Business writing, analysis, brainstorming — Internal data only",Cloud SaaS,Approved,CTO — Kevin Nakamura,2400,45,2026-02-01
+GitHub Copilot Business,GitHub/Microsoft,Code Assistant,Engineering,High,"Source code, internal libraries, API schemas",Cloud SaaS,Approved,CTO — Kevin Nakamura,1200,12,2026-01-20
+Microsoft Copilot (M365),Microsoft,Productivity AI,All Departments,Medium,"Email drafts, document summaries, Excel analysis",Cloud SaaS,Approved,IT Director — Priya Sharma,4500,150,2026-02-15
+Adobe Firefly,Adobe,Image Generation,Marketing,Low,"Text prompts only, marketing assets — Public data only",Cloud SaaS,Approved,VP Sales — Rachel Torres,200,5,2025-11-15
+Grammarly Business,Grammarly,Writing Assistant,All Departments,Medium,"Emails, proposals, client communications — no training on data",Cloud SaaS,Approved,IT Director — Priya Sharma,600,25,2026-01-10
+ChatGPT Free Tier,OpenAI,Generative AI,Various,High,"Unknown — employees using personal accounts for work tasks",Cloud SaaS,Blocked,CISO — Priya Sharma,0,8,Never
+Otter.ai,Otter.ai,Meeting Transcription,Sales,High,"Meeting audio, client conversations, deal terms",Cloud SaaS,Shadow IT,None,200,6,Never
+Midjourney,Midjourney Inc,Image Generation,Marketing,Low,"Text prompts — no company data confirmed",Cloud SaaS,Shadow IT,None,60,2,Never
+Cursor,Anysphere Inc,Code Editor/AI,Engineering,High,"Source code, database schemas — pilot evaluation",Cloud SaaS,Pilot,CTO — Kevin Nakamura,100,3,2026-02-10
+Meta Llama 3.1 (Local),Meta,Local LLM,Engineering,None,"All data stays on premises — no external transmission",On-Premises,Approved,CTO — Kevin Nakamura,0,5,2026-01-15

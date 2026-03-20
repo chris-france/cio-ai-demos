@@ -1,13 +1,9 @@
 name,role,department,years_experience,skills,certifications,last_training,performance_rating
-Sarah Mitchell,Help Desk Manager,IT Support,14,"Ticket triage, ITIL processes, ServiceNow admin, Team management",ITIL v4 Foundation,2024-03-15,Meets Expectations
-James Park,Senior Network Engineer,Infrastructure,11,"Cisco routing/switching, Firewall management, VPN configuration, Cable plant design",CCNP CCNA,2024-06-20,Exceeds Expectations
-Maria Santos,Database Administrator,Data Services,9,"Oracle DBA, SQL Server, Backup/recovery, Performance tuning, Shell scripting",Oracle OCP,2023-11-10,Meets Expectations
-Kevin O'Brien,Desktop Support Lead,IT Support,7,"Windows imaging, Hardware repair, Printer management, Asset tracking",CompTIA A+,2024-01-22,Meets Expectations
-Lisa Chang,Business Analyst,Applications,6,"Requirements gathering, Visio diagrams, UAT coordination, Waterfall PM",None,2024-09-05,Exceeds Expectations
-Robert Taylor,Systems Administrator,Infrastructure,12,"Windows Server, Active Directory, Group Policy, VMware, Backup Exec",MCSE,2023-08-15,Meets Expectations
-Priya Sharma,Junior Developer,Applications,3,"Java, SQL, HTML/CSS, Basic REST APIs",None,2025-01-10,Exceeds Expectations
-Tom Williams,Security Analyst,Security,5,"SIEM monitoring, Vulnerability scanning, Incident response, Nessus",Security+,2024-11-20,Meets Expectations
-Diana Cruz,Project Coordinator,PMO,4,"Gantt charts, Status reporting, Meeting facilitation, MS Project",PMP (in progress),2025-02-15,Meets Expectations
-Mike Johnson,Cloud Engineer,Infrastructure,3,"AWS EC2/S3, Terraform basics, Docker, Linux administration",AWS SAA,2025-03-01,Exceeds Expectations
-Angela Foster,QA Tester,Applications,8,"Manual testing, Test case writing, Regression testing, JIRA",ISTQB Foundation,2023-05-20,Meets Expectations
-David Kim,IT Procurement Specialist,Operations,6,"Vendor negotiations, Contract review, License management, Budget tracking",None,2024-04-10,Meets Expectations
+Priya Sharma,IT Director / CISO,IT Leadership,16,"Network security, risk management, compliance frameworks, team leadership",CISSP CISM,2025-01-15,Exceeds Expectations
+Marcus Reed,Senior Systems Admin,Infrastructure,12,"Windows Server, Linux, VMware, Active Directory, cloud migration",MCSE AWS-SAA,2024-06-20,Meets Expectations
+Jennifer Okafor,Help Desk Manager,IT Support,10,"Ticket triage, ITIL processes, ServiceNow admin, team management",ITIL v4 Foundation,2024-09-10,Meets Expectations
+Carlos Mendez,Junior Developer,Applications,3,"Python, JavaScript, REST APIs, SQL, basic React",None,2025-02-15,Exceeds Expectations
+Diana Walsh,Business Analyst,Applications,7,"Requirements gathering, UAT coordination, stakeholder facilitation, Visio",None,2024-11-05,Exceeds Expectations
+Tom Nguyen,Network Engineer,Infrastructure,9,"Cisco routing/switching, SD-WAN, firewall management, VPN configuration",CCNP,2024-03-20,Meets Expectations
+Sarah Kim,Data Analyst,Data Services,5,"SQL, Python, Tableau, Excel modeling, data pipeline basics",Google Data Analytics,2025-01-10,Meets Expectations
+Robert Chen,QA/Testing Lead,Applications,8,"Manual testing, regression testing, test case design, JIRA, automation basics",ISTQB Foundation,2024-05-20,Meets Expectations

@@ -1,21 +1,21 @@
 project_name,category,annual_cost,strategic_pillar,run_grow_transform,status,start_date,end_date,sponsor,risk_level
-EHR System Maintenance,Applications,4200000,Modernize Legacy Systems,Run,Active,2024-01-01,2026-12-31,CMO,Low
-Network Infrastructure Refresh,Infrastructure,3100000,Strengthen Cybersecurity,Run,Active,2025-03-01,2026-06-30,CTO,Medium
-Telehealth Platform Expansion,Digital Health,2800000,Expand Telehealth,Grow,Active,2025-06-01,2026-09-30,COO,Medium
-AI Radiology Assist,AI/ML,1500000,Integrate AI Diagnostics,Transform,Pilot,2025-09-01,2026-12-31,CMO,High
-Cybersecurity SOC Upgrade,Security,2200000,Strengthen Cybersecurity,Run,Active,2025-01-01,2025-12-31,CISO,High
-Patient Portal Redesign,Digital Experience,950000,Patient First,Grow,Planning,2026-01-01,2026-08-31,CMO,Low
-Data Warehouse Migration,Data & Analytics,1800000,Accelerate Digital Transformation,Transform,Active,2025-04-01,2026-03-31,CDO,Medium
-RPA for Claims Processing,Automation,680000,Reduce Operational Costs,Transform,Pilot,2025-10-01,2026-04-30,CFO,Medium
-Cloud Migration Phase 2,Infrastructure,3500000,Accelerate Digital Transformation,Transform,Active,2025-01-01,2026-06-30,CTO,High
-Identity & Access Management,Security,750000,Strengthen Cybersecurity,Run,Active,2025-06-01,2026-03-31,CISO,Medium
-Mobile App for Clinicians,Digital Health,1200000,Reduce Burnout,Grow,Planning,2026-03-01,2026-12-31,CMO,Medium
-Talent Management Platform,HR Tech,420000,Attract and Retain Talent,Grow,Active,2025-08-01,2026-05-31,CHRO,Low
-Supply Chain Analytics,Data & Analytics,580000,Reduce Operational Costs,Grow,Active,2025-07-01,2026-06-30,COO,Low
-Emergency Triage AI,AI/ML,900000,Integrate AI Diagnostics,Transform,Planning,2026-04-01,2027-03-31,CMO,High
-Pathology Image Analysis,AI/ML,1100000,Integrate AI Diagnostics,Transform,Pilot,2025-11-01,2026-10-31,CMO,High
-Disaster Recovery Modernization,Infrastructure,1600000,Strengthen Cybersecurity,Run,Active,2025-02-01,2025-12-31,CTO,Medium
-Revenue Cycle Optimization,Automation,750000,Reduce Operational Costs,Grow,Active,2025-05-01,2026-04-30,CFO,Low
-Remote Patient Monitoring,Digital Health,640000,Expand Telehealth,Grow,Pilot,2025-09-01,2026-06-30,CMO,Medium
-Legacy System Decommission,Applications,320000,Modernize Legacy Systems,Transform,Planning,2026-06-01,2027-06-30,CTO,Medium
-API Gateway Implementation,Integration,480000,Accelerate Digital Transformation,Transform,Active,2025-08-01,2026-03-31,CTO,Low
+Enterprise PM Platform (Procore),Applications,480000,Operational Excellence,Grow,Active,2025-06-01,2026-06-30,VP Operations — Laura Chen,Medium
+BIM Coordination & Clash Detection,Engineering Technology,350000,Operational Excellence,Transform,Active,2025-09-01,2026-09-30,Director of Engineering — Marcus Webb,Medium
+ERP-to-PM Dashboard Integration,Data & Analytics,280000,Operational Excellence,Transform,Not Started,2026-04-01,2026-12-31,CFO — David Park,Medium
+Renewable Energy Proposal Library + CRM,Applications,180000,Client Growth & Retention,Grow,Active,2025-08-01,2026-05-31,VP Sales — Rachel Torres,Low
+Client Portal with Real-Time Status,Digital Experience,320000,Client Growth & Retention,Grow,Planning,2026-01-01,2026-08-31,VP Sales — Rachel Torres,Medium
+AI-Assisted RFP Response Automation,AI/ML,150000,Client Growth & Retention,Transform,Not Started,2026-06-01,2026-12-31,BD Manager — James Liu,High
+Employee Engagement Survey Platform,HR Tech,95000,Talent & Culture,Grow,Complete,2025-03-01,2025-09-30,CHRO — Angela Morrison,Low
+Learning Management System (LMS),HR Tech,120000,Talent & Culture,Grow,Active,2025-10-01,2026-06-30,CHRO — Angela Morrison,Low
+AI Training Program + Tools Rollout,AI/ML,85000,Talent & Culture,Transform,Not Started,2026-03-01,2026-09-30,CTO — Kevin Nakamura,Medium
+Network Infrastructure Refresh,Infrastructure,340000,— No Strategic Link —,Run,Active,2025-05-01,2026-03-31,IT Director — Priya Sharma,Low
+Microsoft 365 E5 Operations,Productivity,86400,Operational Excellence,Run,Active,2025-01-01,2025-12-31,IT Director — Priya Sharma,Low
+Cybersecurity Monitoring Upgrade,Security,210000,Operational Excellence,Run,Active,2025-07-01,2026-06-30,IT Director — Priya Sharma,High
+Legacy SharePoint Migration,Applications,85000,— No Strategic Link —,Run,Active,2024-09-01,2026-06-30,IT Director — Priya Sharma,Medium
+ServiceNow ITSM Optimization,IT Service Management,180000,Operational Excellence,Run,Active,2025-01-01,2025-12-31,IT Director — Priya Sharma,Low
+Salesforce CRM Consolidation,Applications,144000,Client Growth & Retention,Grow,Active,2025-04-01,2026-03-31,VP Sales — Rachel Torres,Medium
+Field-to-Office Connectivity (SD-WAN),Infrastructure,260000,Operational Excellence,Grow,Planning,2026-01-01,2026-09-30,CTO — Kevin Nakamura,Medium
+Digital Twin Pilot Project,Engineering Technology,200000,Operational Excellence,Transform,Planning,2026-06-01,2027-03-31,Director of Engineering — Marcus Webb,High
+Disaster Recovery Modernization,Infrastructure,180000,Operational Excellence,Run,Active,2025-02-01,2025-12-31,CTO — Kevin Nakamura,Medium
+ESG Reporting & Carbon Accounting Tool,Data & Analytics,95000,Operational Excellence,Grow,Planning,2026-03-01,2026-12-31,VP Operations — Laura Chen,Low
+Accounts Payable Modernization (COBOL),Applications,320000,Operational Excellence,Transform,Planning,2026-06-01,2027-06-30,CFO — David Park,Critical

@@ -1,6 +1,6 @@
 tool_name,category,annual_cost,licensed_users,active_users,features_total,features_used,contract_end,vendor,integration_complexity,data_export_available
-Internal Helpdesk Portal,IT Service Management,96000,300,245,42,18,2026-09-30,ServiceNow,High,Yes
-Employee Onboarding System,HR Tech,54000,50,32,28,12,2026-06-30,BambooHR,Medium,Yes
-Customer Feedback Dashboard,Analytics,72000,25,18,35,8,2026-03-31,Qualtrics,Medium,Limited
-Document Approval Workflow,Business Process,38400,120,85,20,6,2025-12-31,DocuSign CLM,Low,Yes
-Internal Knowledge Base,Knowledge Management,48000,300,95,30,10,2026-08-31,Confluence,Low,Yes
+Jira Software Premium,Project Management,54000,150,98,52,12,2026-01-31,Atlassian,Medium,Yes
+ServiceNow ITSM,IT Service Management,144000,50,42,65,22,2026-06-30,ServiceNow,High,Yes
+Tableau Creator,Analytics & BI,84000,35,22,48,10,2025-12-31,Salesforce,Medium,Limited
+Zendesk Suite Pro,Customer Support,96000,60,48,40,14,2025-11-30,Zendesk,Medium,Yes
+Coupa Procurement,Procurement,120000,50,28,55,15,2025-09-30,Coupa,High,Limited
