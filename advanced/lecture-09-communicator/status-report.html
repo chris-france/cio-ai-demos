@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Weekly Status Report — Meridian Health Systems</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        @page { size: letter; margin: 0.45in; }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none; }
+        }
+        body { background: #f1f5f9; display: flex; justify-content: center; padding: 24px; }
+        .page {
+            width: 8.5in; min-height: 11in; max-height: 11in; overflow: hidden;
+            background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+            padding: 0.45in 0.5in 0.35in 0.5in;
+            display: flex; flex-direction: column;
+        }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #1e293b; padding-bottom: 8px; margin-bottom: 12px; }
+        .header h1 { font-size: 16px; font-weight: 800; color: #1e293b; }
+        .header .sub { font-size: 9px; color: #64748b; margin-top: 2px; }
+        .header-right { text-align: right; font-size: 9px; color: #64748b; }
+        .header-right .org { font-size: 11px; font-weight: 700; color: #1e293b; }
+
+        /* Overall status banner */
+        .overall-banner { display: flex; align-items: center; gap: 12px; padding: 8px 14px; border-radius: 6px; margin-bottom: 12px; }
+        .overall-banner.amber { background: #fffbeb; border: 1.5px solid #f59e0b; }
+        .overall-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+        .overall-dot.amber { background: #f59e0b; }
+        .overall-banner .text { font-size: 11px; font-weight: 700; color: #92400e; }
+        .overall-banner .detail { font-size: 8.5px; color: #a16207; margin-top: 1px; }
+
+        /* Section title */
+        .section-title { font-size: 9px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; padding-bottom: 3px; border-bottom: 1px solid #e2e8f0; }
+
+        /* RAG item rows */
+        .rag-grid { display: grid; gap: 6px; margin-bottom: 14px; }
+        .rag-item { display: grid; grid-template-columns: 16px 1fr; gap: 8px; align-items: start; padding: 7px 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .rag-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 2px; }
+        .rag-dot.red { background: #ef4444; box-shadow: 0 0 0 2px #fecaca; }
+        .rag-dot.amber { background: #f59e0b; box-shadow: 0 0 0 2px #fef3c7; }
+        .rag-dot.green { background: #22c55e; box-shadow: 0 0 0 2px #bbf7d0; }
+        .rag-title { font-size: 10px; font-weight: 700; color: #1e293b; }
+        .rag-board { font-size: 8.5px; color: #475569; margin-top: 1px; line-height: 1.35; }
+        .rag-tech { font-size: 7.5px; color: #94a3b8; margin-top: 2px; font-style: italic; }
+        .rag-action { font-size: 8px; color: #1e40af; margin-top: 3px; font-weight: 600; }
+        .rag-item.red-bg { background: #fef2f2; border-color: #fecaca; }
+        .rag-item.amber-bg { background: #fffbeb; border-color: #fde68a; }
+        .rag-item.green-bg { background: #f0fdf4; border-color: #bbf7d0; }
+
+        /* Metrics strip */
+        .metrics-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 14px; }
+        .metric { text-align: center; padding: 6px 4px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .metric .val { font-size: 15px; font-weight: 800; color: #1e293b; }
+        .metric .lbl { font-size: 7px; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; margin-top: 1px; }
+        .metric .trend { font-size: 7.5px; font-weight: 600; margin-top: 1px; }
+        .metric .trend.good { color: #16a34a; }
+        .metric .trend.neutral { color: #64748b; }
+
+        /* Two-col bottom */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 10px; }
+
+        /* Upcoming */
+        .upcoming-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid #f1f5f9; font-size: 8.5px; }
+        .upcoming-item:last-child { border: none; }
+        .upcoming-date { font-weight: 700; color: #1e293b; width: 52px; flex-shrink: 0; }
+        .upcoming-text { color: #475569; }
+        .upcoming-tag { font-size: 7px; font-weight: 700; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+        .upcoming-tag.dr { background: #dbeafe; color: #1e40af; }
+        .upcoming-tag.compliance { background: #fae8ff; color: #86198f; }
+        .upcoming-tag.vendor { background: #f1f5f9; color: #475569; }
+        .upcoming-tag.maint { background: #fef3c7; color: #92400e; }
+
+        /* Legend */
+        .legend { display: flex; gap: 16px; align-items: center; }
+        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 7.5px; color: #64748b; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Footer */
+        .footer { margin-top: auto; padding-top: 6px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .footer-text { font-size: 7px; color: #94a3b8; }
+
+        /* Print button */
+        .print-btn { position: fixed; top: 20px; right: 20px; background: #1e293b; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .print-btn:hover { background: #334155; }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
+    <div class="page">
+
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>Weekly IT Status Report</h1>
+                <div class="sub">Week of March 10, 2026 &bull; Prepared by Dave Chen, VP Infrastructure</div>
+            </div>
+            <div class="header-right">
+                <div class="org">Meridian Health Systems</div>
+                <div>Board-Ready Summary &bull; Page 1 of 1</div>
+            </div>
+        </div>
+
+        <!-- Overall Status -->
+        <div class="overall-banner amber">
+            <div class="overall-dot amber"></div>
+            <div>
+                <div class="text">OVERALL STATUS: AMBER</div>
+                <div class="detail">One resolved incident + elevated cyber threat level. All systems currently operational. No patient or revenue impact.</div>
+            </div>
+        </div>
+
+        <!-- Critical Items -->
+        <div class="section-title">Critical Items</div>
+        <div class="rag-grid">
+            <div class="rag-item amber-bg">
+                <div class="rag-dot amber"></div>
+                <div>
+                    <div class="rag-title">Billing System Disruption — Resolved</div>
+                    <div class="rag-board">Brief outage detected at 2:47 AM Tuesday, fully resolved by 7:30 AM. No patient impact, no revenue impact, no data loss. Root cause identified and permanent fix shipping March 21.</div>
+                    <div class="rag-tech">PROD-DB-CLUSTER-03 OOM on 3/8 nodes. Unparameterized query in BIL-SVC-v2.3.1 caused connection pool memory leak. MTTR: 4h43m (SLA: 6h).</div>
+                    <div class="rag-action">Action: BIL-SVC-v2.4.0 with circuit breakers releases March 21</div>
+                </div>
+            </div>
+            <div class="rag-item amber-bg">
+                <div class="rag-dot amber"></div>
+                <div>
+                    <div class="rag-title">Cybersecurity — Elevated Threat Activity</div>
+                    <div class="rag-board">Blocked 847,000 attack attempts this week (+23% vs. prior week), consistent with industry-wide trends. Three sophisticated threat actors identified and reported to federal authorities (CISA). No breach. No patient data compromised.</div>
+                    <div class="rag-tech">94% credential stuffing on /api/auth/login. Geo-blocking reduced attack surface 62%. SIEM correlated 3 IPs to known APT groups. IR playbook followed.</div>
+                    <div class="rag-action">Action: Continued monitoring. Geo-blocking rules expanded. CISA coordination ongoing.</div>
+                </div>
+            </div>
+            <div class="rag-item green-bg">
+                <div class="rag-dot green"></div>
+                <div>
+                    <div class="rag-title">Storage Infrastructure Upgrade — 68% Complete</div>
+                    <div class="rag-board">Migrated systems running 3x faster. On budget, on schedule. Final phase requires planned 4-hour maintenance window March 22-23 — back-office reporting only, no clinical systems affected.</div>
+                    <div class="rag-tech">SAN migration EMC VMAX → Pure Storage FlashArray. 412/608 LUNs migrated. Remaining: Tier-1 Oracle RAC volumes.</div>
+                    <div class="rag-action">Action: Maintenance window March 22-23 for ERP read replicas (4 hours)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ongoing Projects -->
+        <div class="section-title">Ongoing Projects</div>
+        <div class="rag-grid">
+            <div class="rag-item">
+                <div class="rag-dot amber"></div>
+                <div>
+                    <div class="rag-title">Container Platform Upgrade</div>
+                    <div class="rag-board">In staging. Two configuration issues found and being fixed. Production target: April 1.</div>
+                    <div class="rag-tech">Kubernetes 1.28→1.31. Deprecated flowcontrol API broke 2 Helm charts. DevOps patching.</div>
+                </div>
+            </div>
+            <div class="rag-item">
+                <div class="rag-dot green"></div>
+                <div>
+                    <div class="rag-title">Single Sign-On Modernization — 78% Complete</div>
+                    <div class="rag-board">Migrating employee login systems to Microsoft's modern platform. 14 applications remaining, 3 have legacy dependencies requiring extra work.</div>
+                    <div class="rag-tech">ADFS → Entra ID. 14 apps need SAML-to-OIDC refactoring. 3 apps have Kerberos dependencies blocking cutover.</div>
+                </div>
+            </div>
+            <div class="rag-item">
+                <div class="rag-dot green"></div>
+                <div>
+                    <div class="rag-title">Monitoring Vendor Consolidation — $340K Annual Savings</div>
+                    <div class="rag-board">Replacing two paid monitoring tools with a unified open-source platform. Proof-of-concept shows 95% feature match. Business case pending finance review.</div>
+                    <div class="rag-tech">Datadog + Splunk → Grafana LGTM stack (Loki, Grafana, Tempo, Mimir). POC complete. Awaiting FinOps review.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="section-title">Key Performance Indicators</div>
+        <div class="metrics-strip">
+            <div class="metric">
+                <div class="val">$487K</div>
+                <div class="lbl">Cloud Spend MTD</div>
+                <div class="trend good">3% under budget</div>
+            </div>
+            <div class="metric">
+                <div class="val">72%</div>
+                <div class="lbl">Compute Utilization</div>
+                <div class="trend good">Target: 65-75%</div>
+            </div>
+            <div class="metric">
+                <div class="val">94.2%</div>
+                <div class="lbl">CDN Cache Hit Ratio</div>
+                <div class="trend good">Above 90% target</div>
+            </div>
+            <div class="metric">
+                <div class="val">847</div>
+                <div class="lbl">Deployments This Week</div>
+                <div class="trend good">99.1% success rate</div>
+            </div>
+            <div class="metric">
+                <div class="val">12.3m</div>
+                <div class="lbl">Mean Deploy Time</div>
+                <div class="trend good">Down from 18.7m last Q</div>
+            </div>
+            <div class="metric">
+                <div class="val">4h43m</div>
+                <div class="lbl">Incident MTTR</div>
+                <div class="trend good">Under 6h SLA</div>
+            </div>
+        </div>
+
+        <!-- Two column: Upcoming + Risk Summary -->
+        <div class="two-col">
+            <div>
+                <div class="section-title">Upcoming (Next 30 Days)</div>
+                <div class="upcoming-item">
+                    <div class="upcoming-date">Mar 21</div>
+                    <div class="upcoming-text">Billing service permanent fix deploys (v2.4.0)</div>
+                    <div class="upcoming-tag maint">Release</div>
+                </div>
+                <div class="upcoming-item">
+                    <div class="upcoming-date">Mar 22-23</div>
+                    <div class="upcoming-text">Storage migration final phase — 4h maintenance window</div>
+                    <div class="upcoming-tag maint">Downtime</div>
+                </div>
+                <div class="upcoming-item">
+                    <div class="upcoming-date">Mar 28</div>
+                    <div class="upcoming-text">Full disaster recovery failover test (US-West-2)</div>
+                    <div class="upcoming-tag dr">DR Test</div>
+                </div>
+                <div class="upcoming-item">
+                    <div class="upcoming-date">Mar 31</div>
+                    <div class="upcoming-text">PCI-DSS v4.0 evidence packages due</div>
+                    <div class="upcoming-tag compliance">Compliance</div>
+                </div>
+                <div class="upcoming-item">
+                    <div class="upcoming-date">Apr 1</div>
+                    <div class="upcoming-text">Container platform upgrade goes to production</div>
+                    <div class="upcoming-tag maint">Release</div>
+                </div>
+                <div class="upcoming-item">
+                    <div class="upcoming-date">Apr 7</div>
+                    <div class="upcoming-text">PCI-DSS v4.0 compliance audit begins</div>
+                    <div class="upcoming-tag compliance">Audit</div>
+                </div>
+                <div class="upcoming-item">
+                    <div class="upcoming-date">Apr TBD</div>
+                    <div class="upcoming-text">Vendor security review — 3 new SaaS tools (DPAs in legal)</div>
+                    <div class="upcoming-tag vendor">Vendor</div>
+                </div>
+            </div>
+            <div>
+                <div class="section-title">Risk Register (Active)</div>
+                <div style="font-size: 8.5px; color: #334155;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1.5px solid #cbd5e1;">
+                                <th style="text-align: left; padding: 3px 4px; font-size: 7.5px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Risk</th>
+                                <th style="text-align: center; padding: 3px 4px; font-size: 7.5px; color: #64748b; width: 50px;">Level</th>
+                                <th style="text-align: left; padding: 3px 4px; font-size: 7.5px; color: #64748b;">Mitigation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 4px;">Sustained cyber threat increase</td>
+                                <td style="padding: 4px; text-align: center;"><span style="background: #f59e0b; color: white; font-size: 7px; font-weight: 700; padding: 1px 6px; border-radius: 3px;">MED</span></td>
+                                <td style="padding: 4px; font-size: 8px; color: #64748b;">Geo-blocking active, CISA engaged, SOC monitoring 24/7</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 4px;">Oracle RAC migration complexity</td>
+                                <td style="padding: 4px; text-align: center;"><span style="background: #f59e0b; color: white; font-size: 7px; font-weight: 700; padding: 1px 6px; border-radius: 3px;">MED</span></td>
+                                <td style="padding: 4px; font-size: 8px; color: #64748b;">Runbook in prep, weekend window, rollback plan tested</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 4px;">K8s upgrade API deprecations</td>
+                                <td style="padding: 4px; text-align: center;"><span style="background: #22c55e; color: white; font-size: 7px; font-weight: 700; padding: 1px 6px; border-radius: 3px;">LOW</span></td>
+                                <td style="padding: 4px; font-size: 8px; color: #64748b;">2 Helm charts being patched, staging validated</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 4px;">Kerberos legacy SSO blockers</td>
+                                <td style="padding: 4px; text-align: center;"><span style="background: #22c55e; color: white; font-size: 7px; font-weight: 700; padding: 1px 6px; border-radius: 3px;">LOW</span></td>
+                                <td style="padding: 4px; font-size: 8px; color: #64748b;">3 apps identified, refactoring underway</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px;">PCI-DSS v4.0 readiness</td>
+                                <td style="padding: 4px; text-align: center;"><span style="background: #f59e0b; color: white; font-size: 7px; font-weight: 700; padding: 1px 6px; border-radius: 3px;">MED</span></td>
+                                <td style="padding: 4px; font-size: 8px; color: #64748b;">Evidence packages due Mar 31, audit Apr 7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 10px; padding: 6px 8px; background: #f8fafc; border-radius: 5px; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 7.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">Board Decisions Needed</div>
+                    <div style="font-size: 8.5px; color: #334155;">None this week. All items informational. Storage maintenance window (Mar 22-23) pre-approved.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Red — Immediate action required</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Amber — Monitor / in progress</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Green — On track</div>
+                <div class="legend-item" style="margin-left: 8px; font-style: italic; color: #94a3b8;">Italic text = technical detail for CIO reference</div>
+            </div>
+            <div class="footer-text">Meridian Health Systems &bull; IT Operations &bull; Confidential &bull; Week of March 10, 2026</div>
+        </div>
+    </div>
+</body>
+</html>
