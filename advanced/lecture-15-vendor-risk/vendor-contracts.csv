@@ -1,0 +1,6 @@
+vendor_name,product,category,annual_cost,contract_start,contract_end,auto_renew,termination_notice_days,data_portability,export_format,api_available,uptime_sla,support_tier,lock_in_factors,switching_cost_estimate,users,data_volume_gb
+OpenAI,ChatGPT Enterprise,Generative AI,96000,2025-06-01,2026-05-31,Yes,90,Limited,"JSON export, no fine-tune data",Yes,99.9%,Priority,"Custom fine-tuning, prompt libraries, usage history",45000,45,12
+Microsoft,Azure OpenAI Service,AI Platform,144000,2025-01-01,2026-12-31,Yes,180,Medium,"Standard Azure export, ARM templates",Yes,99.95%,Premier,"Azure ecosystem integration, Entra ID SSO, compliance certifications",180000,30,85
+Salesforce,Einstein AI + CRM,CRM + AI,285000,2024-01-01,2026-12-31,Yes,120,Poor,"CSV export, limited API history",Yes,99.9%,Premier,"20 years of CRM data, custom objects, workflow automation, AppExchange integrations",950000,150,340
+ServiceNow,IT Service Management,ITSM,96000,2025-03-01,2027-02-28,Yes,90,Medium,"XML/CSV export, REST API",Yes,99.8%,Standard,"CMDB relationships, custom workflows, integration hub connections",280000,300,45
+Snowflake,Data Cloud,Data Platform,240000,2025-04-01,2026-03-31,No,30,Good,"Parquet/CSV export, data sharing",Yes,99.9%,Business Critical,"Stored procedures, data shares, marketplace connections, usage-based pricing makes migration timing complex",120000,20,2800

@@ -1,0 +1,49 @@
+WEEKLY IT STATUS REPORT — INFRASTRUCTURE & OPERATIONS
+Prepared by: Dave Chen, VP Infrastructure | Week of March 10, 2026
+
+CRITICAL ISSUES:
+
+1. PROD-DB-CLUSTER-03 experienced OOM kills on 3 of 8 nodes Tuesday at 02:47 UTC.
+   Root cause: unoptimized query from the billing microservice (BIL-SVC-v2.3.1) caused
+   a cascading memory leak in the connection pool. Hotfix deployed via blue-green deployment
+   at 06:12 UTC. P99 latency returned to baseline (<45ms) by 07:30. MTTR: 4h43m.
+   Action: Engineering is implementing circuit breakers and query parameterization in
+   BIL-SVC-v2.4.0 (release target: March 21).
+
+2. WAF blocked 847,000 malicious requests this week (up 23% WoW). 94% were credential
+   stuffing attacks targeting /api/auth/login. Geo-blocking for non-operating regions
+   reduced attack surface by 62%. SIEM correlation identified 3 IPs linked to known
+   APT groups. Escalated to CISA per our IR playbook. No data exfiltration confirmed.
+
+3. SAN migration from EMC VMAX to Pure Storage FlashArray is 68% complete.
+   LUNs migrated: 412/608. Throughput improved 3.2x on migrated workloads.
+   Remaining LUNs include Tier-1 Oracle RAC volumes — scheduling maintenance window
+   for March 22-23 (requires 4-hour downtime on ERP read replicas).
+
+ONGOING PROJECTS:
+
+4. Kubernetes cluster upgrade from 1.28 to 1.31 is in staging. Deprecated API removals
+   (flowcontrol.apiserver.k8s.io/v1beta3) broke 2 helm charts. DevOps is patching.
+   ETA for production: April 1.
+
+5. SSO migration from on-prem ADFS to Entra ID (formerly Azure AD) — 78% of apps
+   migrated. Remaining 14 apps require SAML-to-OIDC refactoring. Legacy Kerberos
+   dependencies in 3 internal tools blocking full cutover.
+
+6. Observability stack consolidation: migrating from Datadog + Splunk to Grafana LGTM
+   stack (Loki, Grafana, Tempo, Mimir). Estimated annual savings: $340K. POC showed
+   95% feature parity. Full migration plan pending FinOps review.
+
+CAPACITY & PERFORMANCE:
+
+- Cloud spend MTD: $487K (tracking 3% under budget)
+- Compute utilization: 72% avg across 3 AZs (target: 65-75%)
+- CDN cache hit ratio: 94.2% (above 90% target)
+- CI/CD pipeline: 847 deployments this week, 99.1% success rate
+- Mean time to deploy: 12.3 minutes (down from 18.7 last quarter)
+
+UPCOMING:
+
+- DR failover test scheduled March 28 (full site failover to US-West-2)
+- PCI-DSS v4.0 compliance audit starts April 7
+- Vendor security review for 3 new SaaS tools (legal reviewing DPAs)

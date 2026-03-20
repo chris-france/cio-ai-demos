@@ -1,0 +1,6 @@
+tool_name,category,annual_cost,licensed_users,active_users,features_total,features_used,contract_end,vendor,integration_complexity,data_export_available
+Internal Helpdesk Portal,IT Service Management,96000,300,245,42,18,2026-09-30,ServiceNow,High,Yes
+Employee Onboarding System,HR Tech,54000,50,32,28,12,2026-06-30,BambooHR,Medium,Yes
+Customer Feedback Dashboard,Analytics,72000,25,18,35,8,2026-03-31,Qualtrics,Medium,Limited
+Document Approval Workflow,Business Process,38400,120,85,20,6,2025-12-31,DocuSign CLM,Low,Yes
+Internal Knowledge Base,Knowledge Management,48000,300,95,30,10,2026-08-31,Confluence,Low,Yes

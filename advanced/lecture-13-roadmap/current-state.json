@@ -1,0 +1,67 @@
+{
+  "organization": "Meridian Health Systems",
+  "assessment_date": "2026-03-15",
+  "assessed_by": "CIO Office",
+  "findings": {
+    "legacy_systems": {
+      "summary": "4 critical systems running on unsupported platforms",
+      "details": [
+        {"system": "Patient Billing (COBOL)", "age_years": 28, "risk": "High", "replacement_cost_estimate": 2400000},
+        {"system": "Lab Management (FoxPro)", "age_years": 22, "risk": "High", "replacement_cost_estimate": 800000},
+        {"system": "Inventory Tracking (Access DB)", "age_years": 15, "risk": "Medium", "replacement_cost_estimate": 350000},
+        {"system": "Staff Scheduling (Excel macros)", "age_years": 10, "risk": "Medium", "replacement_cost_estimate": 200000}
+      ]
+    },
+    "shadow_it": {
+      "summary": "23 unapproved SaaS tools discovered across 6 departments",
+      "annual_spend": 187000,
+      "highest_risk_tools": [
+        {"tool": "Otter.ai", "department": "Sales", "risk": "Meeting recordings with PHI"},
+        {"tool": "Personal ChatGPT", "department": "Multiple", "risk": "Patient data in prompts"},
+        {"tool": "Airtable", "department": "Operations", "risk": "Scheduling data with PII"}
+      ]
+    },
+    "saas_spend": {
+      "total_annual": 2340000,
+      "tools_count": 26,
+      "underutilized_tools": 8,
+      "duplicate_categories": 3,
+      "potential_annual_savings": 420000
+    },
+    "team_skills": {
+      "total_it_staff": 12,
+      "ai_ready": 3,
+      "needs_upskilling": 7,
+      "at_risk_of_displacement": 2,
+      "training_budget_needed": 145000
+    },
+    "security_posture": {
+      "last_pen_test": "2025-11-01",
+      "critical_vulnerabilities": 2,
+      "compliance_frameworks": ["HIPAA", "SOX", "PCI-DSS"],
+      "next_audit": "2026-04-07",
+      "mfa_adoption": "87%",
+      "phishing_test_fail_rate": "12%"
+    },
+    "ai_readiness": {
+      "current_ai_tools": 10,
+      "approved": 7,
+      "shadow_ai": 3,
+      "governance_policy": false,
+      "data_classification_complete": false,
+      "ai_training_completed": "15%"
+    }
+  },
+  "quick_wins": [
+    "Consolidate 3 duplicate SaaS categories (save $180K/year)",
+    "Implement AI governance policy (reduce shadow AI risk)",
+    "Upskill 4 team members on AI-augmented workflows",
+    "Deploy AI-powered help desk triage (reduce L1 ticket volume 40%)",
+    "Automate 3 Excel-based processes (staff scheduling, inventory, reporting)"
+  ],
+  "budget_available": {
+    "discretionary": 850000,
+    "training": 200000,
+    "new_initiatives": 1500000
+  }
+}

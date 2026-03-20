@@ -1,0 +1,92 @@
+[
+  {
+    "id": "TKT-2026-0401",
+    "from": "jennifer.wu@meridianhealth.com",
+    "subject": "Can't log into Workday",
+    "body": "Hi IT, I've been trying to log into Workday all morning and keep getting 'Invalid credentials.' I changed my password last week and everything was working fine until today. I need to approve timesheets before end of day. Can someone help ASAP?",
+    "timestamp": "2026-03-15T08:23:00Z",
+    "priority_actual": "Medium",
+    "category_actual": "Access/Authentication"
+  },
+  {
+    "id": "TKT-2026-0402",
+    "from": "dr.robert.patel@meridianhealth.com",
+    "subject": "URGENT - EHR system down in ER",
+    "body": "The Epic system is not loading on any of the 6 workstations in ER Bay 3. We have patients waiting and cannot access medical records. This is a patient safety issue. Need immediate response.",
+    "timestamp": "2026-03-15T08:45:00Z",
+    "priority_actual": "Critical",
+    "category_actual": "System Outage"
+  },
+  {
+    "id": "TKT-2026-0403",
+    "from": "mark.stevens@meridianhealth.com",
+    "subject": "Need Adobe Acrobat installed",
+    "body": "Hey, I need Adobe Acrobat Pro installed on my laptop. I'm in the contracts team and need to edit and sign PDFs. My asset tag is MHS-L-4892. I'm in Building C, 3rd floor. Any day this week works.",
+    "timestamp": "2026-03-15T09:12:00Z",
+    "priority_actual": "Low",
+    "category_actual": "Software Request"
+  },
+  {
+    "id": "TKT-2026-0404",
+    "from": "susan.chen@meridianhealth.com",
+    "subject": "Suspicious email received",
+    "body": "I received an email that looks like it's from our CEO asking me to purchase gift cards urgently. The email address looks slightly different from the real one. I didn't click anything but wanted to report it. I've attached a screenshot.",
+    "timestamp": "2026-03-15T09:34:00Z",
+    "priority_actual": "High",
+    "category_actual": "Security Incident"
+  },
+  {
+    "id": "TKT-2026-0405",
+    "from": "carlos.garcia@meridianhealth.com",
+    "subject": "VPN disconnecting every 10 minutes",
+    "body": "I'm working remotely today and the VPN keeps dropping every 10-15 minutes. I have to reconnect each time and it's killing my productivity. I'm on Comcast with 200mbps. Using the Cisco AnyConnect client version 4.10. This started happening after the update last Friday.",
+    "timestamp": "2026-03-15T10:05:00Z",
+    "priority_actual": "Medium",
+    "category_actual": "Network/Connectivity"
+  },
+  {
+    "id": "TKT-2026-0406",
+    "from": "nancy.wright@meridianhealth.com",
+    "subject": "New employee needs accounts set up",
+    "body": "We have a new hire starting Monday, March 18. Name: David Park, Department: Radiology, Title: Radiology Technician. He'll need: AD account, email, Epic access (read-only initially), badge access to Building A and Radiology wing, and a laptop from standard inventory. Manager: Dr. Sarah Kim.",
+    "timestamp": "2026-03-15T10:28:00Z",
+    "priority_actual": "Medium",
+    "category_actual": "Onboarding"
+  },
+  {
+    "id": "TKT-2026-0407",
+    "from": "linda.johnson@meridianhealth.com",
+    "subject": "Printer on 4th floor not working",
+    "body": "The big printer/copier on the 4th floor of Building B (the HP LaserJet near the break room) has been showing 'Paper Jam' for two days. We've cleared the paper path multiple times but it keeps coming back. Asset tag: MHS-P-1247.",
+    "timestamp": "2026-03-15T11:15:00Z",
+    "priority_actual": "Low",
+    "category_actual": "Hardware"
+  },
+  {
+    "id": "TKT-2026-0408",
+    "from": "cfo@meridianhealth.com",
+    "subject": "Monthly IT cost report needed",
+    "body": "Hi team, for the board meeting next Thursday I need the monthly IT cost breakdown by category (infrastructure, SaaS, personnel, projects). Also need YTD actuals vs budget and a forecast for Q2. Can you pull this together by Wednesday?",
+    "timestamp": "2026-03-15T13:00:00Z",
+    "priority_actual": "Medium",
+    "category_actual": "Reporting Request"
+  },
+  {
+    "id": "TKT-2026-0409",
+    "from": "mike.torres@meridianhealth.com",
+    "subject": "Shared drive permissions issue",
+    "body": "I was moved from the Finance team to the Strategy team last month but I still have access to the Finance shared drive (\\\\mhs-fs01\\finance) and I can't access the Strategy drive (\\\\mhs-fs01\\strategy). Can you fix the permissions? My employee ID is E-4521.",
+    "timestamp": "2026-03-15T14:22:00Z",
+    "priority_actual": "Medium",
+    "category_actual": "Access/Permissions"
+  },
+  {
+    "id": "TKT-2026-0410",
+    "from": "dr.amanda.lee@meridianhealth.com",
+    "subject": "Conference room AV not working for board presentation",
+    "body": "The projector and Teams Room system in the main boardroom (Building A, Room 101) isn't connecting to laptops. We have a board meeting tomorrow at 9 AM and the CEO is presenting. This needs to work. Last time it took 20 minutes to get it going and the board was not happy.",
+    "timestamp": "2026-03-15T15:45:00Z",
+    "priority_actual": "High",
+    "category_actual": "AV/Conference Room"
+  }
+]

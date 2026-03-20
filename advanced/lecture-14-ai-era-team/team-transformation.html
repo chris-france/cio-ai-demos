@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 14 — Building Your AI-Era IT Team</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .tab-active { border-bottom: 3px solid #6366f1; color: #6366f1; font-weight: 600; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
+        .tab-inactive:hover { color: #334155; border-bottom-color: #cbd5e1; }
+        .fade-in { animation: fadeIn 0.4s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .org-card { transition: all 0.2s; }
+        .org-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .email-card { transition: all 0.3s; }
+        .email-card:hover { transform: scale(1.01); }
+        .pipeline-arrow { animation: pulseArrow 2s infinite; }
+        @keyframes pulseArrow { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+        .connector-line { position: relative; }
+        .connector-line::after { content: ''; position: absolute; left: 50%; top: 100%; width: 2px; height: 20px; background: #cbd5e1; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        primaryDark: '#4f46e5',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-white/20 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide">Lecture 14</span>
+                <span class="text-indigo-200 text-sm">CIO AI Advanced Course</span>
+            </div>
+            <h1 class="text-3xl font-bold mb-2">Building Your AI-Era IT Team</h1>
+            <p class="text-indigo-100 text-lg max-w-2xl">Transform your IT organization from ticket-takers to strategic enablers. Same people, evolved roles, AI-augmented workflows.</p>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white border-b sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 flex gap-1 overflow-x-auto">
+            <button onclick="showTab('orgchart')" id="tab-orgchart" class="tab-active px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Org Charts</button>
+            <button onclick="showTab('savings')" id="tab-savings" class="tab-inactive px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Cost Savings</button>
+            <button onclick="showTab('email')" id="tab-email" class="tab-inactive px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Email Triage</button>
+            <button onclick="showTab('transition')" id="tab-transition" class="tab-inactive px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Transition Plan</button>
+            <button onclick="showTab('comms')" id="tab-comms" class="tab-inactive px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Comms Plan</button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- ============ ORG CHART TAB ============ -->
+        <div id="panel-orgchart" class="fade-in">
+            <!-- Toggle -->
+            <div class="flex items-center gap-4 mb-6">
+                <h2 class="text-xl font-bold">Organization Chart</h2>
+                <div class="flex bg-gray-100 rounded-lg p-1">
+                    <button onclick="showOrg('current')" id="btn-current" class="px-4 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white">Current State</button>
+                    <button onclick="showOrg('future')" id="btn-future" class="px-4 py-2 text-sm font-medium rounded-md text-gray-600">AI-Era State</button>
+                </div>
+            </div>
+
+            <!-- Current Org -->
+            <div id="org-current">
+                <div class="bg-white rounded-xl border p-6 mb-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <span class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Current Organization &mdash; 15 Positions &mdash; $2,060,000 Total Payroll</span>
+                    </div>
+
+                    <!-- CIO -->
+                    <div class="flex flex-col items-center mb-8">
+                        <div class="org-card bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 w-64 text-center">
+                            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-1">CIO</div>
+                            <div class="font-bold text-gray-900">Margaret Chen</div>
+                            <div class="text-sm text-gray-500 mt-1">$285,000 &middot; 95% util</div>
+                        </div>
+                        <div class="w-0.5 h-6 bg-gray-300"></div>
+                    </div>
+
+                    <!-- IT Director -->
+                    <div class="flex flex-col items-center mb-8">
+                        <div class="org-card bg-white border-2 border-blue-200 rounded-xl p-4 w-64 text-center">
+                            <div class="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">IT Director</div>
+                            <div class="font-bold text-gray-900">Paul Morrison</div>
+                            <div class="text-sm text-gray-500 mt-1">$195,000 &middot; 90% util</div>
+                        </div>
+                        <div class="w-0.5 h-6 bg-gray-300"></div>
+                    </div>
+
+                    <!-- Departments -->
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <!-- IT Support -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-orange-600 uppercase tracking-wide text-center bg-orange-50 py-2 rounded-lg">IT Support (4)</div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-orange-600">Help Desk Mgr</div>
+                                <div class="text-sm font-bold">Sarah Mitchell</div>
+                                <div class="text-xs text-gray-500">$105K &middot; 85%</div>
+                            </div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-orange-600">Analyst I</div>
+                                <div class="text-sm font-bold">Jordan Lee</div>
+                                <div class="text-xs text-gray-500">$52K &middot; 90%</div>
+                            </div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-orange-600">Analyst II</div>
+                                <div class="text-sm font-bold">Casey Brown</div>
+                                <div class="text-xs text-gray-500">$55K &middot; 88%</div>
+                            </div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-orange-600">Analyst III</div>
+                                <div class="text-sm font-bold">Alex Rivera</div>
+                                <div class="text-xs text-gray-500">$58K &middot; 85%</div>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-teal-600 uppercase tracking-wide text-center bg-teal-50 py-2 rounded-lg">Infrastructure (3)</div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-teal-600">Sr Network Eng</div>
+                                <div class="text-sm font-bold">James Park</div>
+                                <div class="text-xs text-gray-500">$135K &middot; 75%</div>
+                            </div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-teal-600">Sys Admin</div>
+                                <div class="text-sm font-bold">Robert Taylor</div>
+                                <div class="text-xs text-gray-500">$115K &middot; 80%</div>
+                            </div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-teal-600">Cloud Engineer</div>
+                                <div class="text-sm font-bold">Mike Johnson</div>
+                                <div class="text-xs text-gray-500">$125K &middot; 70%</div>
+                            </div>
+                        </div>
+
+                        <!-- Security -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wide text-center bg-red-50 py-2 rounded-lg">Security (1)</div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-red-600">Security Analyst</div>
+                                <div class="text-sm font-bold">Tom Williams</div>
+                                <div class="text-xs text-gray-500">$110K &middot; 80%</div>
+                            </div>
+                        </div>
+
+                        <!-- Applications -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-violet-600 uppercase tracking-wide text-center bg-violet-50 py-2 rounded-lg">Applications (3)</div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-violet-600">Business Analyst</div>
+                                <div class="text-sm font-bold">Lisa Chang</div>
+                                <div class="text-xs text-gray-500">$105K &middot; 75%</div>
+                            </div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-violet-600">Sr Developer</div>
+                                <div class="text-sm font-bold">Priya Sharma</div>
+                                <div class="text-xs text-gray-500">$130K &middot; 85%</div>
+                            </div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-violet-600">QA Tester</div>
+                                <div class="text-sm font-bold">Angela Foster</div>
+                                <div class="text-xs text-gray-500">$85K &middot; 70%</div>
+                            </div>
+                        </div>
+
+                        <!-- PMO / Ops -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-amber-600 uppercase tracking-wide text-center bg-amber-50 py-2 rounded-lg">PMO / Ops (2)</div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-amber-600">Project Coord</div>
+                                <div class="text-sm font-bold">Diana Cruz</div>
+                                <div class="text-xs text-gray-500">$78K &middot; 75%</div>
+                            </div>
+                            <div class="org-card bg-white border rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-amber-600">IT Procurement</div>
+                                <div class="text-sm font-bold">David Kim</div>
+                                <div class="text-xs text-gray-500">$82K &middot; 65%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Future Org -->
+            <div id="org-future" class="hidden">
+                <div class="bg-white rounded-xl border p-6 mb-6">
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span class="text-sm font-semibold text-gray-500 uppercase tracking-wide">AI-Era Organization &mdash; 11 Positions &mdash; $1,618,000 Total Payroll</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-6 ml-5">Same people, transformed roles. 4 positions consolidated; 11 evolved with new titles and expanded scope.</p>
+
+                    <!-- CIO -->
+                    <div class="flex flex-col items-center mb-8">
+                        <div class="org-card bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 w-72 text-center">
+                            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-1">CIO &amp; AI Strategy Lead</div>
+                            <div class="font-bold text-gray-900">Margaret Chen</div>
+                            <div class="text-sm text-gray-500 mt-1">$295,000 &middot; 95% util</div>
+                            <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI governance, vendor AI strategy</div>
+                        </div>
+                        <div class="w-0.5 h-6 bg-gray-300"></div>
+                    </div>
+
+                    <!-- IT Director -->
+                    <div class="flex flex-col items-center mb-8">
+                        <div class="org-card bg-white border-2 border-blue-200 rounded-xl p-4 w-72 text-center">
+                            <div class="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Dir. of IT &amp; AI Operations</div>
+                            <div class="font-bold text-gray-900">Paul Morrison</div>
+                            <div class="text-sm text-gray-500 mt-1">$205,000 &middot; 92% util</div>
+                            <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI ops oversight, automation KPIs</div>
+                        </div>
+                        <div class="w-0.5 h-6 bg-gray-300"></div>
+                    </div>
+
+                    <!-- Departments -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- AI-Augmented Support -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-orange-600 uppercase tracking-wide text-center bg-orange-50 py-2 rounded-lg">AI-Augmented Support (1)</div>
+                            <div class="org-card bg-white border-2 border-orange-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-orange-600">AI Support & Escalation Lead</div>
+                                <div class="text-sm font-bold">Sarah Mitchell</div>
+                                <div class="text-xs text-gray-500">$115K &middot; 90%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">Manages AI chatbot + escalations</div>
+                            </div>
+                            <div class="border border-dashed border-gray-300 rounded-lg p-3 text-center bg-gray-50">
+                                <div class="text-xs text-gray-400 font-semibold">CONSOLIDATED</div>
+                                <div class="text-xs text-gray-500 mt-1">Jordan Lee &rarr; retrained</div>
+                                <div class="text-xs text-gray-500">Casey Brown &rarr; retrained</div>
+                                <div class="text-xs text-gray-500">Alex Rivera &rarr; retrained</div>
+                                <div class="text-xs text-gray-400 mt-1 italic">AI handles L1/L2 tickets</div>
+                            </div>
+                        </div>
+
+                        <!-- Platform Engineering -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-teal-600 uppercase tracking-wide text-center bg-teal-50 py-2 rounded-lg">Platform Engineering (3)</div>
+                            <div class="org-card bg-white border-2 border-teal-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-teal-600">Platform & AI Infra Eng</div>
+                                <div class="text-sm font-bold">James Park</div>
+                                <div class="text-xs text-gray-500">$145K &middot; 85%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI infrastructure, MLOps</div>
+                            </div>
+                            <div class="org-card bg-white border-2 border-teal-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-teal-600">Automation & DevOps Eng</div>
+                                <div class="text-sm font-bold">Robert Taylor</div>
+                                <div class="text-xs text-gray-500">$125K &middot; 88%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+IaC, CI/CD, auto-patching</div>
+                            </div>
+                            <div class="org-card bg-white border-2 border-teal-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-teal-600">Cloud & AI Platform Eng</div>
+                                <div class="text-sm font-bold">Mike Johnson</div>
+                                <div class="text-xs text-gray-500">$135K &middot; 82%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI model deployment, FinOps</div>
+                            </div>
+                        </div>
+
+                        <!-- Security & AI Risk -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wide text-center bg-red-50 py-2 rounded-lg">Security & AI Risk (1)</div>
+                            <div class="org-card bg-white border-2 border-red-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-red-600">AI Security & Risk Lead</div>
+                                <div class="text-sm font-bold">Tom Williams</div>
+                                <div class="text-xs text-gray-500">$125K &middot; 90%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI risk, prompt injection, data governance</div>
+                            </div>
+                        </div>
+
+                        <!-- Product & AI Development -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold text-violet-600 uppercase tracking-wide text-center bg-violet-50 py-2 rounded-lg">Product & AI Dev (4)</div>
+                            <div class="org-card bg-white border-2 border-violet-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-violet-600">AI Product Manager</div>
+                                <div class="text-sm font-bold">Lisa Chang</div>
+                                <div class="text-xs text-gray-500">$118K &middot; 88%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI use case prioritization, ROI</div>
+                            </div>
+                            <div class="org-card bg-white border-2 border-violet-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-violet-600">Full-Stack AI Developer</div>
+                                <div class="text-sm font-bold">Priya Sharma</div>
+                                <div class="text-xs text-gray-500">$145K &middot; 90%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI-assisted coding, prompt eng</div>
+                            </div>
+                            <div class="org-card bg-white border-2 border-violet-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-violet-600">AI Ops & Quality Lead</div>
+                                <div class="text-sm font-bold">Angela Foster</div>
+                                <div class="text-xs text-gray-500">$98K &middot; 85%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI output QA, testing automation</div>
+                            </div>
+                            <div class="org-card bg-white border-2 border-violet-200 rounded-lg p-3 text-center">
+                                <div class="text-xs font-semibold text-violet-600">AI Vendor & Procurement Mgr</div>
+                                <div class="text-sm font-bold">David Kim</div>
+                                <div class="text-xs text-gray-500">$92K &middot; 80%</div>
+                                <div class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block">+AI vendor eval, contract AI clauses</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Retrained staff -->
+                    <div class="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <h3 class="font-semibold text-amber-800 mb-2">Retrained & Redeployed (4 staff)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div class="bg-white rounded-lg p-3 border border-amber-100">
+                                <div class="text-sm font-bold">Jordan Lee</div>
+                                <div class="text-xs text-gray-500">Was: Help Desk Analyst I ($52K)</div>
+                                <div class="text-xs text-green-700 font-medium mt-1">Now: AI Training & Data Specialist ($62K)</div>
+                                <div class="text-xs text-gray-500 mt-1">Trains AI chatbot, curates knowledge base</div>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 border border-amber-100">
+                                <div class="text-sm font-bold">Casey Brown</div>
+                                <div class="text-xs text-gray-500">Was: Help Desk Analyst II ($55K)</div>
+                                <div class="text-xs text-green-700 font-medium mt-1">Now: AI Workflow Automation Analyst ($68K)</div>
+                                <div class="text-xs text-gray-500 mt-1">Builds no-code automations, Power Automate</div>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 border border-amber-100">
+                                <div class="text-sm font-bold">Alex Rivera</div>
+                                <div class="text-xs text-gray-500">Was: Help Desk Analyst III ($58K)</div>
+                                <div class="text-xs text-green-700 font-medium mt-1">Now: Employee Tech Experience Specialist ($65K)</div>
+                                <div class="text-xs text-gray-500 mt-1">Onboarding, training, AI adoption coaching</div>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 border border-amber-100">
+                                <div class="text-sm font-bold">Diana Cruz</div>
+                                <div class="text-xs text-gray-500">Was: Project Coordinator ($78K)</div>
+                                <div class="text-xs text-green-700 font-medium mt-1">Now: AI Program Coordinator ($85K)</div>
+                                <div class="text-xs text-gray-500 mt-1">Tracks AI initiatives, ROI reporting, adoption metrics</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ COST SAVINGS TAB ============ -->
+        <div id="panel-savings" class="hidden fade-in">
+            <h2 class="text-xl font-bold mb-6">Cost Savings &amp; Transformation Summary</h2>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-xl border p-6 text-center">
+                    <div class="text-3xl font-bold text-gray-900">15 &rarr; 11</div>
+                    <div class="text-sm text-gray-500 mt-1">Dedicated Roles</div>
+                    <div class="text-xs text-green-600 font-semibold mt-2">4 positions consolidated</div>
+                </div>
+                <div class="bg-white rounded-xl border p-6 text-center">
+                    <div class="text-3xl font-bold text-green-600">$442K</div>
+                    <div class="text-sm text-gray-500 mt-1">Annual Savings</div>
+                    <div class="text-xs text-gray-400 mt-2">$2.06M &rarr; $1.618M</div>
+                </div>
+                <div class="bg-white rounded-xl border p-6 text-center">
+                    <div class="text-3xl font-bold text-indigo-600">21.5%</div>
+                    <div class="text-sm text-gray-500 mt-1">Cost Reduction</div>
+                    <div class="text-xs text-gray-400 mt-2">While increasing capability</div>
+                </div>
+                <div class="bg-white rounded-xl border p-6 text-center">
+                    <div class="text-3xl font-bold text-purple-600">0</div>
+                    <div class="text-sm text-gray-500 mt-1">People Laid Off</div>
+                    <div class="text-xs text-amber-600 font-semibold mt-2">All retrained or redeployed</div>
+                </div>
+            </div>
+
+            <!-- Detailed Comparison -->
+            <div class="bg-white rounded-xl border overflow-hidden mb-8">
+                <div class="px-6 py-4 bg-gray-50 border-b">
+                    <h3 class="font-semibold">Position-by-Position Comparison</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-600">
+                            <tr>
+                                <th class="text-left px-4 py-3 font-medium">Name</th>
+                                <th class="text-left px-4 py-3 font-medium">Current Role</th>
+                                <th class="text-right px-4 py-3 font-medium">Current $</th>
+                                <th class="text-left px-4 py-3 font-medium">Future Role</th>
+                                <th class="text-right px-4 py-3 font-medium">Future $</th>
+                                <th class="text-center px-4 py-3 font-medium">Delta</th>
+                                <th class="text-center px-4 py-3 font-medium">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Margaret Chen</td><td class="px-4 py-3">CIO</td><td class="px-4 py-3 text-right">$285K</td><td class="px-4 py-3">CIO & AI Strategy Lead</td><td class="px-4 py-3 text-right">$295K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$10K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Paul Morrison</td><td class="px-4 py-3">IT Director</td><td class="px-4 py-3 text-right">$195K</td><td class="px-4 py-3">Dir. IT & AI Ops</td><td class="px-4 py-3 text-right">$205K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$10K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Sarah Mitchell</td><td class="px-4 py-3">Help Desk Manager</td><td class="px-4 py-3 text-right">$105K</td><td class="px-4 py-3">AI Support & Escalation Lead</td><td class="px-4 py-3 text-right">$115K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$10K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50 bg-amber-50/50"><td class="px-4 py-3 font-medium">Jordan Lee</td><td class="px-4 py-3">Help Desk Analyst I</td><td class="px-4 py-3 text-right">$52K</td><td class="px-4 py-3">AI Training & Data Specialist</td><td class="px-4 py-3 text-right">$62K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$10K</td><td class="px-4 py-3 text-center"><span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs font-medium">Retrained</span></td></tr>
+                            <tr class="hover:bg-gray-50 bg-amber-50/50"><td class="px-4 py-3 font-medium">Casey Brown</td><td class="px-4 py-3">Help Desk Analyst II</td><td class="px-4 py-3 text-right">$55K</td><td class="px-4 py-3">AI Workflow Automation Analyst</td><td class="px-4 py-3 text-right">$68K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$13K</td><td class="px-4 py-3 text-center"><span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs font-medium">Retrained</span></td></tr>
+                            <tr class="hover:bg-gray-50 bg-amber-50/50"><td class="px-4 py-3 font-medium">Alex Rivera</td><td class="px-4 py-3">Help Desk Analyst III</td><td class="px-4 py-3 text-right">$58K</td><td class="px-4 py-3">Employee Tech Experience Spec</td><td class="px-4 py-3 text-right">$65K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$7K</td><td class="px-4 py-3 text-center"><span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs font-medium">Retrained</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">James Park</td><td class="px-4 py-3">Sr Network Engineer</td><td class="px-4 py-3 text-right">$135K</td><td class="px-4 py-3">Platform & AI Infra Engineer</td><td class="px-4 py-3 text-right">$145K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$10K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Robert Taylor</td><td class="px-4 py-3">Systems Administrator</td><td class="px-4 py-3 text-right">$115K</td><td class="px-4 py-3">Automation & DevOps Engineer</td><td class="px-4 py-3 text-right">$125K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$10K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Mike Johnson</td><td class="px-4 py-3">Cloud Engineer</td><td class="px-4 py-3 text-right">$125K</td><td class="px-4 py-3">Cloud & AI Platform Engineer</td><td class="px-4 py-3 text-right">$135K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$10K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Tom Williams</td><td class="px-4 py-3">Security Analyst</td><td class="px-4 py-3 text-right">$110K</td><td class="px-4 py-3">AI Security & Risk Lead</td><td class="px-4 py-3 text-right">$125K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$15K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Lisa Chang</td><td class="px-4 py-3">Business Analyst</td><td class="px-4 py-3 text-right">$105K</td><td class="px-4 py-3">AI Product Manager</td><td class="px-4 py-3 text-right">$118K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$13K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Priya Sharma</td><td class="px-4 py-3">Senior Developer</td><td class="px-4 py-3 text-right">$130K</td><td class="px-4 py-3">Full-Stack AI Developer</td><td class="px-4 py-3 text-right">$145K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$15K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">Angela Foster</td><td class="px-4 py-3">QA Tester</td><td class="px-4 py-3 text-right">$85K</td><td class="px-4 py-3">AI Ops & Quality Lead</td><td class="px-4 py-3 text-right">$98K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$13K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                            <tr class="hover:bg-gray-50 bg-amber-50/50"><td class="px-4 py-3 font-medium">Diana Cruz</td><td class="px-4 py-3">Project Coordinator</td><td class="px-4 py-3 text-right">$78K</td><td class="px-4 py-3">AI Program Coordinator</td><td class="px-4 py-3 text-right">$85K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$7K</td><td class="px-4 py-3 text-center"><span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs font-medium">Retrained</span></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">David Kim</td><td class="px-4 py-3">IT Procurement</td><td class="px-4 py-3 text-right">$82K</td><td class="px-4 py-3">AI Vendor & Procurement Mgr</td><td class="px-4 py-3 text-right">$92K</td><td class="px-4 py-3 text-center text-green-600 font-medium">+$10K</td><td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">Evolved</span></td></tr>
+                        </tbody>
+                        <tfoot class="bg-gray-50 font-semibold">
+                            <tr>
+                                <td class="px-4 py-3" colspan="2">Totals</td>
+                                <td class="px-4 py-3 text-right">$2,060K</td>
+                                <td class="px-4 py-3"></td>
+                                <td class="px-4 py-3 text-right">$1,878K</td>
+                                <td class="px-4 py-3 text-center text-green-600">+$163K raises</td>
+                                <td class="px-4 py-3"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Net Savings Explanation -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
+                <h3 class="font-bold text-green-800 mb-3">How It Works: Savings Through Consolidation, Not Cuts</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                    <div>
+                        <div class="text-green-700 font-semibold mb-2">Positions Consolidated (3 HD roles)</div>
+                        <p class="text-gray-600">Three help desk analyst roles are replaced by AI chatbot handling L1/L2 tickets. Those three people are retrained into higher-value roles (AI training, workflow automation, tech experience). Their old line items ($165K) are eliminated; they receive new, higher-paying positions.</p>
+                    </div>
+                    <div>
+                        <div class="text-green-700 font-semibold mb-2">Everyone Gets a Raise</div>
+                        <p class="text-gray-600">Every person who stays gets a pay bump ($7K-$15K) reflecting their expanded responsibilities. Total raise cost: $163K. This is an investment in retention and capability.</p>
+                    </div>
+                    <div>
+                        <div class="text-green-700 font-semibold mb-2">Net Savings: $442K/yr</div>
+                        <p class="text-gray-600">Old structure: $2,060K. New structure: $1,618K (11 dedicated roles + 4 retrained roles redeployed to other departments). The retrained staff cost is absorbed by the departments that receive them, reducing IT's headcount cost by 21.5%.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ EMAIL TRIAGE TAB ============ -->
+        <div id="panel-email" class="hidden fade-in">
+            <h2 class="text-xl font-bold mb-2">AI Email Triage Workflow</h2>
+            <p class="text-gray-500 mb-6">10 real support emails processed through an AI classification pipeline. Watch which ones AI handles vs which require a human.</p>
+
+            <!-- Pipeline Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-green-700">7/10</div>
+                    <div class="text-sm text-green-600">AI Handled</div>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-red-700">3/10</div>
+                    <div class="text-sm text-red-600">Escalated to Human</div>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-blue-700">45 sec</div>
+                    <div class="text-sm text-blue-600">Avg AI Response Time</div>
+                </div>
+                <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-700">3 &rarr; 1</div>
+                    <div class="text-sm text-purple-600">Staff Required</div>
+                </div>
+            </div>
+
+            <!-- Pipeline Visualization -->
+            <div class="bg-white rounded-xl border p-6 mb-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-gray-100 rounded-lg px-4 py-2 text-center">
+                        <div class="text-lg font-bold text-gray-700">10</div>
+                        <div class="text-xs text-gray-500">Emails In</div>
+                    </div>
+                    <div class="text-gray-400 text-2xl pipeline-arrow">&rarr;</div>
+                    <div class="bg-indigo-100 rounded-lg px-4 py-2 text-center">
+                        <div class="text-sm font-bold text-indigo-700">AI Classifier</div>
+                        <div class="text-xs text-indigo-500">Categorize + Priority</div>
+                    </div>
+                    <div class="text-gray-400 text-2xl pipeline-arrow">&rarr;</div>
+                    <div class="flex gap-2">
+                        <div class="bg-green-100 rounded-lg px-3 py-2 text-center">
+                            <div class="text-xs font-bold text-green-700">Auto-Handle</div>
+                            <div class="text-xs text-green-500">7 tickets</div>
+                        </div>
+                        <div class="bg-red-100 rounded-lg px-3 py-2 text-center">
+                            <div class="text-xs font-bold text-red-700">Human</div>
+                            <div class="text-xs text-red-500">3 tickets</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Cards -->
+            <div class="space-y-3">
+                <!-- TKT-0401: Password Reset - AI handles -->
+                <div class="email-card bg-white rounded-xl border p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-green-700">AI</div>
+                                <div class="text-[10px] text-green-600">AUTO</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0401</span>
+                                <span class="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full font-medium">Access/Auth</span>
+                                <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">Medium</span>
+                            </div>
+                            <div class="font-semibold text-sm">Can't log into Workday</div>
+                            <div class="text-xs text-gray-500 mt-1">jennifer.wu@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-green-600 font-medium">AI Action: Password reset link sent</div>
+                            <div class="text-xs text-gray-400 mt-1">Response time: 12 seconds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0402: EHR down - HUMAN -->
+                <div class="email-card bg-red-50/50 rounded-xl border-2 border-red-200 p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-red-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-red-700">HUMAN</div>
+                                <div class="text-[10px] text-red-600">ESCALATE</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0402</span>
+                                <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-medium">System Outage</span>
+                                <span class="bg-red-200 text-red-800 text-xs px-2 py-0.5 rounded-full font-bold">CRITICAL</span>
+                            </div>
+                            <div class="font-semibold text-sm">URGENT - EHR system down in ER</div>
+                            <div class="text-xs text-gray-500 mt-1">dr.robert.patel@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-red-600 font-medium">Why human: Patient safety, critical system, multi-station</div>
+                            <div class="text-xs text-gray-400 mt-1">AI drafted incident alert to on-call team</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0403: Software install - AI handles -->
+                <div class="email-card bg-white rounded-xl border p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-green-700">AI</div>
+                                <div class="text-[10px] text-green-600">AUTO</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0403</span>
+                                <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-medium">Software Request</span>
+                                <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">Low</span>
+                            </div>
+                            <div class="font-semibold text-sm">Need Adobe Acrobat installed</div>
+                            <div class="text-xs text-gray-500 mt-1">mark.stevens@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-green-600 font-medium">AI Action: License checked, SCCM push initiated</div>
+                            <div class="text-xs text-gray-400 mt-1">Response time: 30 seconds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0404: Phishing - HUMAN -->
+                <div class="email-card bg-red-50/50 rounded-xl border-2 border-red-200 p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-red-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-red-700">HUMAN</div>
+                                <div class="text-[10px] text-red-600">ESCALATE</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0404</span>
+                                <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-medium">Security Incident</span>
+                                <span class="bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full">High</span>
+                            </div>
+                            <div class="font-semibold text-sm">Suspicious email received</div>
+                            <div class="text-xs text-gray-500 mt-1">susan.chen@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-red-600 font-medium">Why human: Potential BEC attack, needs investigation</div>
+                            <div class="text-xs text-gray-400 mt-1">AI flagged as CEO fraud, alerted security team</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0405: VPN - AI handles -->
+                <div class="email-card bg-white rounded-xl border p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-green-700">AI</div>
+                                <div class="text-[10px] text-green-600">AUTO</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0405</span>
+                                <span class="bg-teal-100 text-teal-700 text-xs px-2 py-0.5 rounded-full font-medium">Network</span>
+                                <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">Medium</span>
+                            </div>
+                            <div class="font-semibold text-sm">VPN disconnecting every 10 minutes</div>
+                            <div class="text-xs text-gray-500 mt-1">carlos.garcia@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-green-600 font-medium">AI Action: Known issue (Friday update), sent fix KB-2841</div>
+                            <div class="text-xs text-gray-400 mt-1">Response time: 18 seconds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0406: Onboarding - AI handles -->
+                <div class="email-card bg-white rounded-xl border p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-green-700">AI</div>
+                                <div class="text-[10px] text-green-600">AUTO</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0406</span>
+                                <span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-medium">Onboarding</span>
+                                <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">Medium</span>
+                            </div>
+                            <div class="font-semibold text-sm">New employee needs accounts set up</div>
+                            <div class="text-xs text-gray-500 mt-1">nancy.wright@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-green-600 font-medium">AI Action: Onboarding checklist created, AD provisioned</div>
+                            <div class="text-xs text-gray-400 mt-1">Response time: 45 seconds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0407: Printer - AI handles -->
+                <div class="email-card bg-white rounded-xl border p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-green-700">AI</div>
+                                <div class="text-[10px] text-green-600">AUTO</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0407</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium">Hardware</span>
+                                <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">Low</span>
+                            </div>
+                            <div class="font-semibold text-sm">Printer on 4th floor not working</div>
+                            <div class="text-xs text-gray-500 mt-1">linda.johnson@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-green-600 font-medium">AI Action: Vendor service ticket created (under warranty)</div>
+                            <div class="text-xs text-gray-400 mt-1">Response time: 22 seconds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0408: Cost report - AI handles -->
+                <div class="email-card bg-white rounded-xl border p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-green-700">AI</div>
+                                <div class="text-[10px] text-green-600">AUTO</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0408</span>
+                                <span class="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full font-medium">Reporting</span>
+                                <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">Medium</span>
+                            </div>
+                            <div class="font-semibold text-sm">Monthly IT cost report needed</div>
+                            <div class="text-xs text-gray-500 mt-1">cfo@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-green-600 font-medium">AI Action: Report auto-generated from cost DB, draft sent</div>
+                            <div class="text-xs text-gray-400 mt-1">Response time: 90 seconds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0409: Permissions - AI handles -->
+                <div class="email-card bg-white rounded-xl border p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-green-700">AI</div>
+                                <div class="text-[10px] text-green-600">AUTO</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0409</span>
+                                <span class="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full font-medium">Access/Permissions</span>
+                                <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">Medium</span>
+                            </div>
+                            <div class="font-semibold text-sm">Shared drive permissions issue</div>
+                            <div class="text-xs text-gray-500 mt-1">mike.torres@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-green-600 font-medium">AI Action: Verified transfer in HR system, AD groups updated</div>
+                            <div class="text-xs text-gray-400 mt-1">Response time: 35 seconds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TKT-0410: AV boardroom - HUMAN -->
+                <div class="email-card bg-red-50/50 rounded-xl border-2 border-red-200 p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-16 text-center">
+                            <div class="bg-red-100 rounded-lg p-2">
+                                <div class="text-xs font-bold text-red-700">HUMAN</div>
+                                <div class="text-[10px] text-red-600">ESCALATE</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-mono text-gray-400">TKT-2026-0410</span>
+                                <span class="bg-violet-100 text-violet-700 text-xs px-2 py-0.5 rounded-full font-medium">AV/Conference</span>
+                                <span class="bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full">High</span>
+                            </div>
+                            <div class="font-semibold text-sm">Conference room AV not working for board presentation</div>
+                            <div class="text-xs text-gray-500 mt-1">dr.amanda.lee@meridianhealth.com</div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-xs text-red-600 font-medium">Why human: Physical AV, executive-level, time-sensitive</div>
+                            <div class="text-xs text-gray-400 mt-1">AI scheduled on-site tech for 7 AM pre-check</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insight -->
+            <div class="mt-6 bg-indigo-50 border border-indigo-200 rounded-xl p-5">
+                <h3 class="font-bold text-indigo-800 mb-2">The Takeaway for CIOs</h3>
+                <p class="text-sm text-indigo-700">AI handled 7 out of 10 emails automatically &mdash; password resets, software installs, known issues, onboarding, permissions, reporting, and vendor tickets. The 3 that went to a human were: a <strong>critical system outage</strong> (patient safety), a <strong>security incident</strong> (BEC attack), and a <strong>physical AV issue</strong> (executive meeting). This is the right split. One person reviewing AI-handled tickets replaces three people doing manual triage. The humans focus on what only humans can do.</p>
+            </div>
+        </div>
+
+        <!-- ============ TRANSITION PLAN TAB ============ -->
+        <div id="panel-transition" class="hidden fade-in">
+            <h2 class="text-xl font-bold mb-6">Role-by-Role Transition Plan</h2>
+
+            <div class="space-y-4">
+                <!-- Each role transition -->
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">CIO</div>
+                            <div class="text-xs text-gray-500">Margaret Chen</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">CIO & AI Strategy Lead</div>
+                            <div class="text-xs text-gray-500">+$10K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI governance frameworks</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Responsible AI policy</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Vendor AI evaluation</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 1-2</div>
+                            <div class="text-xs text-gray-400">Executive coaching</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">IT Director</div>
+                            <div class="text-xs text-gray-500">Paul Morrison</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">Dir. IT & AI Operations</div>
+                            <div class="text-xs text-gray-500">+$10K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI operations management</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Automation KPIs</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Change management</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 1-3</div>
+                            <div class="text-xs text-gray-400">Leadership + cert</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">Help Desk Manager</div>
+                            <div class="text-xs text-gray-500">Sarah Mitchell</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">AI Support & Escalation Lead</div>
+                            <div class="text-xs text-gray-500">+$10K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI chatbot management</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Prompt engineering</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Escalation design</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-amber-600">Month 2-4</div>
+                            <div class="text-xs text-gray-400">Hands-on + cert</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 rounded-xl border border-amber-200 overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-amber-100/50 border-r border-amber-200">
+                            <div class="text-xs text-amber-600 uppercase tracking-wide mb-1">Retrained</div>
+                            <div class="font-bold text-sm">Help Desk Analyst I</div>
+                            <div class="text-xs text-gray-500">Jordan Lee</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r border-amber-200">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">AI Training & Data Specialist</div>
+                            <div class="text-xs text-gray-500">+$10K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r border-amber-200">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI/ML fundamentals</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Data labeling & QA</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Knowledge base curation</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-amber-600">Month 2-5</div>
+                            <div class="text-xs text-gray-400">Bootcamp + mentoring</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 rounded-xl border border-amber-200 overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-amber-100/50 border-r border-amber-200">
+                            <div class="text-xs text-amber-600 uppercase tracking-wide mb-1">Retrained</div>
+                            <div class="font-bold text-sm">Help Desk Analyst II</div>
+                            <div class="text-xs text-gray-500">Casey Brown</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r border-amber-200">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">AI Workflow Automation Analyst</div>
+                            <div class="text-xs text-gray-500">+$13K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r border-amber-200">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Power Automate / n8n</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Low-code platforms</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Process mapping</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-amber-600">Month 2-5</div>
+                            <div class="text-xs text-gray-400">Bootcamp + projects</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 rounded-xl border border-amber-200 overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-amber-100/50 border-r border-amber-200">
+                            <div class="text-xs text-amber-600 uppercase tracking-wide mb-1">Retrained</div>
+                            <div class="font-bold text-sm">Help Desk Analyst III</div>
+                            <div class="text-xs text-gray-500">Alex Rivera</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r border-amber-200">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">Employee Tech Experience Spec</div>
+                            <div class="text-xs text-gray-500">+$7K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r border-amber-200">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">UX / employee experience</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI adoption coaching</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Training design</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-amber-600">Month 3-6</div>
+                            <div class="text-xs text-gray-400">Cross-training</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">Sr Network Engineer</div>
+                            <div class="text-xs text-gray-500">James Park</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">Platform & AI Infra Engineer</div>
+                            <div class="text-xs text-gray-500">+$10K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">GPU infrastructure</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">MLOps pipelines</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Model serving</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 1-4</div>
+                            <div class="text-xs text-gray-400">Self-paced + lab</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">Systems Administrator</div>
+                            <div class="text-xs text-gray-500">Robert Taylor</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">Automation & DevOps Engineer</div>
+                            <div class="text-xs text-gray-500">+$10K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Terraform / Ansible</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">CI/CD pipelines</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Auto-remediation</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 1-4</div>
+                            <div class="text-xs text-gray-400">Cert + projects</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">Cloud Engineer</div>
+                            <div class="text-xs text-gray-500">Mike Johnson</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">Cloud & AI Platform Engineer</div>
+                            <div class="text-xs text-gray-500">+$10K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI model deployment</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">FinOps for AI</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Serverless AI</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 1-3</div>
+                            <div class="text-xs text-gray-400">Vendor training</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">Security Analyst</div>
+                            <div class="text-xs text-gray-500">Tom Williams</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">AI Security & Risk Lead</div>
+                            <div class="text-xs text-gray-500">+$15K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI red teaming</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Prompt injection defense</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI data governance</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 1-3</div>
+                            <div class="text-xs text-gray-400">SANS AI Security</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">Business Analyst</div>
+                            <div class="text-xs text-gray-500">Lisa Chang</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">AI Product Manager</div>
+                            <div class="text-xs text-gray-500">+$13K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI use case design</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">ROI measurement</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Product thinking</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 2-4</div>
+                            <div class="text-xs text-gray-400">PM bootcamp</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">Senior Developer</div>
+                            <div class="text-xs text-gray-500">Priya Sharma</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">Full-Stack AI Developer</div>
+                            <div class="text-xs text-gray-500">+$15K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI-assisted coding (Copilot)</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">LLM integration</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">RAG patterns</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 1-2</div>
+                            <div class="text-xs text-gray-400">Fastest transition</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">QA Tester</div>
+                            <div class="text-xs text-gray-500">Angela Foster</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">AI Ops & Quality Lead</div>
+                            <div class="text-xs text-gray-500">+$13K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI output validation</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Test automation</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI monitoring</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 2-4</div>
+                            <div class="text-xs text-gray-400">Cert + shadowing</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 rounded-xl border border-amber-200 overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-amber-100/50 border-r border-amber-200">
+                            <div class="text-xs text-amber-600 uppercase tracking-wide mb-1">Retrained</div>
+                            <div class="font-bold text-sm">Project Coordinator</div>
+                            <div class="text-xs text-gray-500">Diana Cruz</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r border-amber-200">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">AI Program Coordinator</div>
+                            <div class="text-xs text-gray-500">+$7K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r border-amber-200">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI initiative tracking</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">ROI reporting</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Adoption metrics</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-amber-600">Month 3-5</div>
+                            <div class="text-xs text-gray-400">On-the-job</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                        <div class="md:col-span-3 p-4 bg-gray-50 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Current</div>
+                            <div class="font-bold text-sm">IT Procurement</div>
+                            <div class="text-xs text-gray-500">David Kim</div>
+                        </div>
+                        <div class="md:col-span-3 p-4 border-r">
+                            <div class="text-xs text-indigo-500 uppercase tracking-wide mb-1">Future</div>
+                            <div class="font-bold text-sm text-indigo-700">AI Vendor & Procurement Mgr</div>
+                            <div class="text-xs text-gray-500">+$10K raise</div>
+                        </div>
+                        <div class="md:col-span-4 p-4 border-r">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Skills to Add</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI vendor evaluation</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">AI contract clauses</span>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded">Usage-based pricing</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 p-4 text-center">
+                            <div class="text-xs text-gray-400 uppercase tracking-wide mb-1">Timeline</div>
+                            <div class="text-sm font-semibold text-green-600">Month 2-4</div>
+                            <div class="text-xs text-gray-400">Workshop + practice</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ COMMS PLAN TAB ============ -->
+        <div id="panel-comms" class="hidden fade-in">
+            <h2 class="text-xl font-bold mb-6">Communication Plan Template</h2>
+            <p class="text-gray-500 mb-6">A phased communication strategy for announcing the IT restructure. Customize for your organization.</p>
+
+            <!-- Timeline -->
+            <div class="space-y-6">
+                <!-- Phase 1 -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                                <span class="text-indigo-700 font-bold text-lg">1</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-lg">Leadership Alignment</h3>
+                                <span class="bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded-full">Week 1-2</span>
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-2">
+                                <p><strong>Audience:</strong> CEO, CFO, CHRO, fellow VPs</p>
+                                <p><strong>Channel:</strong> In-person executive briefing (1 hour)</p>
+                                <p><strong>Key Messages:</strong></p>
+                                <ul class="list-disc ml-5 space-y-1 text-gray-600">
+                                    <li>This is a transformation, not a reduction. Zero layoffs.</li>
+                                    <li>AI handles routine tasks; humans handle strategy, judgment, and relationships.</li>
+                                    <li>21.5% cost savings ($442K/yr) while increasing team capability.</li>
+                                    <li>Every affected employee gets a raise and a higher-value role.</li>
+                                    <li>Training investment: ~$80K (certs, bootcamps, tools). ROI in &lt;3 months.</li>
+                                </ul>
+                                <p><strong>Ask:</strong> Approval to proceed, HR partnership for role changes, budget for training.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <span class="text-blue-700 font-bold text-lg">2</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-lg">Direct Reports & Managers</h3>
+                                <span class="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">Week 3</span>
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-2">
+                                <p><strong>Audience:</strong> IT Director, team leads (Sarah, James)</p>
+                                <p><strong>Channel:</strong> Private 1:1 meetings, then small group</p>
+                                <p><strong>Key Messages:</strong></p>
+                                <ul class="list-disc ml-5 space-y-1 text-gray-600">
+                                    <li>Share the full plan before the team hears anything. They need to be partners, not surprised.</li>
+                                    <li>Their roles expand &mdash; more strategic, more interesting, more valued.</li>
+                                    <li>They will help design the training plan for their teams.</li>
+                                    <li>Address concerns privately. Expect: "Will my team resent me?"</li>
+                                </ul>
+                                <p><strong>Deliverable:</strong> Manager FAQ document with answers to anticipated questions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <span class="text-green-700 font-bold text-lg">3</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-lg">Individual Conversations</h3>
+                                <span class="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">Week 4</span>
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-2">
+                                <p><strong>Audience:</strong> Each team member individually (priority: the 4 being retrained)</p>
+                                <p><strong>Channel:</strong> Private 1:1 with their manager + HR present</p>
+                                <p><strong>Key Messages:</strong></p>
+                                <ul class="list-disc ml-5 space-y-1 text-gray-600">
+                                    <li>"Your job is not being eliminated. Your job is being upgraded."</li>
+                                    <li>Show their specific: new title, new salary (higher), new responsibilities, training plan.</li>
+                                    <li>"We're investing in you because you know this organization. That knowledge is irreplaceable."</li>
+                                    <li>Give them time to process. Schedule a follow-up in 48 hours.</li>
+                                </ul>
+                                <p><strong>Deliverable:</strong> Individual transition letter with new title, salary, timeline, and training details.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 4 -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <span class="text-purple-700 font-bold text-lg">4</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-lg">Full Team Announcement</h3>
+                                <span class="bg-purple-100 text-purple-700 text-xs font-medium px-2 py-0.5 rounded-full">Week 5</span>
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-2">
+                                <p><strong>Audience:</strong> Entire IT team (all 15)</p>
+                                <p><strong>Channel:</strong> In-person all-hands meeting (CIO presents)</p>
+                                <p><strong>Key Messages:</strong></p>
+                                <ul class="list-disc ml-5 space-y-1 text-gray-600">
+                                    <li>Frame as: "We're building the IT team of the future &mdash; and every one of you is part of it."</li>
+                                    <li>Show the vision: current org &rarr; future org. Highlight everyone's new role.</li>
+                                    <li>Announce training budget, timeline, and support resources.</li>
+                                    <li>Open Q&A. Be transparent about what changes and what doesn't.</li>
+                                </ul>
+                                <p><strong>Tone:</strong> Confident but empathetic. Acknowledge the change is significant. Celebrate the opportunity.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 5 -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                                <span class="text-amber-700 font-bold text-lg">5</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-lg">Broader Organization</h3>
+                                <span class="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">Week 6</span>
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-2">
+                                <p><strong>Audience:</strong> All employees (IT's "customers")</p>
+                                <p><strong>Channel:</strong> Company-wide email + intranet post + town hall mention</p>
+                                <p><strong>Key Messages:</strong></p>
+                                <ul class="list-disc ml-5 space-y-1 text-gray-600">
+                                    <li>"IT is evolving to serve you better. Here's what changes for you."</li>
+                                    <li>New AI chatbot for instant help (password resets in seconds, not hours).</li>
+                                    <li>Same people you know and trust, now focused on bigger problems.</li>
+                                    <li>Faster response times, 24/7 AI support, human backup always available.</li>
+                                </ul>
+                                <p><strong>Deliverable:</strong> FAQ page on intranet, new IT contact guide, AI chatbot launch announcement.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anti-patterns -->
+            <div class="mt-8 bg-red-50 border border-red-200 rounded-xl p-6">
+                <h3 class="font-bold text-red-800 mb-3">What NOT To Do</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="flex items-start gap-2">
+                        <span class="text-red-500 font-bold text-lg leading-none">x</span>
+                        <div>
+                            <p class="text-red-800 font-medium">Don't announce to everyone at once</p>
+                            <p class="text-red-600">People whose roles change most should hear first, privately, with time to process.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-red-500 font-bold text-lg leading-none">x</span>
+                        <div>
+                            <p class="text-red-800 font-medium">Don't use the word "replaced"</p>
+                            <p class="text-red-600">Use "evolved," "transformed," "upgraded." Language matters enormously.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-red-500 font-bold text-lg leading-none">x</span>
+                        <div>
+                            <p class="text-red-800 font-medium">Don't lead with cost savings</p>
+                            <p class="text-red-600">Lead with capability and career growth. Cost savings are for the CFO deck, not the team meeting.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-red-500 font-bold text-lg leading-none">x</span>
+                        <div>
+                            <p class="text-red-800 font-medium">Don't skip the follow-up</p>
+                            <p class="text-red-600">Check in weekly during months 1-3. Anxiety peaks after the announcement, not during.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-100 border-t mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-6 text-center text-xs text-gray-400">
+            CIO AI Advanced Course &mdash; Lecture 14: Building Your AI-Era IT Team &mdash; Demo Dashboard
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            // Hide all panels
+            document.querySelectorAll('[id^="panel-"]').forEach(el => el.classList.add('hidden'));
+            // Deactivate all tabs
+            document.querySelectorAll('[id^="tab-"]').forEach(el => {
+                el.classList.remove('tab-active');
+                el.classList.add('tab-inactive');
+            });
+            // Show selected
+            document.getElementById('panel-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.remove('tab-inactive');
+            document.getElementById('tab-' + tab).classList.add('tab-active');
+        }
+
+        function showOrg(view) {
+            if (view === 'current') {
+                document.getElementById('org-current').classList.remove('hidden');
+                document.getElementById('org-future').classList.add('hidden');
+                document.getElementById('btn-current').className = 'px-4 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white';
+                document.getElementById('btn-future').className = 'px-4 py-2 text-sm font-medium rounded-md text-gray-600';
+            } else {
+                document.getElementById('org-current').classList.add('hidden');
+                document.getElementById('org-future').classList.remove('hidden');
+                document.getElementById('btn-future').className = 'px-4 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white';
+                document.getElementById('btn-current').className = 'px-4 py-2 text-sm font-medium rounded-md text-gray-600';
+            }
+        }
+    </script>
+</body>
+</html>

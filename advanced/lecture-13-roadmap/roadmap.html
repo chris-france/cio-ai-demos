@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>90-Day AI Leadership Roadmap — Meridian Health Systems</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<style>
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+    .phase-assess { --phase-color: #6366f1; --phase-bg: #eef2ff; --phase-border: #c7d2fe; }
+    .phase-pilot { --phase-color: #0891b2; --phase-bg: #ecfeff; --phase-border: #a5f3fc; }
+    .phase-roi { --phase-color: #059669; --phase-bg: #ecfdf5; --phase-border: #a7f3d0; }
+    .phase-scale { --phase-color: #7c3aed; --phase-bg: #f5f3ff; --phase-border: #ddd6fe; }
+    .milestone { cursor: pointer; transition: all 0.2s; border-left: 4px solid var(--phase-color); }
+    .milestone:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
+    .milestone.completed { opacity: 0.85; }
+    .milestone.completed .ms-title { text-decoration: line-through; }
+    .gantt-bar { height: 36px; border-radius: 6px; position: relative; display: flex; align-items: center; padding: 0 10px; font-size: 12px; font-weight: 600; color: #fff; cursor: pointer; transition: all 0.2s; }
+    .gantt-bar:hover { filter: brightness(1.1); transform: scaleY(1.1); }
+    .risk-flag { position: absolute; top: -8px; right: -4px; font-size: 14px; }
+    .dep-arrow { position: absolute; height: 2px; background: #94a3b8; z-index: 1; }
+    details summary { cursor: pointer; list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary .chevron { transform: rotate(90deg); }
+    .chevron { transition: transform 0.2s; display: inline-block; }
+    .check { color: #22c55e; font-weight: bold; }
+    .pending { color: #d1d5db; }
+    .progress-ring { transform: rotate(-90deg); }
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 text-white">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-slate-400 text-sm font-medium tracking-wide uppercase">Lecture 13 — Your 90-Day AI Leadership Roadmap</p>
+                <h1 class="text-3xl font-bold mt-1">90-Day AI Transformation Roadmap</h1>
+                <p class="text-slate-400 mt-2">Meridian Health Systems &mdash; CIO-Led Initiative</p>
+            </div>
+            <div class="text-right">
+                <div class="text-sm text-slate-400">Start Date: April 1, 2026</div>
+                <div class="text-sm text-slate-400">End Date: June 24, 2026</div>
+                <div class="mt-2 flex items-center gap-2 justify-end">
+                    <svg class="progress-ring" width="48" height="48">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="#334155" stroke-width="4"/>
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="#22c55e" stroke-width="4" stroke-dasharray="125.66" stroke-dashoffset="88" stroke-linecap="round"/>
+                    </svg>
+                    <div>
+                        <div class="text-lg font-bold">30%</div>
+                        <div class="text-xs text-slate-400">Complete</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Summary Cards -->
+<div class="max-w-7xl mx-auto px-6 -mt-4">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-indigo-600">4</div>
+            <div class="text-xs text-gray-500">Phases</div>
+        </div>
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-cyan-600">16</div>
+            <div class="text-xs text-gray-500">Milestones</div>
+        </div>
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-emerald-600">5</div>
+            <div class="text-xs text-gray-500">Completed</div>
+        </div>
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-red-500">3</div>
+            <div class="text-xs text-gray-500">Risk Flags</div>
+        </div>
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-purple-600">$2.55M</div>
+            <div class="text-xs text-gray-500">Total Budget</div>
+        </div>
+    </div>
+</div>
+
+<!-- Gantt Chart -->
+<div class="max-w-7xl mx-auto px-6 mt-8">
+    <div class="card p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Interactive Timeline</h2>
+        <p class="text-sm text-gray-500 mb-6">Click any bar to jump to milestone details below.</p>
+
+        <!-- Week headers -->
+        <div class="overflow-x-auto">
+            <div style="min-width: 900px;">
+                <!-- Week labels -->
+                <div class="flex items-end mb-1 ml-40">
+                    <div class="flex-1 grid grid-cols-12 text-xs text-gray-400 text-center">
+                        <div>W1</div><div>W2</div><div>W3</div><div>W4</div><div>W5</div><div>W6</div><div>W7</div><div>W8</div><div>W9</div><div>W10</div><div>W11</div><div>W12</div>
+                    </div>
+                </div>
+
+                <!-- Phase labels -->
+                <div class="flex items-center mb-1 ml-40">
+                    <div class="flex-1 grid grid-cols-12">
+                        <div class="col-span-2 text-center text-xs font-bold text-indigo-600 bg-indigo-50 rounded-t py-1 mx-0.5">ASSESS</div>
+                        <div class="col-span-4 text-center text-xs font-bold text-cyan-600 bg-cyan-50 rounded-t py-1 mx-0.5">PILOT</div>
+                        <div class="col-span-4 text-center text-xs font-bold text-emerald-600 bg-emerald-50 rounded-t py-1 mx-0.5">PROVE ROI</div>
+                        <div class="col-span-2 text-center text-xs font-bold text-purple-600 bg-purple-50 rounded-t py-1 mx-0.5">SCALE</div>
+                    </div>
+                </div>
+
+                <!-- Gantt rows -->
+                <div class="space-y-2" id="ganttChart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Budget Allocation -->
+<div class="max-w-7xl mx-auto px-6 mt-8">
+    <div class="card p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Budget Allocation by Phase</h2>
+        <div class="flex items-center gap-1 h-12 rounded-lg overflow-hidden">
+            <div class="h-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold" style="width:12%">
+                <span>$200K</span>
+            </div>
+            <div class="h-full bg-cyan-500 flex items-center justify-center text-white text-xs font-bold" style="width:28%">
+                <span>$550K</span>
+            </div>
+            <div class="h-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold" style="width:38%">
+                <span>$950K</span>
+            </div>
+            <div class="h-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold" style="width:22%">
+                <span>$850K</span>
+            </div>
+        </div>
+        <div class="flex items-center justify-between mt-2 text-xs text-gray-500">
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-indigo-500 inline-block"></span> Assess: $200K (8%)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-cyan-500 inline-block"></span> Pilot: $550K (22%)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span> Prove ROI: $950K (37%)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-purple-500 inline-block"></span> Scale: $850K (33%)</span>
+        </div>
+        <div class="mt-4 grid grid-cols-3 gap-4 text-sm">
+            <div class="bg-gray-50 rounded-lg p-3">
+                <div class="text-gray-500 text-xs">Discretionary Budget</div>
+                <div class="font-bold text-lg">$850,000</div>
+                <div class="text-xs text-gray-400">Available from current fiscal year</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+                <div class="text-gray-500 text-xs">Training Budget</div>
+                <div class="font-bold text-lg">$200,000</div>
+                <div class="text-xs text-gray-400">Allocated for team upskilling</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+                <div class="text-gray-500 text-xs">New Initiatives Fund</div>
+                <div class="font-bold text-lg">$1,500,000</div>
+                <div class="text-xs text-gray-400">Board-approved transformation budget</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Milestone Details by Phase -->
+<div class="max-w-7xl mx-auto px-6 mt-8 mb-12 space-y-8" id="milestoneDetails">
+</div>
+
+<!-- Cross-Lecture Synthesis -->
+<div class="max-w-7xl mx-auto px-6 mb-12">
+    <div class="card p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Cross-Lecture Synthesis: What Feeds This Roadmap</h2>
+        <p class="text-sm text-gray-500 mb-4">This 90-day plan synthesizes findings from all prior course lectures into actionable milestones.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="text-sm font-bold text-red-700 mb-2">Legacy Systems (Lecture 5)</div>
+                <ul class="text-xs text-gray-600 space-y-1">
+                    <li>&#8226; Patient Billing (COBOL) — 28 yrs old, $2.4M to replace</li>
+                    <li>&#8226; Lab Management (FoxPro) — 22 yrs old, $800K</li>
+                    <li>&#8226; Inventory Tracking (Access DB) — $350K</li>
+                    <li>&#8226; Staff Scheduling (Excel) — $200K</li>
+                </ul>
+                <div class="text-xs text-red-600 mt-2 font-medium">Roadmap impact: Phase 3-4 modernization planning</div>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div class="text-sm font-bold text-amber-700 mb-2">Shadow IT (Lecture 12)</div>
+                <ul class="text-xs text-gray-600 space-y-1">
+                    <li>&#8226; 23 unapproved SaaS tools, $187K annual spend</li>
+                    <li>&#8226; Otter.ai recording client meetings (PHI risk)</li>
+                    <li>&#8226; Personal ChatGPT with patient data</li>
+                    <li>&#8226; Airtable with PII scheduling data</li>
+                </ul>
+                <div class="text-xs text-amber-600 mt-2 font-medium">Roadmap impact: Phase 1 audit, Phase 2 governance</div>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="text-sm font-bold text-blue-700 mb-2">SaaS Optimization (Lecture 8)</div>
+                <ul class="text-xs text-gray-600 space-y-1">
+                    <li>&#8226; $2.34M annual SaaS spend across 26 tools</li>
+                    <li>&#8226; 8 underutilized tools identified</li>
+                    <li>&#8226; 3 duplicate categories to consolidate</li>
+                    <li>&#8226; $420K potential annual savings</li>
+                </ul>
+                <div class="text-xs text-blue-600 mt-2 font-medium">Roadmap impact: Phase 3 ROI proof, Phase 4 renegotiation</div>
+            </div>
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div class="text-sm font-bold text-purple-700 mb-2">Team Skills (Lecture 11)</div>
+                <ul class="text-xs text-gray-600 space-y-1">
+                    <li>&#8226; Only 25% of team AI-ready (3 of 12)</li>
+                    <li>&#8226; 2 staff at high displacement risk</li>
+                    <li>&#8226; $145K training budget needed</li>
+                    <li>&#8226; 3 priority hires needed (ML Eng, AI PM, Data Eng)</li>
+                </ul>
+                <div class="text-xs text-purple-600 mt-2 font-medium">Roadmap impact: Phase 1-2 training, Phase 4 hiring</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-gray-800 text-gray-400 text-center py-6 text-xs">
+    CIO AI Advanced Course — Lecture 13 Demo Output &bull; 90-Day AI Leadership Roadmap &bull; Generated March 2026
+</footer>
+
+<script>
+const phases = [
+    {
+        name: "Assess", color: "indigo", weeks: "1-2", phaseClass: "phase-assess",
+        milestones: [
+            { id: "a1", title: "Complete AI Readiness Assessment", weeks: [1,2], owner: "CIO + IT Director", completed: true,
+              desc: "Full organizational assessment covering legacy systems, shadow IT, SaaS spend, team skills, and security posture.",
+              success: "Assessment document signed off by CIO and shared with leadership team.",
+              risks: [], deps: [],
+              detail: "This assessment has been completed. Key findings: 4 legacy systems on unsupported platforms, 23 shadow IT tools, $420K in potential SaaS savings, only 25% of IT team AI-ready." },
+            { id: "a2", title: "Shadow AI Audit & Risk Inventory", weeks: [1,2], owner: "Security Analyst (Tom)", completed: true,
+              desc: "Identify all unapproved AI tools in use across the organization. Assess data exposure risk for each.",
+              success: "Complete inventory with risk scores; immediate blocks on critical-risk tools.",
+              risks: [], deps: [],
+              detail: "Completed. Found 2 critical shadow AI tools: Otter.ai (recording client meetings with PHI) and Midjourney (IP ownership concerns). Otter.ai blocked immediately." },
+            { id: "a3", title: "Stakeholder Alignment Workshop", weeks: [2,2], owner: "CIO", completed: true,
+              desc: "Half-day workshop with department heads to align on AI vision, priorities, and governance approach.",
+              success: "Signed AI charter with executive sponsorship and agreed priority use cases.",
+              risks: [{ flag: "Executive buy-in may vary across departments" }], deps: ["a1"],
+              detail: "Workshop conducted with 6 department heads. Three priority use cases identified: AI help desk triage, automated reporting, and clinical documentation assistance." },
+            { id: "a4", title: "Data Classification Framework", weeks: [1,2], owner: "DBA (Maria) + Security (Tom)", completed: true,
+              desc: "Establish 4-tier data classification (Public/Internal/Confidential/Restricted) to govern what data can be used with which AI tools.",
+              success: "Framework documented, approved by legal, and mapped to each AI tool.",
+              risks: [], deps: [],
+              detail: "Completed. All 10 AI tools mapped to data classification tiers. Restricted data (PHI, PII) explicitly prohibited from all external AI tools." }
+        ]
+    },
+    {
+        name: "Pilot", color: "cyan", weeks: "3-6", phaseClass: "phase-pilot",
+        milestones: [
+            { id: "p1", title: "Deploy AI Help Desk Triage Pilot", weeks: [3,6], owner: "Sarah Mitchell + Mike Johnson", completed: true,
+              desc: "Implement AI-powered ticket classification and routing for IT help desk. Target: 40% reduction in L1 ticket volume.",
+              success: "AI triage handling 40%+ of incoming tickets with 90%+ accuracy for 2 weeks.",
+              risks: [{ flag: "Staff resistance to AI handling tickets" }], deps: ["a1", "a3"],
+              detail: "Pilot launched week 3. Using ChatGPT Enterprise API for ticket classification. Currently at 35% automation rate with 92% accuracy. On track to hit 40% by week 6." },
+            { id: "p2", title: "AI Governance Policy Published", weeks: [3,4], owner: "CIO + Legal + Tom Williams", completed: false,
+              desc: "Finalize and publish the AI Acceptable Use Policy. Roll out mandatory training to all staff.",
+              success: "Policy published on intranet; 80%+ staff acknowledge receipt within 2 weeks.",
+              risks: [], deps: ["a2", "a4"],
+              detail: "Draft v1.0 completed. Legal review in progress. Target publication: end of week 4. Training modules being built in LMS." },
+            { id: "p3", title: "Team Upskilling Program Launch", weeks: [3,6], owner: "HR + CIO", completed: false,
+              desc: "Begin 90-day upskilling program for all 12 IT staff. AI Foundations bootcamp for everyone, specialized tracks for key roles.",
+              success: "All 12 staff enrolled; AI Foundations completed by week 6; 3 staff in advanced tracks.",
+              risks: [{ flag: "At-risk staff may resist training" }], deps: ["a1", "a3"],
+              detail: "AI Foundations bootcamp vendor selected. Budget approved ($145K). Kevin O'Brien and Angela Foster enrolled in career pivot coaching alongside technical training." },
+            { id: "p4", title: "SaaS Consolidation Quick Win", weeks: [4,6], owner: "David Kim (Procurement)", completed: false,
+              desc: "Consolidate 3 duplicate SaaS categories identified in assessment. Renegotiate contracts for remaining tools.",
+              success: "3 redundant tools eliminated; $180K annual savings documented.",
+              risks: [], deps: ["a1"],
+              detail: "Three duplicate categories identified: project management (3 tools), document collaboration (2 tools), and communication (2 overlapping). Vendor conversations initiated." },
+            { id: "p5", title: "Automated Reporting Prototype", weeks: [5,6], owner: "Priya Sharma + Lisa Chang", completed: false,
+              desc: "Build prototype for AI-generated executive reporting from existing data sources. Replace 3 manual Excel report processes.",
+              success: "Working prototype generating 1 executive report automatically with 95% accuracy.",
+              risks: [], deps: ["p1"],
+              detail: "Requirements gathered from CFO office. Targeting monthly financial summary, weekly ops dashboard, and quarterly board report. Using approved AI tools only." }
+        ]
+    },
+    {
+        name: "Prove ROI", color: "emerald", weeks: "7-10", phaseClass: "phase-roi",
+        milestones: [
+            { id: "r1", title: "Help Desk ROI Report", weeks: [7,8], owner: "Sarah Mitchell", completed: false,
+              desc: "Document measurable ROI from AI help desk triage pilot. Present to leadership with hard numbers.",
+              success: "ROI report showing cost savings, ticket resolution time improvement, and staff reallocation opportunities.",
+              risks: [], deps: ["p1"],
+              detail: "Expected metrics: 40% L1 ticket reduction = 2 FTE equivalent savings ($160K/yr). Mean time to resolution improved by 55%. Staff satisfaction survey to be included." },
+            { id: "r2", title: "Legacy System Modernization Plan", weeks: [7,10], owner: "CIO + Robert Taylor", completed: false,
+              desc: "Based on assessment findings, develop phased plan for modernizing 4 legacy systems. Prioritize by risk and AI-enablement potential.",
+              success: "Board-ready modernization proposal with timeline, budget, and vendor shortlist.",
+              risks: [{ flag: "COBOL billing system replacement is $2.4M — board approval needed" }], deps: ["a1"],
+              detail: "Priority order: 1) Staff Scheduling Excel→AI-powered ($200K, quick win), 2) Inventory Access DB→cloud ($350K), 3) Lab FoxPro→modern ($800K), 4) Billing COBOL→enterprise ($2.4M, FY27)." },
+            { id: "r3", title: "AI Vendor Evaluation Framework", weeks: [8,9], owner: "David Kim + Tom Williams", completed: false,
+              desc: "Establish repeatable framework for evaluating new AI tools. Includes security assessment, data classification check, and ROI model.",
+              success: "Framework documented with scoring rubric; applied to 2 pending vendor requests as validation.",
+              risks: [], deps: ["a2", "p2"],
+              detail: "Framework will include: vendor security questionnaire (SOC 2, BAA, DPA), data flow diagram requirement, 30-day pilot protocol, and ROI calculator template." },
+            { id: "r4", title: "SaaS Savings Realized", weeks: [9,10], owner: "David Kim", completed: false,
+              desc: "Execute SaaS consolidation contracts. Document realized savings vs. projected $420K annual savings target.",
+              success: "$300K+ in confirmed annual savings with signed contract amendments.",
+              risks: [], deps: ["p4"],
+              detail: "Targeting $180K from duplicate elimination + $120K from license right-sizing + $120K from renegotiation. Contracts to be renegotiated during renewal windows." }
+        ]
+    },
+    {
+        name: "Scale", color: "purple", weeks: "11-12", phaseClass: "phase-scale",
+        milestones: [
+            { id: "s1", title: "AI Center of Excellence Launch", weeks: [11,12], owner: "CIO", completed: false,
+              desc: "Establish formal AI CoE with charter, governance board, and operating model. Staff with internal champions from each department.",
+              success: "CoE charter signed; governance board members appointed; first monthly review scheduled.",
+              risks: [{ flag: "Requires sustained executive commitment beyond 90 days" }], deps: ["p2", "r1"],
+              detail: "CoE will include: CIO (sponsor), 1 rep per department, security liaison, legal liaison. Monthly review of AI tool requests, quarterly strategy updates." },
+            { id: "s2", title: "Hiring Plan Execution", weeks: [11,12], owner: "HR + CIO", completed: false,
+              desc: "Post job requisitions for 3 priority hires identified in skills gap analysis: AI/ML Engineer, AI Product Manager, Data Engineer.",
+              success: "All 3 positions posted; recruiter engaged; target fill date within 60 days.",
+              risks: [], deps: ["r1"],
+              detail: "Budget: AI/ML Engineer ($140-180K), AI Product Manager ($130-160K), Data Engineer ($120-150K). Total: ~$430K annual. Funded from new initiatives budget." },
+            { id: "s3", title: "90-Day Board Presentation", weeks: [12,12], owner: "CIO", completed: false,
+              desc: "Present 90-day results to the board. Cover: ROI achieved, risks mitigated, team transformation progress, and 12-month roadmap proposal.",
+              success: "Board approves 12-month AI strategy and associated budget for FY27.",
+              risks: [{ flag: "Board may push back on legacy system modernization budget" }], deps: ["r1", "r2", "r4"],
+              detail: "Key talking points: help desk savings ($160K/yr), SaaS savings ($300K+/yr), shadow IT risk eliminated, team 60% AI-ready (up from 25%), governance framework in place. Ask: $3.75M for FY27 modernization." }
+        ]
+    }
+];
+
+// Render Gantt Chart
+const ganttChart = document.getElementById("ganttChart");
+const colorMap = { indigo: "#6366f1", cyan: "#0891b2", emerald: "#059669", purple: "#7c3aed" };
+
+phases.forEach(phase => {
+    phase.milestones.forEach(ms => {
+        const start = ms.weeks[0];
+        const end = ms.weeks[1];
+        const span = end - start + 1;
+        const offset = start - 1;
+        const hasRisk = ms.risks.length > 0;
+
+        let barHtml = `<div class="flex items-center" style="min-width:900px">
+            <div class="w-40 pr-3 text-xs text-gray-600 text-right truncate font-medium">${ms.title.length > 28 ? ms.title.substring(0, 28) + '...' : ms.title}</div>
+            <div class="flex-1 relative" style="height:40px">
+                <div class="gantt-bar ${ms.completed ? 'opacity-70' : ''}" onclick="document.getElementById('ms-${ms.id}').open=true; document.getElementById('ms-${ms.id}').scrollIntoView({behavior:'smooth', block:'center'})" style="position:absolute; left:${(offset/12)*100}%; width:${(span/12)*100}%; background:${colorMap[phase.color]}; top:2px;">
+                    ${ms.completed ? '<span class="mr-1">&#10003;</span>' : ''}${ms.title.length > 20 ? ms.title.substring(0, 20) + '...' : ms.title}
+                    ${hasRisk ? '<span class="risk-flag" title="Risk flag">&#9888;</span>' : ''}
+                </div>
+            </div>
+        </div>`;
+        ganttChart.innerHTML += barHtml;
+    });
+    // Phase separator
+    if (phase.name !== "Scale") {
+        ganttChart.innerHTML += `<div style="height:1px; background:#e5e7eb; margin:4px 0 4px 160px;"></div>`;
+    }
+});
+
+// Render Milestone Details
+const milestoneDetails = document.getElementById("milestoneDetails");
+
+phases.forEach(phase => {
+    let phaseHtml = `<div class="card p-6 ${phase.phaseClass}">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-3 h-3 rounded-full" style="background:var(--phase-color)"></div>
+            <h2 class="text-xl font-bold" style="color:var(--phase-color)">Phase: ${phase.name}</h2>
+            <span class="text-sm text-gray-500">Weeks ${phase.weeks}</span>
+            <span class="ml-auto text-sm font-medium" style="color:var(--phase-color)">${phase.milestones.filter(m=>m.completed).length}/${phase.milestones.length} complete</span>
+        </div>
+        <div class="space-y-3">`;
+
+    phase.milestones.forEach(ms => {
+        const statusIcon = ms.completed ? '<span class="text-emerald-500 font-bold text-lg">&#10003;</span>' : '<span class="text-gray-300 text-lg">&#9675;</span>';
+        const statusBadge = ms.completed
+            ? '<span class="px-2 py-0.5 rounded text-xs bg-emerald-100 text-emerald-700 font-bold">COMPLETE</span>'
+            : '<span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-500 font-bold">IN PROGRESS</span>';
+
+        phaseHtml += `<details id="ms-${ms.id}" class="milestone rounded-lg bg-white p-4 border" style="border-color: var(--phase-border);">
+            <summary class="flex items-center gap-3">
+                ${statusIcon}
+                <span class="ms-title font-semibold ${ms.completed ? 'text-gray-400' : 'text-gray-800'}">${ms.title}</span>
+                ${ms.risks.length > 0 ? '<span class="text-red-500 text-sm" title="Risk flag">&#9888;</span>' : ''}
+                <span class="ml-auto flex items-center gap-2">
+                    ${statusBadge}
+                    <span class="text-xs text-gray-400">Wk ${ms.weeks[0]}${ms.weeks[1] !== ms.weeks[0] ? '-' + ms.weeks[1] : ''}</span>
+                    <span class="chevron text-gray-400">&#9654;</span>
+                </span>
+            </summary>
+            <div class="mt-4 pl-8 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <div class="mb-3">
+                        <div class="text-xs font-bold text-gray-500 uppercase mb-1">What</div>
+                        <div class="text-gray-600">${ms.desc}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="text-xs font-bold text-gray-500 uppercase mb-1">Owner</div>
+                        <div class="text-gray-600">${ms.owner}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-gray-500 uppercase mb-1">Dependencies</div>
+                        <div class="text-gray-600">${ms.deps.length > 0 ? ms.deps.map(d => '<span class="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-500 text-xs mr-1">' + d.toUpperCase() + '</span>').join('') : '<span class="text-gray-400">None</span>'}</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="mb-3">
+                        <div class="text-xs font-bold text-gray-500 uppercase mb-1">Success Criteria</div>
+                        <div class="text-gray-600">${ms.success}</div>
+                    </div>
+                    ${ms.risks.length > 0 ? '<div class="mb-3"><div class="text-xs font-bold text-red-500 uppercase mb-1">Risks</div><div class="text-red-600 bg-red-50 p-2 rounded text-xs">' + ms.risks.map(r => '&#9888; ' + r.flag).join('<br>') + '</div></div>' : ''}
+                    <div>
+                        <div class="text-xs font-bold text-gray-500 uppercase mb-1">Status Detail</div>
+                        <div class="text-gray-600 text-xs">${ms.detail}</div>
+                    </div>
+                </div>
+            </div>
+        </details>`;
+    });
+
+    phaseHtml += `</div></div>`;
+    milestoneDetails.innerHTML += phaseHtml;
+});
+</script>
+</body>
+</html>

@@ -20,10 +20,10 @@ def get_demos():
         },
         "advanced": {
             "title": "Advanced Course",
-            "subtitle": "Lectures 7-12",
+            "subtitle": "Lectures 8-15",
             "description": (
-                "Advanced demos add local models (Ollama), UI-based tools, "
-                "and self-hosted infrastructure."
+                "Strategy, communication, and execution: from mission alignment "
+                "to vendor risk management."
             ),
             "demos": enrich_demos(ADVANCED_DEMOS),
         },

@@ -260,6 +260,99 @@ WORKBOOK_SECTIONS = {
         ],
     },
     8: {
+        "title": "Strategy Cascade & IT Portfolio",
+        "lecture_title": "From Mission to IT Strategy",
+        "sections": [
+            {
+                "key": "mission",
+                "title": "Mission Statement & Verb Analysis",
+                "fields": [
+                    {"name": "company_mission", "label": "Your Company Mission Statement", "type": "textarea",
+                     "placeholder": "Paste your company's mission statement here"},
+                    {"name": "verbs", "label": "Actionable Verbs (underline each verb in the mission)", "type": "textarea",
+                     "placeholder": "e.g., deliver, innovate, protect, sustain, grow..."},
+                    {"name": "capabilities", "label": "Capabilities Implied by Each Verb", "type": "textarea",
+                     "placeholder": "deliver → project execution systems\ninnovate → R&D/IP tools\nprotect → compliance/safety platforms"},
+                ],
+            },
+            {
+                "key": "strategic_pillars",
+                "title": "Strategic Pillars & IT Initiatives",
+                "type": "table",
+                "columns": [
+                    {"name": "pillar", "label": "Strategic Pillar", "type": "text"},
+                    {"name": "initiative", "label": "Strategic Initiative", "type": "text"},
+                    {"name": "it_project", "label": "IT Project", "type": "text"},
+                    {"name": "owner", "label": "Business Owner", "type": "text"},
+                    {"name": "status", "label": "Status", "type": "select",
+                     "options": ["Not Started", "In Progress", "Complete", "Orphan — No Link"]},
+                ],
+                "initial_rows": 10,
+            },
+            {
+                "key": "portfolio",
+                "title": "IT Portfolio & Spend Analysis",
+                "fields": [
+                    {"name": "annual_revenue", "label": "Company Annual Net Revenue ($)", "type": "number"},
+                    {"name": "it_spend", "label": "Total Annual IT Spend ($)", "type": "number"},
+                    {"name": "it_pct", "label": "IT Spend as % of Revenue", "type": "text",
+                     "placeholder": "Calculate: IT Spend / Revenue × 100"},
+                    {"name": "industry_benchmark", "label": "Industry Benchmark Range", "type": "select",
+                     "options": ["Manufacturing 1-3%", "Professional Services 3-5%", "Financial Services 7-10%", "Technology 8-15%", "Other"]},
+                    {"name": "run_pct", "label": "Run the Business (%)", "type": "number",
+                     "placeholder": "60-70% typical"},
+                    {"name": "grow_pct", "label": "Grow the Business (%)", "type": "number",
+                     "placeholder": "20-30% typical"},
+                    {"name": "transform_pct", "label": "Transform the Business (%)", "type": "number",
+                     "placeholder": "5-10% typical"},
+                    {"name": "orphan_projects", "label": "Orphan Projects (no strategic link)", "type": "textarea",
+                     "placeholder": "List any IT projects that can't be traced to a strategic initiative"},
+                ],
+            },
+        ],
+    },
+    9: {
+        "title": "Communication Frameworks",
+        "lecture_title": "The CIO as Communicator",
+        "sections": [
+            {
+                "key": "board_rewrite",
+                "title": "Tech-to-Business Translation Practice",
+                "fields": [
+                    {"name": "original_update", "label": "Your Last IT Status Update (paste it here)", "type": "textarea",
+                     "placeholder": "Paste a recent IT status update, email, or report — jargon and all"},
+                    {"name": "board_version", "label": "Board-Ready Rewrite (no technical jargon)", "type": "textarea",
+                     "placeholder": "Rewrite the above for a board of directors — focus on business impact, risk, and cost"},
+                    {"name": "elevator_pitch", "label": "60-Second Elevator Pitch for Your Biggest Initiative", "type": "textarea",
+                     "placeholder": "Imagine the CEO asks 'What's the one thing I should know about IT right now?' — answer in 60 seconds"},
+                ],
+            },
+            {
+                "key": "stakeholder_map",
+                "title": "Stakeholder Communication Map",
+                "type": "table",
+                "columns": [
+                    {"name": "stakeholder", "label": "Stakeholder", "type": "text"},
+                    {"name": "role", "label": "Role", "type": "text"},
+                    {"name": "cares_about", "label": "Cares About", "type": "text"},
+                    {"name": "language", "label": "Language to Use", "type": "text"},
+                    {"name": "frequency", "label": "Update Frequency", "type": "select",
+                     "options": ["Weekly", "Biweekly", "Monthly", "Quarterly", "As Needed"]},
+                ],
+                "initial_rows": 6,
+            },
+            {
+                "key": "peer_feedback",
+                "title": "Presentation Self-Assessment",
+                "fields": [
+                    {"name": "peer_feedback", "label": "Peer Feedback: 'When I present, the one thing I should change is...'", "type": "textarea"},
+                    {"name": "ceo_shadow", "label": "CEO/CFO Shadow Session Notes — What did you observe?", "type": "textarea",
+                     "placeholder": "How do they structure updates? What language do they use? How do they handle questions?"},
+                ],
+            },
+        ],
+    },
+    10: {
         "title": "Build vs Buy Assessment",
         "lecture_title": "Build vs Buy Just Changed",
         "sections": [
@@ -282,7 +375,7 @@ WORKBOOK_SECTIONS = {
             }
         ],
     },
-    9: {
+    11: {
         "title": "Team Readiness Conversations",
         "lecture_title": "Leading Teams Through AI Disruption",
         "sections": [
@@ -301,7 +394,7 @@ WORKBOOK_SECTIONS = {
             }
         ],
     },
-    10: {
+    12: {
         "title": "AI Governance Checklist",
         "lecture_title": "AI Governance and IP Protection",
         "sections": [
@@ -322,7 +415,7 @@ WORKBOOK_SECTIONS = {
             }
         ],
     },
-    11: {
+    13: {
         "title": "90-Day AI Roadmap",
         "lecture_title": "Your 90-Day AI Leadership Roadmap",
         "sections": [
@@ -345,7 +438,7 @@ WORKBOOK_SECTIONS = {
             }
         ],
     },
-    12: {
+    14: {
         "title": "AI-Era Team Roles",
         "lecture_title": "Building Your AI-Era IT Team",
         "sections": [
@@ -365,7 +458,7 @@ WORKBOOK_SECTIONS = {
             }
         ],
     },
-    13: {
+    15: {
         "title": "Vendor Risk Scorecard",
         "lecture_title": "AI Tools, Dependency, and Vendor Risk",
         "sections": [

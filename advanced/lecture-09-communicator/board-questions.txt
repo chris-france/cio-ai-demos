@@ -1,0 +1,12 @@
+TYPICAL BOARD QUESTIONS FOR THE CIO
+(Collected from board meetings, Q1-Q4 2025)
+
+1. "Are we protected from a ransomware attack?"
+
+2. "Why does IT cost so much when we just moved to the cloud?"
+
+3. "How do we know our patient data is safe?"
+
+4. "What's our AI strategy and how does it compare to competitors?"
+
+5. "If our main system goes down, how long until we're back up?"

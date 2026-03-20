@@ -84,7 +84,7 @@ export default function WorkbookView() {
       <section className="mb-12">
         <div className="flex items-center gap-3 mb-2">
           <h2 className="text-xl font-bold text-gray-900">Advanced Workbook</h2>
-          <span className="text-sm text-gray-500">&mdash; Lectures 8-13</span>
+          <span className="text-sm text-gray-500">&mdash; Lectures 8-15</span>
         </div>
         <div className="flex items-center gap-3 mb-6">
           <span className="bg-france-cyan text-white text-[11px] font-bold px-3 py-0.5 rounded-full tracking-wide">
