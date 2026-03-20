@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Setup — CIO in the AI World</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .copy-feedback { transition: opacity 0.2s ease; }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-green-700 to-emerald-600 text-white">
+    <div class="max-w-3xl mx-auto px-6 py-12 text-center">
+      <p class="text-green-200 text-sm font-semibold uppercase tracking-widest mb-2">Udemy Course by Chris France</p>
+      <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight">CIO in the AI World</h1>
+      <p class="text-green-100 text-lg mt-3">Course Setup</p>
+      <p class="text-green-200 text-sm mt-4 max-w-xl mx-auto">
+        Complete these 4 steps before Lecture 2. Takes about 5 minutes.
+      </p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-3xl mx-auto px-6 py-10">
+
+    <!-- Step 1 -->
+    <section class="mb-10">
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center text-lg font-bold shadow">1</div>
+        <div class="flex-1">
+          <h2 class="text-xl font-bold text-green-900">Get a Claude Pro or Max subscription</h2>
+          <p class="text-gray-600 mt-2 leading-relaxed">
+            Go to <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" class="text-green-700 underline font-medium hover:text-green-900">claude.ai</a>, create an account, and subscribe to <strong>Pro ($20/month)</strong> or Max. This gives you access to Claude Code, which we use throughout the course.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="mb-10">
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center text-lg font-bold shadow">2</div>
+        <div class="flex-1">
+          <h2 class="text-xl font-bold text-green-900">Install Claude Code</h2>
+          <p class="text-gray-600 mt-2 leading-relaxed">
+            Open <strong>Terminal</strong> (Mac/Linux) or <strong>PowerShell</strong> (Windows) and copy-paste the command for your system:
+          </p>
+
+          <!-- Mac / Linux -->
+          <div class="mt-4">
+            <p class="text-sm font-semibold text-green-700 mb-1">Mac / Linux:</p>
+            <div class="flex items-center gap-2 bg-gray-900 rounded-lg px-4 py-3">
+              <code class="text-green-400 text-sm font-mono flex-1 break-all select-all">curl -fsSL https://claude.ai/install.sh | bash</code>
+              <button onclick="copyText('curl -fsSL https://claude.ai/install.sh | bash', this)" class="flex items-center gap-1 text-xs text-green-400 hover:text-green-300 transition-colors shrink-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-width="2"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Windows -->
+          <div class="mt-3">
+            <p class="text-sm font-semibold text-green-700 mb-1">Windows PowerShell:</p>
+            <div class="flex items-center gap-2 bg-gray-900 rounded-lg px-4 py-3">
+              <code class="text-green-400 text-sm font-mono flex-1 break-all select-all">irm https://claude.ai/install.ps1 | iex</code>
+              <button onclick="copyText('irm https://claude.ai/install.ps1 | iex', this)" class="flex items-center gap-1 text-xs text-green-400 hover:text-green-300 transition-colors shrink-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-width="2"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="mb-10">
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center text-lg font-bold shadow">3</div>
+        <div class="flex-1">
+          <h2 class="text-xl font-bold text-green-900">Launch Claude Code</h2>
+          <p class="text-gray-600 mt-2 leading-relaxed">
+            In the same terminal, type:
+          </p>
+
+          <div class="mt-3">
+            <div class="flex items-center gap-2 bg-gray-900 rounded-lg px-4 py-3">
+              <code class="text-green-400 text-sm font-mono flex-1 select-all">claude</code>
+              <button onclick="copyText('claude', this)" class="flex items-center gap-1 text-xs text-green-400 hover:text-green-300 transition-colors shrink-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-width="2"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+          </div>
+
+          <p class="text-sm text-green-700 mt-3">
+            First time? It will open your browser to log in with your Anthropic account. Follow the prompts, then come back to the terminal.
+          </p>
+
+          <div class="mt-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg px-4 py-3 text-sm">
+            <strong>Important:</strong> Do NOT paste the prompt into claude.ai (the website). Claude Code runs in your <strong>terminal</strong> — that's where you paste it.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 4 -->
+    <section class="mb-10">
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center text-lg font-bold shadow">4</div>
+        <div class="flex-1">
+          <h2 class="text-xl font-bold text-green-900">Paste the setup prompt into Claude Code</h2>
+          <p class="text-gray-600 mt-2 leading-relaxed">
+            Copy the entire prompt below and paste it into the Claude Code terminal. Hit Enter and let it run.
+          </p>
+
+          <div class="mt-4">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm font-semibold text-green-700">Master Setup Prompt</p>
+              <button onclick="copyPrompt(this)" class="flex items-center gap-1.5 text-sm text-green-600 hover:text-green-800 transition-colors cursor-pointer font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-width="2"/></svg>
+                <span>Copy Prompt</span>
+              </button>
+            </div>
+            <div id="setup-prompt" class="bg-gray-900 text-green-400 rounded-lg p-5 text-sm font-mono leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto border border-gray-700">I'm taking the "CIO in the AI World" Udemy course by Chris France and I need you to set up all the hands-on demos on my machine. Do everything automatically — install whatever is missing, don't stop to ask me.
+
+IMPORTANT: If any install command fails due to permissions (no admin/sudo access), fall back to user-profile installs instead. Everything can be installed without admin access.
+
+Here's what I need:
+
+1. Check if Python 3.10+ is installed. If not, install it:
+   - Mac: use Homebrew (install Homebrew first if needed). If no admin, download the installer from python.org
+   - Windows: use winget (winget install Python.Python.3.12). If no admin, download from python.org and install for current user only
+   - Linux: use apt/dnf. If no sudo, install pyenv into ~/.pyenv and use it to install Python
+
+2. Check if Node.js 18+ is installed. If not, install it:
+   - Mac: use Homebrew (brew install node). If no admin, install nvm into ~/.nvm and use it to install Node
+   - Windows: use winget (winget install OpenJS.NodeJS.LTS). If no admin, install nvm-windows into the user profile
+   - Linux: use apt/dnf. If no sudo, install nvm into ~/.nvm and use it to install Node
+
+3. Check if git is installed. If not, install it:
+   - Mac: use Homebrew (brew install git) or run xcode-select --install
+   - Windows: use winget (winget install Git.Git). If no admin, download Git portable from git-scm.com
+   - Linux: use apt/dnf. If no sudo, download a portable git binary
+
+4. Clone the demo repository into my home directory:
+   - git clone https://github.com/chris-france/cio-ai-demos.git ~/cio-ai-demos
+
+5. Clone the full public prototypes repo (includes the Inference Cost Calculator for Lecture 2):
+   - git clone https://github.com/chris-france/AI_Public_Prototypes.git ~/AI_Public_Prototypes
+
+6. Set up the demo menu app:
+   - Create a Python virtual environment in ~/cio-ai-demos/backend/venv
+   - Install the backend requirements (fastapi, uvicorn)
+   - Install the frontend npm dependencies in ~/cio-ai-demos/frontend/
+
+7. Pre-generate the sample data for Lecture 4 (Shadow IT demo):
+   - Install openpyxl in the backend venv
+   - Run ~/cio-ai-demos/foundation/lecture-04-shadow-it/generate-workbook.py
+
+8. Install the Python dependencies for Lecture 5 (Offshore demo):
+   - Install flask and pytest in the backend venv
+
+9. Make the demo launcher executable and create a global "ciodemos" command:
+   - chmod +x ~/cio-ai-demos/run.sh
+   - On Mac/Linux: create ~/.local/bin/ if it doesn't exist, then ln -sf ~/cio-ai-demos/run.sh ~/.local/bin/ciodemos. Make sure ~/.local/bin is in the user's PATH (add to ~/.zshrc or ~/.bashrc if needed)
+   - On Windows: create a ciodemos.cmd batch file in %USERPROFILE%\.local\bin\ and add that to the user's PATH if needed
+
+10. Launch the demo menu and open it in my browser.
+
+After everything is done, give me a summary of what was installed and confirm all 7 foundation demos are ready. Remind the user they can now type "ciodemos" from any terminal to launch the demos in the future.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Divider -->
+    <hr class="border-green-200 my-10" />
+
+    <!-- What Happens Next -->
+    <section class="mb-10">
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
+        <h2 class="text-lg font-bold text-green-800 mb-4">What happens next</h2>
+        <p class="text-gray-600 text-sm mb-4">Once you paste the prompt, Claude Code takes over and does everything automatically:</p>
+        <ul class="space-y-2.5">
+          <li class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span class="text-gray-700 text-sm">Checks your system and installs anything missing (Python, Node.js, git)</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span class="text-gray-700 text-sm">Clones the demo repo and installs all dependencies</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span class="text-gray-700 text-sm">Pre-generates sample data files for the demos</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span class="text-gray-700 text-sm">Creates a global <code class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-mono text-xs">ciodemos</code> command you can use from any terminal</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span class="text-gray-700 text-sm">Launches the demo menu at <strong>localhost:18802</strong></span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span class="text-gray-700 text-sm">It will ask your permission before running commands — just approve them</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ciodemos note -->
+    <section class="mb-10">
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center">
+        <p class="text-gray-500 text-sm mb-1">After setup, just type</p>
+        <code class="text-2xl font-bold font-mono text-green-700">ciodemos</code>
+        <p class="text-gray-500 text-sm mt-2">in any terminal to launch the demo menu. You only run the setup once.</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-400 text-xs pb-10">
+      <p>CIO in the AI World &mdash; chrisfrance.ai</p>
+    </footer>
+
+  </main>
+
+  <script>
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const span = btn.querySelector('span');
+        const original = span.textContent;
+        span.textContent = 'Copied!';
+        btn.classList.add('text-green-300');
+        setTimeout(() => {
+          span.textContent = original;
+          btn.classList.remove('text-green-300');
+        }, 2000);
+      });
+    }
+
+    function copyPrompt(btn) {
+      const prompt = document.getElementById('setup-prompt').textContent;
+      navigator.clipboard.writeText(prompt).then(() => {
+        const span = btn.querySelector('span');
+        span.textContent = 'Copied!';
+        setTimeout(() => {
+          span.textContent = 'Copy Prompt';
+        }, 2000);
+      });
+    }
+  </script>
+
+</body>
+</html>

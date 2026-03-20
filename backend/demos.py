@@ -428,11 +428,15 @@ ADVANCED_DEMOS = [
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
             "advanced/lecture-08-mission-strategy. Read sample-mission.txt (a company "
-            "mission statement). Build a Strategy Cascade tool as a single index.html — "
+            "mission statement).\n\n"
+            "Fetch the IT portfolio data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/8\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build a Strategy Cascade tool as a single index.html — "
             "parse the mission, identify actionable verbs, map to strategic pillars, "
             "generate IT project suggestions, show IT spend benchmarks, create a "
-            "Run/Grow/Transform portfolio visualization. Use sample-it-portfolio.csv "
-            "for the current portfolio data. Open in browser."
+            "Run/Grow/Transform portfolio visualization using the workbook data. "
+            "Open in browser."
         ),
         "takeaway": (
             "You built a strategic IT portfolio from a mission statement in 8 minutes. "
@@ -513,8 +517,11 @@ ADVANCED_DEMOS = [
         ],
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
-            "advanced/lecture-10-build-vs-buy. Read saas-evaluation.csv (5 SaaS tools "
-            "with costs, features, usage data). For each tool, run a build-vs-buy "
+            "advanced/lecture-10-build-vs-buy.\n\n"
+            "Fetch the SaaS evaluation data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/10\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "For each tool, run a build-vs-buy "
             "analysis: estimate what it would cost to build with AI, time to build, "
             "maintenance burden, data control benefits. Generate a "
             "build-vs-buy-dashboard.html with a decision matrix, cost comparison "
@@ -557,8 +564,11 @@ ADVANCED_DEMOS = [
         ],
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
-            "advanced/lecture-11-team-disruption. Read team-roster.csv (12 IT team "
-            "members with current roles, skills, years of experience). Build a Skills "
+            "advanced/lecture-11-team-disruption.\n\n"
+            "Fetch the team roster data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/11\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build a Skills "
             "Gap Analyzer — for each person, identify which skills are AI-era critical, "
             "which are becoming obsolete, and recommend a personalized 90-day development "
             "plan. Generate skills-gap-report.html with a heatmap visualization. "
@@ -600,8 +610,11 @@ ADVANCED_DEMOS = [
         ],
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
-            "advanced/lecture-12-governance. Read ai-tools-inventory.csv (list of AI "
-            "tools currently in use across the org). Build an AI Governance Dashboard — "
+            "advanced/lecture-12-governance.\n\n"
+            "Fetch the AI tools inventory from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/12\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build an AI Governance Dashboard — "
             "classify each tool by risk level, data exposure, compliance status. Generate "
             "a model card for the highest-risk tool. Create governance-dashboard.html "
             "with a risk heatmap, compliance checklist progress tracker, and recommended "
@@ -687,8 +700,11 @@ ADVANCED_DEMOS = [
         ],
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
-            "advanced/lecture-14-ai-era-team. Read org-chart.csv (current IT org with "
-            "15 positions, salaries, utilization). Build an AI-powered email triage "
+            "advanced/lecture-14-ai-era-team.\n\n"
+            "Fetch the org chart data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/14\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build an AI-powered email triage "
             "workflow demo: create a simple n8n-style workflow visualization that shows "
             "how one person with AI can do L1 support that previously took 3 people. "
             "Use sample-support-emails.json as test data. Generate "
@@ -733,8 +749,11 @@ ADVANCED_DEMOS = [
         ],
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
-            "advanced/lecture-15-vendor-risk. Read vendor-contracts.csv (5 AI vendor "
-            "contracts with pricing, terms, lock-in factors). Build a Vendor Risk "
+            "advanced/lecture-15-vendor-risk.\n\n"
+            "Fetch the vendor contract data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/15\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build a Vendor Risk "
             "Dashboard — score each vendor on 5 dimensions (lock-in, data portability, "
             "pricing risk, capability, support), simulate a vendor-down scenario, show "
             "the cost of switching. Generate vendor-risk-dashboard.html with a radar "

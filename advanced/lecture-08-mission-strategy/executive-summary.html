@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Strategy Executive Summary — Meridian Health Systems FY2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        @page { size: letter; margin: 0.5in; }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none; }
+        }
+        body { background: #f8fafc; display: flex; justify-content: center; padding: 24px; }
+        .page {
+            width: 8.5in; min-height: 11in; max-height: 11in; overflow: hidden;
+            background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+            padding: 0.5in 0.55in 0.4in 0.55in;
+            display: flex; flex-direction: column;
+        }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1e3a5f; padding-bottom: 10px; margin-bottom: 14px; }
+        .header-left h1 { font-size: 17px; font-weight: 800; color: #1e3a5f; letter-spacing: -0.3px; }
+        .header-left p { font-size: 10px; color: #64748b; margin-top: 2px; }
+        .header-right { text-align: right; }
+        .header-right .org { font-size: 12px; font-weight: 700; color: #1e3a5f; }
+        .header-right .date { font-size: 9px; color: #94a3b8; margin-top: 1px; }
+        .confidential { font-size: 8px; color: #ef4444; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+
+        /* KPI strip */
+        .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
+        .kpi { background: #f1f5f9; border-radius: 6px; padding: 8px 10px; text-align: center; }
+        .kpi .value { font-size: 18px; font-weight: 800; color: #1e3a5f; }
+        .kpi .label { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
+        .kpi.highlight { background: #1e3a5f; }
+        .kpi.highlight .value { color: white; }
+        .kpi.highlight .label { color: #93c5fd; }
+
+        /* Section headers */
+        .section-title { font-size: 11px; font-weight: 700; color: #1e3a5f; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; padding-bottom: 3px; border-bottom: 1px solid #e2e8f0; }
+
+        /* Two column layout */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+
+        /* Portfolio table */
+        .pillar-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+        .pillar-table th { text-align: left; font-weight: 700; color: #475569; padding: 4px 6px; border-bottom: 2px solid #cbd5e1; font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pillar-table td { padding: 5px 6px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        .pillar-table tr:last-child td { border-bottom: 2px solid #cbd5e1; font-weight: 700; }
+        .pillar-table .bar-cell { width: 30%; }
+        .bar-bg { background: #e2e8f0; border-radius: 3px; height: 10px; overflow: hidden; }
+        .bar-fill { height: 10px; border-radius: 3px; }
+        .bar-fill.blue { background: #3b82f6; }
+        .bar-fill.red { background: #ef4444; }
+        .bar-fill.amber { background: #f59e0b; }
+
+        /* RGT visual */
+        .rgt-container { display: flex; flex-direction: column; align-items: center; }
+        .rgt-bar { display: flex; width: 100%; height: 28px; border-radius: 6px; overflow: hidden; margin-bottom: 6px; }
+        .rgt-bar .run { background: #6b7280; }
+        .rgt-bar .grow { background: #3b82f6; }
+        .rgt-bar .transform { background: #10b981; }
+        .rgt-bar span { display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; }
+        .rgt-legend { display: flex; gap: 14px; font-size: 8px; color: #475569; }
+        .rgt-legend .dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 3px; vertical-align: middle; }
+        .rgt-benchmark { font-size: 8px; color: #94a3b8; margin-top: 4px; text-align: center; }
+
+        /* Benchmark bars */
+        .bench-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+        .bench-label { font-size: 9px; color: #475569; width: 100px; text-align: right; }
+        .bench-bar-bg { flex: 1; background: #f1f5f9; border-radius: 4px; height: 14px; position: relative; }
+        .bench-bar-fill { height: 14px; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; }
+        .bench-bar-fill span { font-size: 8px; font-weight: 700; color: white; }
+        .bench-pct { font-size: 9px; font-weight: 700; width: 32px; text-align: left; }
+
+        /* Findings */
+        .finding { display: flex; gap: 8px; margin-bottom: 7px; }
+        .finding-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+        .finding-icon.red { background: #fef2f2; color: #dc2626; }
+        .finding-icon.amber { background: #fffbeb; color: #d97706; }
+        .finding-icon.green { background: #f0fdf4; color: #16a34a; }
+        .finding-text { font-size: 9px; color: #334155; line-height: 1.4; }
+        .finding-text strong { color: #1e3a5f; }
+
+        /* Recommendations */
+        .rec-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .rec-card { border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; }
+        .rec-card .rec-num { font-size: 8px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px; }
+        .rec-card .rec-title { font-size: 10px; font-weight: 700; color: #1e3a5f; margin: 2px 0; }
+        .rec-card .rec-detail { font-size: 8px; color: #64748b; line-height: 1.35; }
+        .rec-card .rec-cost { font-size: 9px; font-weight: 700; color: #059669; margin-top: 4px; }
+
+        /* Footer */
+        .footer { margin-top: auto; padding-top: 8px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; }
+
+        /* Print button */
+        .print-btn { position: fixed; top: 20px; right: 20px; background: #1e3a5f; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .print-btn:hover { background: #2d4a73; }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>IT Strategy Alignment &mdash; Executive Summary</h1>
+                <p>Mission-to-Portfolio Cascade Analysis &bull; FY2026 Strategic Plan</p>
+            </div>
+            <div class="header-right">
+                <div class="org">Meridian Health Systems</div>
+                <div class="date">Prepared March 2026</div>
+                <div class="confidential">Board Confidential</div>
+            </div>
+        </div>
+
+        <!-- KPI Strip -->
+        <div class="kpi-strip">
+            <div class="kpi highlight">
+                <div class="value">$112M</div>
+                <div class="label">IT Budget</div>
+            </div>
+            <div class="kpi">
+                <div class="value">4.0%</div>
+                <div class="label">IT as % Revenue</div>
+            </div>
+            <div class="kpi">
+                <div class="value">21</div>
+                <div class="label">Active Projects</div>
+            </div>
+            <div class="kpi">
+                <div class="value">95%</div>
+                <div class="label">Strategy Aligned</div>
+            </div>
+            <div class="kpi">
+                <div class="value">2</div>
+                <div class="label">Gaps Identified</div>
+            </div>
+        </div>
+
+        <!-- Two-column: Portfolio by Pillar + RGT & Benchmark -->
+        <div class="two-col">
+            <!-- Left: Investment by Strategic Pillar -->
+            <div>
+                <div class="section-title">Investment by Strategic Priority</div>
+                <table class="pillar-table">
+                    <thead>
+                        <tr>
+                            <th>Board Priority</th>
+                            <th style="text-align:center">Proj</th>
+                            <th style="text-align:right">Spend</th>
+                            <th class="bar-cell">Share of IT Budget</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Strengthen Cybersecurity</td>
+                            <td style="text-align:center">4</td>
+                            <td style="text-align:right">$7.7M</td>
+                            <td><div class="bar-bg"><div class="bar-fill blue" style="width:68%"></div></div></td>
+                        </tr>
+                        <tr>
+                            <td>Accelerate Digital Transformation</td>
+                            <td style="text-align:center">3</td>
+                            <td style="text-align:right">$5.8M</td>
+                            <td><div class="bar-bg"><div class="bar-fill blue" style="width:52%"></div></div></td>
+                        </tr>
+                        <tr>
+                            <td>Modernize Legacy EHR</td>
+                            <td style="text-align:center">2</td>
+                            <td style="text-align:right">$4.5M</td>
+                            <td><div class="bar-bg"><div class="bar-fill blue" style="width:40%"></div></div></td>
+                        </tr>
+                        <tr>
+                            <td>Integrate AI Diagnostics</td>
+                            <td style="text-align:center">3</td>
+                            <td style="text-align:right">$3.5M</td>
+                            <td><div class="bar-bg"><div class="bar-fill blue" style="width:31%"></div></div></td>
+                        </tr>
+                        <tr>
+                            <td>Expand Telehealth</td>
+                            <td style="text-align:center">2</td>
+                            <td style="text-align:right">$3.4M</td>
+                            <td><div class="bar-bg"><div class="bar-fill amber" style="width:31%"></div></div></td>
+                        </tr>
+                        <tr>
+                            <td>Reduce Operational Costs</td>
+                            <td style="text-align:center">3</td>
+                            <td style="text-align:right">$2.0M</td>
+                            <td><div class="bar-bg"><div class="bar-fill blue" style="width:18%"></div></div></td>
+                        </tr>
+                        <tr style="color: #dc2626;">
+                            <td>Attract &amp; Retain Talent</td>
+                            <td style="text-align:center">1</td>
+                            <td style="text-align:right">$0.4M</td>
+                            <td><div class="bar-bg"><div class="bar-fill red" style="width:4%"></div></div></td>
+                        </tr>
+                        <tr>
+                            <td>TOTAL (aligned)</td>
+                            <td style="text-align:center">18</td>
+                            <td style="text-align:right">$27.3M</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Right: RGT Split + IT Spend Benchmark -->
+            <div>
+                <div class="section-title">Portfolio Split: Run / Grow / Transform</div>
+                <div class="rgt-container">
+                    <div class="rgt-bar">
+                        <span class="run" style="width:43%">Run 43%</span>
+                        <span class="grow" style="width:25%">Grow 25%</span>
+                        <span class="transform" style="width:32%">Transform 32%</span>
+                    </div>
+                    <div class="rgt-legend">
+                        <span><span class="dot" style="background:#6b7280"></span>Run $11.9M &mdash; keep the lights on</span>
+                        <span><span class="dot" style="background:#3b82f6"></span>Grow $6.8M &mdash; incremental</span>
+                        <span><span class="dot" style="background:#10b981"></span>Transform $8.9M &mdash; strategic</span>
+                    </div>
+                    <div class="rgt-benchmark">Industry benchmark: 50% Run / 30% Grow / 20% Transform &bull; Meridian over-indexes on Transform (32% vs 20%)</div>
+                </div>
+
+                <div style="margin-top: 14px;">
+                    <div class="section-title">IT Spend vs. Healthcare Benchmarks</div>
+                    <div class="bench-row">
+                        <div class="bench-label">Bottom Quartile</div>
+                        <div class="bench-bar-bg"><div class="bench-bar-fill" style="width:35%; background:#f87171;"><span>$59M</span></div></div>
+                        <div class="bench-pct" style="color:#ef4444">2.1%</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label">Industry Average</div>
+                        <div class="bench-bar-bg"><div class="bench-bar-fill" style="width:58%; background:#94a3b8;"><span>$98M</span></div></div>
+                        <div class="bench-pct" style="color:#64748b">3.5%</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label" style="font-weight:700; color:#1e3a5f">Meridian</div>
+                        <div class="bench-bar-bg"><div class="bench-bar-fill" style="width:67%; background:#1e3a5f;"><span>$112M</span></div></div>
+                        <div class="bench-pct" style="color:#1e3a5f">4.0%</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label">Top Quartile</div>
+                        <div class="bench-bar-bg"><div class="bench-bar-fill" style="width:87%; background:#10b981;"><span>$146M</span></div></div>
+                        <div class="bench-pct" style="color:#059669">5.2%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Findings -->
+        <div style="margin-bottom: 12px;">
+            <div class="section-title">Key Findings</div>
+            <div class="finding">
+                <div class="finding-icon red">!</div>
+                <div class="finding-text"><strong>Talent strategy is critically under-funded.</strong> "Attract & Retain Talent" receives just $420K (0.4% of IT budget) despite being a board-approved priority. With 18,500 employees in a competitive healthcare labor market, this gap poses material execution risk to every other pillar.</div>
+            </div>
+            <div class="finding">
+                <div class="finding-icon amber">!</div>
+                <div class="finding-text"><strong>Telehealth lacks infrastructure depth.</strong> Two clinical delivery projects ($3.4M) are well-funded, but neither addresses the connectivity and edge infrastructure needed to reach 50,000 additional rural patients. The board target requires infrastructure investment, not just application rollout.</div>
+            </div>
+            <div class="finding">
+                <div class="finding-icon amber">!</div>
+                <div class="finding-text"><strong>1 orphan project detected.</strong> "Mobile App for Clinicians" ($1.2M) is mapped to "Reduce Burnout" — not a board-approved priority. Either re-map to "Modernize Legacy EHR" or seek board endorsement for a new priority. No project should be funded without strategic traceability.</div>
+            </div>
+            <div class="finding">
+                <div class="finding-icon green">&check;</div>
+                <div class="finding-text"><strong>Transform allocation is aggressive and intentional.</strong> At 32% (vs. 20% industry norm), Meridian is signaling a serious modernization posture. Execution risk is elevated, but the portfolio is well-diversified across AI, cloud, and automation.</div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div>
+            <div class="section-title">Recommendations for Board Consideration</div>
+            <div class="rec-grid">
+                <div class="rec-card">
+                    <div class="rec-num">Recommendation 1</div>
+                    <div class="rec-title">Close the Talent Gap</div>
+                    <div class="rec-detail">Fund 3 new projects: AI-powered recruiting platform, learning management system, and employee experience analytics. Essential to support all other transformation initiatives.</div>
+                    <div class="rec-cost">Est. investment: $830K/yr</div>
+                </div>
+                <div class="rec-card">
+                    <div class="rec-num">Recommendation 2</div>
+                    <div class="rec-title">Add Rural Infrastructure</div>
+                    <div class="rec-detail">Commission a rural connectivity & edge compute project to support the 50K-patient telehealth expansion. Current projects deliver software but not the network reach needed for rural access.</div>
+                    <div class="rec-cost">Est. investment: $600K/yr</div>
+                </div>
+                <div class="rec-card">
+                    <div class="rec-num">Recommendation 3</div>
+                    <div class="rec-title">Resolve Orphan Project</div>
+                    <div class="rec-detail">Re-map the $1.2M "Mobile App for Clinicians" to the "Modernize Legacy EHR" pillar (clinician workflow improvement) or formally adopt "Reduce Burnout" as an 8th strategic priority.</div>
+                    <div class="rec-cost">No additional cost &mdash; governance action</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span>Meridian Health Systems &bull; IT Strategy Alignment Report &bull; FY2026</span>
+            <span>Prepared by Office of the CIO &bull; Board Confidential &bull; Page 1 of 1</span>
+        </div>
+    </div>
+</body>
+</html>

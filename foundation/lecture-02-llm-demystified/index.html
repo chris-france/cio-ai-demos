@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Model Comparison Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .tier-local { border-left: 4px solid #10b981; }
+        .tier-cloud { border-left: 4px solid #3b82f6; }
+        .badge-local { background: #ecfdf5; color: #065f46; }
+        .badge-cloud { background: #eff6ff; color: #1e40af; }
+        .matrix-yes { background: #d1fae5; color: #065f46; }
+        .matrix-no { background: #fee2e2; color: #991b1b; }
+        .matrix-maybe { background: #fef3c7; color: #92400e; }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #1d4ed8; font-weight: 700; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #6b7280; }
+        .tab-inactive:hover { color: #374151; border-color: #d1d5db; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<div class="max-w-7xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-2">
+        <div class="flex items-center gap-3 mb-1">
+            <div class="w-2 h-10 bg-gradient-to-b from-emerald-500 to-blue-600 rounded-full"></div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">LLM Model Comparison Dashboard</h1>
+        </div>
+        <p class="text-sm text-gray-500 ml-5">CIO AI Curriculum — Lecture 02: LLMs Demystified</p>
+    </div>
+
+    <!-- Key Insight Banner -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-6 mb-8 mt-6 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+        <div class="absolute bottom-0 right-20 w-24 h-24 bg-white/5 rounded-full translate-y-8"></div>
+        <div class="relative">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="text-3xl font-bold">KEY INSIGHT</span>
+            </div>
+            <p class="text-blue-100 leading-relaxed max-w-4xl text-lg">
+                <strong class="text-white">You don't need the biggest model for every task.</strong>
+                A 1-billion-parameter model running free on your laptop can handle simple classification just as well as a cloud API that costs $20/month.
+                Match the model to the task — save your cloud budget for what actually needs it.
+            </p>
+        </div>
+    </div>
+
+    <!-- Size Tier Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Small -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm tier-local">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold badge-local mb-2">LOCAL / FREE</span>
+                    <h3 class="text-lg font-bold text-gray-900">Small Models</h3>
+                    <p class="text-sm text-gray-500">1B parameters</p>
+                </div>
+                <div class="text-4xl font-extrabold text-emerald-500">1B</div>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Model</span><span class="font-semibold">Llama 3.2:1b</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Speed</span><span class="font-semibold text-emerald-600">Very Fast</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Quality</span><span class="font-semibold">Basic</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">RAM Required</span><span class="font-semibold">2 GB</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Disk Size</span><span class="font-semibold">1.3 GB</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Cost</span><span class="font-bold text-emerald-600">$0 / month</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Data Privacy</span><span class="font-semibold text-emerald-600">Data stays local</span></div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500"><strong>Best for:</strong> Simple summaries, Q&A, classification, drafts</p>
+            </div>
+        </div>
+
+        <!-- Medium -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm tier-local">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold badge-local mb-2">LOCAL / FREE</span>
+                    <h3 class="text-lg font-bold text-gray-900">Medium Models</h3>
+                    <p class="text-sm text-gray-500">3B–8B parameters</p>
+                </div>
+                <div class="text-4xl font-extrabold text-emerald-500">3-8B</div>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Models</span><span class="font-semibold">Llama 3.2:3b, 3.1:8b</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Speed</span><span class="font-semibold text-blue-600">Fast to Moderate</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Quality</span><span class="font-semibold">Good to Very Good</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">RAM Required</span><span class="font-semibold">4–8 GB</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Disk Size</span><span class="font-semibold">2.0–4.7 GB</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Cost</span><span class="font-bold text-emerald-600">$0 / month</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Data Privacy</span><span class="font-semibold text-emerald-600">Data stays local</span></div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500"><strong>Best for:</strong> Business writing, analysis, complex reasoning, planning</p>
+            </div>
+        </div>
+
+        <!-- Large / Cloud -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm tier-cloud">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold badge-cloud mb-2">CLOUD / PAID</span>
+                    <h3 class="text-lg font-bold text-gray-900">Large Models</h3>
+                    <p class="text-sm text-gray-500">70B+ parameters</p>
+                </div>
+                <div class="text-4xl font-extrabold text-blue-500">70B+</div>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Models</span><span class="font-semibold">Claude, GPT-4o</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Speed</span><span class="font-semibold text-amber-600">Moderate to Fast</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Quality</span><span class="font-semibold">Excellent to Best</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">RAM Required</span><span class="font-semibold">N/A (cloud)</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Disk Size</span><span class="font-semibold">N/A (cloud)</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Cost</span><span class="font-bold text-blue-600">$20 / month</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Data Privacy</span><span class="font-semibold text-amber-600">Data leaves building</span></div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500"><strong>Best for:</strong> Complex analysis, coding, strategy, high-stakes decisions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+        <!-- Speed Chart -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Speed Comparison</h2>
+            <p class="text-sm text-gray-500 mb-4">Estimated tokens per second (higher is better)</p>
+            <div style="height: 280px;"><canvas id="speedChart"></canvas></div>
+        </div>
+
+        <!-- Quality Chart -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Quality Score</h2>
+            <p class="text-sm text-gray-500 mb-4">Relative output quality (0–100 scale)</p>
+            <div style="height: 280px;"><canvas id="qualityChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Resource Usage Chart -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Resource Requirements</h2>
+        <p class="text-sm text-gray-500 mb-4">RAM and disk usage for local models — cloud models require no local resources</p>
+        <div style="height: 300px;"><canvas id="resourceChart"></canvas></div>
+    </div>
+
+    <!-- Response Comparison -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Response Comparison — Same Prompt, Different Models</h2>
+        <p class="text-sm text-gray-500 mb-4">Prompt: "Summarize the key risks of migrating to a cloud-based ERP system in 3 bullet points."</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Small model response -->
+            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold badge-local">1B LOCAL</span>
+                    <span class="text-xs text-gray-400">~0.8 seconds</span>
+                </div>
+                <div class="text-sm text-gray-700 space-y-2">
+                    <p>- Cloud ERP has risks with data</p>
+                    <p>- Migration can be hard and take time</p>
+                    <p>- There are costs to consider</p>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400">Quality:</span>
+                        <div class="flex-1 bg-gray-200 rounded-full h-2"><div class="bg-amber-400 h-2 rounded-full" style="width:35%"></div></div>
+                        <span class="text-xs font-bold text-amber-600">35/100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medium model response -->
+            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold badge-local">3B LOCAL</span>
+                    <span class="text-xs text-gray-400">~1.5 seconds</span>
+                </div>
+                <div class="text-sm text-gray-700 space-y-2">
+                    <p>- <strong>Data security:</strong> Sensitive financial and HR data moves off-premises, increasing exposure to breaches and compliance gaps</p>
+                    <p>- <strong>Vendor lock-in:</strong> Proprietary APIs and data formats make it costly to switch providers later</p>
+                    <p>- <strong>Integration complexity:</strong> Legacy systems may not connect cleanly, causing data sync issues during transition</p>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400">Quality:</span>
+                        <div class="flex-1 bg-gray-200 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full" style="width:72%"></div></div>
+                        <span class="text-xs font-bold text-blue-600">72/100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cloud model response -->
+            <div class="border border-blue-200 rounded-lg p-4 bg-blue-50/30">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold badge-cloud">CLAUDE (CLOUD)</span>
+                    <span class="text-xs text-gray-400">~2.1 seconds</span>
+                </div>
+                <div class="text-sm text-gray-700 space-y-2">
+                    <p>- <strong>Data sovereignty and compliance:</strong> Moving ERP data to third-party cloud infrastructure creates regulatory exposure (GDPR, SOX, HIPAA), requires contractual DPA agreements, and shifts your security perimeter beyond your direct control</p>
+                    <p>- <strong>Vendor dependency and exit costs:</strong> Deep integration with a single cloud ERP vendor creates switching costs of 2-3x the original implementation; ensure contractual data portability clauses before signing</p>
+                    <p>- <strong>Organizational change management:</strong> The technical migration is typically 30% of the effort — the remaining 70% is retraining staff, redesigning workflows, and managing the 6-18 month productivity dip during transition</p>
+                </div>
+                <div class="mt-3 pt-3 border-t border-blue-200">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400">Quality:</span>
+                        <div class="flex-1 bg-gray-200 rounded-full h-2"><div class="bg-emerald-500 h-2 rounded-full" style="width:95%"></div></div>
+                        <span class="text-xs font-bold text-emerald-600">95/100</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p class="text-sm text-amber-800">
+                <strong>Notice:</strong> For simple classification tasks (yes/no, categorize, extract a date), the 1B model scores just as well as the cloud model.
+                The quality gap only matters for nuanced, multi-step reasoning. <strong>Match the model to the task complexity.</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Cost Analysis -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Cost Analysis — Local vs Cloud</h2>
+        <p class="text-sm text-gray-500 mb-4">What it costs to run 1 million tokens through each model</p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div style="height: 300px;"><canvas id="costChart"></canvas></div>
+            <div class="space-y-4">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                    <h3 class="font-bold text-emerald-800 text-sm mb-2">Local Models (Free)</h3>
+                    <ul class="text-sm text-emerald-700 space-y-1">
+                        <li>$0 per million tokens — you already own the hardware</li>
+                        <li>No API keys, no rate limits, no usage tracking</li>
+                        <li>Data never leaves your machine or network</li>
+                        <li>One-time download, runs offline forever</li>
+                    </ul>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="font-bold text-blue-800 text-sm mb-2">Cloud APIs (Subscription or Per-Token)</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>$20/month subscription (ChatGPT Plus, Claude Pro)</li>
+                        <li>API pricing: $3–$15 per million input tokens</li>
+                        <li>$15–$75 per million output tokens</li>
+                        <li>Best quality available, but data leaves your control</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-bold text-gray-700 text-sm mb-2">Annual Cost for 100 Users</h3>
+                    <div class="grid grid-cols-2 gap-4 mt-2">
+                        <div>
+                            <p class="text-2xl font-extrabold text-emerald-600">$0</p>
+                            <p class="text-xs text-gray-500">Local models (Ollama)</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-extrabold text-blue-600">$24,000</p>
+                            <p class="text-xs text-gray-500">Cloud subscriptions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decision Matrix -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Decision Matrix — When to Use Local vs Cloud</h2>
+        <p class="text-sm text-gray-500 mb-4">Match the model tier to the task. Most enterprise workloads fall in the green zone.</p>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600 border-b border-gray-200">Task Type</th>
+                        <th class="text-center px-4 py-3 font-semibold text-gray-600 border-b border-gray-200">1B Local</th>
+                        <th class="text-center px-4 py-3 font-semibold text-gray-600 border-b border-gray-200">3B–8B Local</th>
+                        <th class="text-center px-4 py-3 font-semibold text-gray-600 border-b border-gray-200">70B+ Cloud</th>
+                        <th class="text-left px-4 py-3 font-semibold text-gray-600 border-b border-gray-200">CIO Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody id="matrixBody" class="divide-y divide-gray-100">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tabbed Prompt Playground -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Interactive: Try Different Tasks</h2>
+        <p class="text-sm text-gray-500 mb-4">Select a task type to see which model is the best fit</p>
+
+        <div class="flex gap-1 border-b border-gray-200 mb-6">
+            <button class="tab-btn tab-active px-4 py-2 text-sm transition-all" data-tab="classify">Classification</button>
+            <button class="tab-btn tab-inactive px-4 py-2 text-sm transition-all" data-tab="summarize">Summarization</button>
+            <button class="tab-btn tab-inactive px-4 py-2 text-sm transition-all" data-tab="analyze">Complex Analysis</button>
+            <button class="tab-btn tab-inactive px-4 py-2 text-sm transition-all" data-tab="code">Code Generation</button>
+        </div>
+
+        <div id="tab-classify" class="tab-panel fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs font-bold text-gray-400 mb-2">PROMPT</p>
+                    <p class="text-sm text-gray-700 italic">"Is this email spam or not spam: 'Congratulations! You've won a free iPhone...'"</p>
+                </div>
+                <div class="bg-emerald-50 rounded-lg p-4 border-2 border-emerald-300">
+                    <p class="text-xs font-bold text-emerald-600 mb-2">BEST FIT: 1B LOCAL</p>
+                    <p class="text-sm text-gray-700">Result: <strong>"Spam"</strong> — Correct. Simple binary classification works perfectly on the smallest model. Zero cost, zero latency, zero data exposure.</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs font-bold text-gray-400 mb-2">WHY NOT CLOUD?</p>
+                    <p class="text-sm text-gray-500">Cloud gives the same answer but costs money and sends your email content to a third party. For classification, local is the smart choice.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-summarize" class="tab-panel hidden fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs font-bold text-gray-400 mb-2">PROMPT</p>
+                    <p class="text-sm text-gray-700 italic">"Summarize this 10-page contract into 5 key points for the executive team."</p>
+                </div>
+                <div class="bg-emerald-50 rounded-lg p-4 border-2 border-emerald-300">
+                    <p class="text-xs font-bold text-emerald-600 mb-2">BEST FIT: 3B–8B LOCAL</p>
+                    <p class="text-sm text-gray-700">The 3B model produces clean, structured summaries. The 8B model adds better nuance. Both run locally — your contract text never leaves the building.</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs font-bold text-gray-400 mb-2">WHY NOT 1B?</p>
+                    <p class="text-sm text-gray-500">The 1B model misses context and produces vague bullets. For multi-page documents, you need at least 3B parameters to capture the key details.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-analyze" class="tab-panel hidden fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs font-bold text-gray-400 mb-2">PROMPT</p>
+                    <p class="text-sm text-gray-700 italic">"Analyze our Q3 financials, identify anomalies, compare to industry benchmarks, and recommend 3 strategic adjustments with risk assessments."</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-300">
+                    <p class="text-xs font-bold text-blue-600 mb-2">BEST FIT: CLOUD (CLAUDE / GPT-4)</p>
+                    <p class="text-sm text-gray-700">Multi-step reasoning with industry knowledge requires the largest models. The cloud model spots trends the local models miss entirely.</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs font-bold text-gray-400 mb-2">WHEN TO USE CLOUD</p>
+                    <p class="text-sm text-gray-500">High-stakes decisions, multi-step reasoning, and tasks requiring broad knowledge. Worth the $20/month when the output informs a $500K+ decision.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-code" class="tab-panel hidden fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs font-bold text-gray-400 mb-2">PROMPT</p>
+                    <p class="text-sm text-gray-700 italic">"Write a Python script that connects to our PostgreSQL database, pulls the last 30 days of transactions, and generates a PDF report."</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-300">
+                    <p class="text-xs font-bold text-blue-600 mb-2">BEST FIT: CLOUD OR 8B LOCAL</p>
+                    <p class="text-sm text-gray-700">The 8B model writes functional code. Cloud models write production-quality code with error handling, logging, and edge cases covered.</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs font-bold text-gray-400 mb-2">THE TRADEOFF</p>
+                    <p class="text-sm text-gray-500">For internal scripts — use 8B local (free, private). For customer-facing code or complex integrations — use cloud. The $0 vs $20 question depends on who sees the output.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="bg-gray-900 text-white rounded-xl p-8 mb-8">
+        <h2 class="text-xl font-bold mb-4">CIO Takeaways</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <div class="text-3xl font-extrabold text-emerald-400 mb-2">80%</div>
+                <p class="text-sm text-gray-300">of enterprise AI tasks can run on free local models — classification, summarization, data extraction, drafting</p>
+            </div>
+            <div>
+                <div class="text-3xl font-extrabold text-blue-400 mb-2">$0</div>
+                <p class="text-sm text-gray-300">cost to run local models with Ollama — no API keys, no subscriptions, no data leaving your network</p>
+            </div>
+            <div>
+                <div class="text-3xl font-extrabold text-amber-400 mb-2">20%</div>
+                <p class="text-sm text-gray-300">of tasks truly need cloud models — complex reasoning, multi-step analysis, and high-stakes strategic decisions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Foundation Module — Built with Tailwind CSS & Chart.js</p>
+</div>
+
+<script>
+// Model data
+const models = [
+    { name: "Llama 3.2:1b", params: "1B", speed: 120, quality: 35, ram: 2, disk: 1.3, cost: 0, type: "local" },
+    { name: "Llama 3.2:3b", params: "3B", speed: 80, quality: 62, ram: 4, disk: 2.0, cost: 0, type: "local" },
+    { name: "Llama 3.1:8b", params: "8B", speed: 45, quality: 78, ram: 8, disk: 4.7, cost: 0, type: "local" },
+    { name: "Llama 3.1:70b", params: "70B", speed: 12, quality: 90, ram: 48, disk: 40, cost: 0, type: "local" },
+    { name: "Claude Sonnet", params: "Cloud", speed: 90, quality: 92, ram: 0, disk: 0, cost: 20, type: "cloud" },
+    { name: "Claude Opus", params: "Cloud", speed: 40, quality: 97, ram: 0, disk: 0, cost: 20, type: "cloud" },
+    { name: "GPT-4o", params: "Cloud", speed: 85, quality: 93, ram: 0, disk: 0, cost: 20, type: "cloud" }
+];
+
+const localColor = "#10b981";
+const cloudColor = "#3b82f6";
+const getColor = m => m.type === "local" ? localColor : cloudColor;
+const getColorAlpha = m => m.type === "local" ? "rgba(16, 185, 129, 0.7)" : "rgba(59, 130, 246, 0.7)";
+
+// Speed Chart
+new Chart(document.getElementById("speedChart"), {
+    type: "bar",
+    data: {
+        labels: models.map(m => m.name),
+        datasets: [{
+            label: "Tokens/sec",
+            data: models.map(m => m.speed),
+            backgroundColor: models.map(m => getColorAlpha(m)),
+            borderColor: models.map(m => getColor(m)),
+            borderWidth: 2,
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: "Tokens / second", font: { size: 12, weight: "600" } }, grid: { color: "#f3f4f6" } },
+            x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+        }
+    }
+});
+
+// Quality Chart
+new Chart(document.getElementById("qualityChart"), {
+    type: "bar",
+    data: {
+        labels: models.map(m => m.name),
+        datasets: [{
+            label: "Quality Score",
+            data: models.map(m => m.quality),
+            backgroundColor: models.map(m => getColorAlpha(m)),
+            borderColor: models.map(m => getColor(m)),
+            borderWidth: 2,
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, max: 100, title: { display: true, text: "Quality Score (0-100)", font: { size: 12, weight: "600" } }, grid: { color: "#f3f4f6" } },
+            x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+        }
+    }
+});
+
+// Resource Chart
+const localModels = models.filter(m => m.type === "local");
+new Chart(document.getElementById("resourceChart"), {
+    type: "bar",
+    data: {
+        labels: localModels.map(m => m.name),
+        datasets: [
+            {
+                label: "RAM Required (GB)",
+                data: localModels.map(m => m.ram),
+                backgroundColor: "rgba(245, 158, 11, 0.7)",
+                borderColor: "#f59e0b",
+                borderWidth: 2,
+                borderRadius: 6
+            },
+            {
+                label: "Disk Size (GB)",
+                data: localModels.map(m => m.disk),
+                backgroundColor: "rgba(139, 92, 246, 0.7)",
+                borderColor: "#8b5cf6",
+                borderWidth: 2,
+                borderRadius: 6
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "top", labels: { font: { size: 12 } } } },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: "Gigabytes", font: { size: 12, weight: "600" } }, grid: { color: "#f3f4f6" } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Cost Chart
+new Chart(document.getElementById("costChart"), {
+    type: "bar",
+    data: {
+        labels: ["Local Models\n(Ollama)", "Claude Pro\n(Subscription)", "GPT-4o API\n(Per Token)", "Claude API\n(Per Token)"],
+        datasets: [{
+            label: "Cost per 1M tokens ($)",
+            data: [0, 0.67, 5.00, 3.00],
+            backgroundColor: [
+                "rgba(16, 185, 129, 0.7)",
+                "rgba(59, 130, 246, 0.7)",
+                "rgba(59, 130, 246, 0.5)",
+                "rgba(59, 130, 246, 0.5)"
+            ],
+            borderColor: ["#10b981", "#3b82f6", "#3b82f6", "#3b82f6"],
+            borderWidth: 2,
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ctx.raw === 0 ? "Free" : `$${ctx.raw.toFixed(2)} per 1M tokens`
+                }
+            }
+        },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: "Cost per 1M Tokens ($)", font: { size: 12, weight: "600" } }, grid: { color: "#f3f4f6" } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Decision Matrix
+const matrixData = [
+    { task: "Email classification (spam/not spam)", small: "yes", medium: "yes", large: "yes", rec: "Use 1B local — identical accuracy, zero cost, no data exposure" },
+    { task: "Document summarization (1-5 pages)", small: "no", medium: "yes", large: "yes", rec: "Use 3B local — good quality, keeps documents private" },
+    { task: "Contract review and risk extraction", small: "no", medium: "maybe", large: "yes", rec: "Use 8B local for standard contracts; cloud for complex multi-party agreements" },
+    { task: "Customer sentiment analysis", small: "yes", medium: "yes", large: "yes", rec: "Use 1B local — sentiment is simple classification, run it on-device" },
+    { task: "Business writing (emails, memos)", small: "no", medium: "yes", large: "yes", rec: "Use 3B local — professional quality, keeps drafts confidential" },
+    { task: "Financial analysis with benchmarks", small: "no", medium: "no", large: "yes", rec: "Use cloud — requires broad knowledge and multi-step reasoning" },
+    { task: "Code generation (scripts, automation)", small: "no", medium: "maybe", large: "yes", rec: "8B local for simple scripts; cloud for production code" },
+    { task: "Strategic planning and scenario modeling", small: "no", medium: "no", large: "yes", rec: "Use cloud — this is where you get ROI on the $20/month" },
+    { task: "Data extraction from forms/invoices", small: "yes", medium: "yes", large: "yes", rec: "Use 1B local — structured extraction is a strength of small models" },
+    { task: "Meeting notes to action items", small: "no", medium: "yes", large: "yes", rec: "Use 3B local — fast, free, and your meeting content stays private" }
+];
+
+const badgeMap = { yes: "matrix-yes", no: "matrix-no", maybe: "matrix-maybe" };
+const labelMap = { yes: "Works well", no: "Not suitable", maybe: "Acceptable" };
+
+document.getElementById("matrixBody").innerHTML = matrixData.map(row => `
+    <tr class="hover:bg-gray-50 transition-colors">
+        <td class="px-4 py-3 font-medium text-gray-900">${row.task}</td>
+        <td class="px-4 py-3 text-center"><span class="inline-block px-2 py-0.5 rounded text-xs font-bold ${badgeMap[row.small]}">${labelMap[row.small]}</span></td>
+        <td class="px-4 py-3 text-center"><span class="inline-block px-2 py-0.5 rounded text-xs font-bold ${badgeMap[row.medium]}">${labelMap[row.medium]}</span></td>
+        <td class="px-4 py-3 text-center"><span class="inline-block px-2 py-0.5 rounded text-xs font-bold ${badgeMap[row.large]}">${labelMap[row.large]}</span></td>
+        <td class="px-4 py-3 text-gray-600 text-xs">${row.rec}</td>
+    </tr>
+`).join("");
+
+// Tab switching
+document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => { b.className = "tab-btn tab-inactive px-4 py-2 text-sm transition-all"; });
+        btn.className = "tab-btn tab-active px-4 py-2 text-sm transition-all";
+        document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("hidden"));
+        const panel = document.getElementById("tab-" + btn.dataset.tab);
+        panel.classList.remove("hidden");
+        panel.classList.add("fade-in");
+    });
+});
+</script>
+
+</body>
+</html>
