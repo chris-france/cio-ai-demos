@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Circuit Discovery Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}.node{cursor:pointer;}.sortable{cursor:pointer;user-select:none;}.sortable:hover{background:#f1f5f9;}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">AI Circuit Discovery Dashboard</h1>
+                <p class="text-blue-300 text-sm mt-1">Network Scanner &amp; Topology Mapper</p>
+            </div>
+            <div class="text-right text-sm">
+                <div class="text-blue-300">Scan Date</div>
+                <div class="font-semibold text-lg">March 28, 2026</div>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Discovery Results &mdash; Known vs Found</h3>
+                <div style="height:300px"><canvas id="compareChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Shadow Circuits by Site</h3>
+                <div style="height:300px"><canvas id="shadowChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-700">Circuit Reconciliation</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3">Discovered Circuit</th>
+                            <th class="px-4 py-3">Site</th>
+                            <th class="px-4 py-3">Carrier Detected</th>
+                            <th class="px-4 py-3">Bandwidth</th>
+                            <th class="px-4 py-3">Est. Monthly Cost</th>
+                            <th class="px-4 py-3">In Inventory?</th>
+                            <th class="px-4 py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reconBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-amber-800 mb-3">Shadow Circuit Alerts</h3>
+            <div id="shadowAlerts" class="space-y-2"></div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            AI Circuit Discovery &mdash; Course 18: IT Telecom &amp; Circuit Management &mdash; Lecture 2 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const DISCOVERED = [
+    { circuit: 'DISC-001', site: 'HQ - New York', carrier: 'AT&T', bw: '500 Mbps', cost: 4200, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-002', site: 'HQ - New York', carrier: 'Verizon', bw: '1 Gbps', cost: 3800, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-003', site: 'HQ - New York', carrier: 'Cogent', bw: '100 Mbps', cost: 850, inInventory: false, status: 'Shadow' },
+    { circuit: 'DISC-004', site: 'Chicago Office', carrier: 'AT&T', bw: '200 Mbps', cost: 2400, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-005', site: 'Chicago Office', carrier: 'Comcast', bw: '500 Mbps', cost: 450, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-006', site: 'Dallas Data Center', carrier: 'Lumen', bw: '10 Gbps', cost: 8500, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-007', site: 'Dallas Data Center', carrier: 'Zayo', bw: '1 Gbps', cost: 5200, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-008', site: 'Dallas Data Center', carrier: 'Unknown', bw: '200 Mbps', cost: 1400, inInventory: false, status: 'Shadow' },
+    { circuit: 'DISC-009', site: 'San Francisco', carrier: 'AT&T', bw: '500 Mbps', cost: 4400, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-010', site: 'San Francisco', carrier: 'Sonic', bw: '1 Gbps', cost: 600, inInventory: false, status: 'Shadow' },
+    { circuit: 'DISC-011', site: 'Boston Office', carrier: 'Comcast', bw: '1 Gbps', cost: 650, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-012', site: 'Boston Office', carrier: 'Lumen', bw: '200 Mbps', cost: 2600, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-013', site: 'Atlanta Branch', carrier: 'AT&T', bw: '500 Mbps', cost: 2800, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-014', site: 'Denver Office', carrier: 'Zayo', bw: '1 Gbps', cost: 3200, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-015', site: 'Denver Office', carrier: 'CenturyLink', bw: '50 Mbps', cost: 380, inInventory: false, status: 'Shadow' },
+    { circuit: 'DISC-016', site: 'Seattle Office', carrier: 'Lumen', bw: '500 Mbps', cost: 4100, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-017', site: 'Miami Branch', carrier: 'AT&T', bw: '100 Mbps', cost: 1800, inInventory: true, status: 'Matched' },
+    { circuit: 'DISC-018', site: 'Miami Branch', carrier: 'FPL FiberNet', bw: '100 Mbps', cost: 550, inInventory: false, status: 'Shadow' },
+];
+
+const shadows = DISCOVERED.filter(d => d.status === 'Shadow');
+const matched = DISCOVERED.filter(d => d.status === 'Matched');
+const totalShadowCost = shadows.reduce((s,d) => s + d.cost, 0);
+
+const KPI_DATA = [
+    { label: 'In Inventory', value: '22', icon: '&#128203;', color: '#3b82f6' },
+    { label: 'Discovered', value: DISCOVERED.length, icon: '&#128269;', color: '#8b5cf6' },
+    { label: 'Shadow Circuits', value: shadows.length, icon: '&#9888;', color: '#ef4444' },
+    { label: 'Shadow Cost/Mo', value: '$' + totalShadowCost.toLocaleString(), icon: '&#128176;', color: '#f59e0b' },
+    { label: 'Coverage', value: '94%', icon: '&#9989;', color: '#10b981' },
+];
+
+document.getElementById('kpiCards').innerHTML = KPI_DATA.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <div class="flex items-center justify-between mb-2"><span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span><span class="text-xl">${k.icon}</span></div>
+        <div class="text-3xl font-extrabold" style="color:${k.color}">${k.value}</div>
+    </div>`
+).join('');
+
+new Chart(document.getElementById('compareChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Known in Inventory', 'Discovered on Network', 'Shadow (Untracked)'],
+        datasets: [{ data: [22, DISCOVERED.length, shadows.length], backgroundColor: ['#3b82f6','#8b5cf6','#ef4444'], borderRadius: 6 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+});
+
+const shadowSites = {};
+shadows.forEach(s => { shadowSites[s.site] = (shadowSites[s.site] || 0) + 1; });
+new Chart(document.getElementById('shadowChart'), {
+    type: 'bar',
+    data: { labels: Object.keys(shadowSites), datasets: [{ label: 'Shadow Circuits', data: Object.values(shadowSites), backgroundColor: '#ef4444', borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+});
+
+document.getElementById('reconBody').innerHTML = DISCOVERED.map(d => {
+    const badge = d.status === 'Shadow' ? '<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-semibold">Shadow</span>' : '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">Matched</span>';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${d.status==='Shadow'?'bg-red-50':''}">
+        <td class="px-4 py-3 font-mono text-xs">${d.circuit}</td><td class="px-4 py-3">${d.site}</td>
+        <td class="px-4 py-3">${d.carrier}</td><td class="px-4 py-3">${d.bw}</td>
+        <td class="px-4 py-3 font-semibold">$${d.cost.toLocaleString()}</td>
+        <td class="px-4 py-3">${d.inInventory?'Yes':'No'}</td><td class="px-4 py-3">${badge}</td></tr>`;
+}).join('');
+
+document.getElementById('shadowAlerts').innerHTML = shadows.map(s =>
+    `<div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-amber-200">
+        <span class="text-amber-600 text-lg">&#9888;</span>
+        <div><span class="font-semibold text-amber-900">${s.site}</span> &mdash; ${s.carrier} ${s.bw} &mdash; <span class="font-semibold text-red-600">$${s.cost}/mo untracked</span></div>
+    </div>`
+).join('');
+</script>
+</body>
+</html>

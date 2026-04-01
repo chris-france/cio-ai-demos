@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BYOD Compliance Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto"><h1 class="text-2xl font-extrabold">BYOD Compliance Dashboard</h1>
+        <p class="text-slate-300 text-sm mt-1">Policy Compliance Checker &amp; Risk Assessment</p></div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Compliance Status</h3>
+                <div style="height:280px"><canvas id="statusChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Policy Violations by Category</h3>
+                <div style="height:280px"><canvas id="violationChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">BYOD Device Compliance</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Device</th><th class="px-4 py-3">Owner</th><th class="px-4 py-3">Type</th>
+                        <th class="px-4 py-3">OS</th><th class="px-4 py-3">Encrypted</th><th class="px-4 py-3">MDM</th>
+                        <th class="px-4 py-3">Score</th><th class="px-4 py-3">Risk</th>
+                    </tr></thead>
+                    <tbody id="byodBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-blue-800 mb-3">BYOD vs Company-Owned Cost Comparison</h3>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white rounded-lg p-4 border border-blue-200 text-center"><div class="text-xs text-gray-500">BYOD Program (42 devices)</div><div class="text-2xl font-bold text-blue-700 mt-1">$2,100/mo</div><div class="text-xs text-gray-500">$50/device stipend</div></div>
+                <div class="bg-white rounded-lg p-4 border border-blue-200 text-center"><div class="text-xs text-gray-500">Company-Owned Equivalent</div><div class="text-2xl font-bold text-red-600 mt-1">$5,250/mo</div><div class="text-xs text-gray-500">$125/device TCO</div></div>
+                <div class="bg-white rounded-lg p-4 border border-blue-200 text-center"><div class="text-xs text-gray-500">Annual Savings</div><div class="text-2xl font-bold text-green-700 mt-1">$37,800</div><div class="text-xs text-gray-500">If risk is managed</div></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">BYOD Compliance &mdash; Course 19 &mdash; Lecture 5 &mdash; Confidential</footer>
+    </main>
+<script>
+const BYOD = [
+    { device: 'iPhone 15 Pro', owner: 'Sarah Chen', type: 'Mobile', os: 'iOS 19.3', encrypted: true, mdm: true, score: 95, risk: 'Low' },
+    { device: 'Samsung S24', owner: 'Marcus Johnson', type: 'Mobile', os: 'Android 15', encrypted: true, mdm: true, score: 90, risk: 'Low' },
+    { device: 'iPad Pro', owner: 'Priya Patel', type: 'Tablet', os: 'iPadOS 19', encrypted: true, mdm: true, score: 92, risk: 'Low' },
+    { device: 'MacBook Air M3', owner: 'James Wilson', type: 'Laptop', os: 'macOS 15.3', encrypted: true, mdm: false, score: 65, risk: 'Medium' },
+    { device: 'iPhone 13', owner: 'Ana Rodriguez', type: 'Mobile', os: 'iOS 17.4', encrypted: true, mdm: true, score: 72, risk: 'Medium' },
+    { device: 'Pixel 8', owner: 'David Kim', type: 'Mobile', os: 'Android 14', encrypted: true, mdm: false, score: 55, risk: 'High' },
+    { device: 'Samsung A54', owner: 'Tom Bradley', type: 'Mobile', os: 'Android 13', encrypted: false, mdm: false, score: 25, risk: 'Critical' },
+    { device: 'Dell XPS 13', owner: 'Lisa Nguyen', type: 'Laptop', os: 'Windows 11', encrypted: true, mdm: true, score: 88, risk: 'Low' },
+    { device: 'iPhone 14', owner: 'Chris Martinez', type: 'Mobile', os: 'iOS 18.2', encrypted: true, mdm: true, score: 85, risk: 'Low' },
+    { device: 'OnePlus 11', owner: 'Rachel Foster', type: 'Mobile', os: 'Android 13', encrypted: false, mdm: false, score: 20, risk: 'Critical' },
+];
+
+const compRate = Math.round(BYOD.filter(d=>d.score>=80).length/BYOD.length*100);
+const KPI = [
+    { label: 'BYOD Devices', value: '42', color: '#3b82f6' },
+    { label: 'Compliance Rate', value: compRate+'%', color: '#10b981' },
+    { label: 'Missing Encryption', value: BYOD.filter(d=>!d.encrypted).length, color: '#ef4444' },
+    { label: 'Outdated OS', value: BYOD.filter(d=>d.os.includes('13')||d.os.includes('17')).length, color: '#f59e0b' },
+    { label: 'MDM Enrolled', value: Math.round(BYOD.filter(d=>d.mdm).length/BYOD.length*100)+'%', color: '#8b5cf6' },
+];
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: { labels: ['Compliant','Partial','Non-Compliant'], datasets: [{ data: [5,3,2], backgroundColor: ['#10b981','#f59e0b','#ef4444'], borderWidth: 2, borderColor: '#fff' }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('violationChart'), {
+    type: 'bar',
+    data: { labels: ['No MDM','Outdated OS','No Encryption','Weak Password','Jailbroken'], datasets: [{ data: [4,3,2,1,0], backgroundColor: '#ef4444', borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+});
+
+document.getElementById('byodBody').innerHTML = BYOD.map(d => {
+    const yn = v => v ? '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">Y</span>' : '<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-semibold">N</span>';
+    const riskColor = d.risk==='Critical'?'bg-red-100 text-red-700':d.risk==='High'?'bg-amber-100 text-amber-700':d.risk==='Medium'?'bg-blue-100 text-blue-700':'bg-green-100 text-green-700';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${d.risk==='Critical'?'bg-red-50':''}">
+        <td class="px-4 py-3 font-medium">${d.device}</td><td class="px-4 py-3">${d.owner}</td><td class="px-4 py-3">${d.type}</td>
+        <td class="px-4 py-3">${d.os}</td><td class="px-4 py-3">${yn(d.encrypted)}</td><td class="px-4 py-3">${yn(d.mdm)}</td>
+        <td class="px-4 py-3 font-bold ${d.score>=80?'text-green-600':d.score>=60?'text-amber-600':'text-red-600'}">${d.score}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${riskColor} font-semibold">${d.risk}</span></td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

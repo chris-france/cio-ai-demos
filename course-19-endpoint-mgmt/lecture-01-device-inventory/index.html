@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Endpoint Inventory Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}.sortable{cursor:pointer;user-select:none;}.sortable:hover{background:#f1f5f9;}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div><h1 class="text-2xl font-extrabold">Endpoint Inventory Dashboard</h1>
+            <p class="text-slate-300 text-sm mt-1">Device Management &mdash; 200-Person Organization</p></div>
+            <div class="text-right text-sm"><div class="text-slate-300">Last Scan</div><div class="font-semibold text-lg">March 28, 2026</div></div>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Devices by Type</h3>
+                <div style="height:300px"><canvas id="typeChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">OS Distribution</h3>
+                <div style="height:300px"><canvas id="osChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-700">Device Inventory</h3>
+                <select id="filter" onchange="renderTable()" class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
+                    <option value="all">All Types</option><option value="Laptop">Laptop</option><option value="Desktop">Desktop</option>
+                    <option value="Mobile">Mobile</option><option value="Server">Server</option><option value="IoT">IoT</option>
+                </select>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 sortable" onclick="sortBy(0)">Hostname</th><th class="px-4 py-3 sortable" onclick="sortBy(1)">Type</th>
+                        <th class="px-4 py-3 sortable" onclick="sortBy(2)">OS</th><th class="px-4 py-3">Last Seen</th>
+                        <th class="px-4 py-3">Managed</th><th class="px-4 py-3">Compliant</th><th class="px-4 py-3">Encrypted</th>
+                    </tr></thead>
+                    <tbody id="deviceBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-red-50 border border-red-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-red-800 mb-3">Unmanaged Device Alerts</h3>
+            <div id="alerts" class="space-y-2"></div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Endpoint Inventory &mdash; Course 19: Endpoint &amp; Device Management &mdash; Lecture 1 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const DEVICES = [
+    { hostname: 'WS-NYC-001', type: 'Laptop', os: 'Windows 11 23H2', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'WS-NYC-002', type: 'Laptop', os: 'Windows 11 23H2', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'WS-NYC-003', type: 'Laptop', os: 'Windows 10 22H2', lastSeen: '2026-03-27', managed: true, compliant: false, encrypted: true },
+    { hostname: 'WS-CHI-001', type: 'Desktop', os: 'Windows 11 23H2', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'WS-CHI-002', type: 'Desktop', os: 'Windows 10 21H2', lastSeen: '2026-03-15', managed: true, compliant: false, encrypted: false },
+    { hostname: 'MAC-SF-001', type: 'Laptop', os: 'macOS 15.3', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'MAC-SF-002', type: 'Laptop', os: 'macOS 14.7', lastSeen: '2026-03-26', managed: true, compliant: false, encrypted: true },
+    { hostname: 'IPHONE-012', type: 'Mobile', os: 'iOS 19.3', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'IPHONE-034', type: 'Mobile', os: 'iOS 18.2', lastSeen: '2026-03-20', managed: false, compliant: false, encrypted: true },
+    { hostname: 'ANDROID-005', type: 'Mobile', os: 'Android 15', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'ANDROID-011', type: 'Mobile', os: 'Android 13', lastSeen: '2026-02-15', managed: false, compliant: false, encrypted: false },
+    { hostname: 'SRV-DC-001', type: 'Server', os: 'Windows Server 2022', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'SRV-DC-002', type: 'Server', os: 'RHEL 9.3', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'SRV-DC-003', type: 'Server', os: 'Windows Server 2016', lastSeen: '2026-03-28', managed: true, compliant: false, encrypted: true },
+    { hostname: 'IOT-CAM-01', type: 'IoT', os: 'Firmware 4.2', lastSeen: '2026-03-28', managed: false, compliant: false, encrypted: false },
+    { hostname: 'IOT-HVAC-01', type: 'IoT', os: 'Firmware 2.8', lastSeen: '2026-03-25', managed: false, compliant: false, encrypted: false },
+    { hostname: 'IOT-PRINT-01', type: 'IoT', os: 'Firmware 6.1', lastSeen: '2026-03-28', managed: false, compliant: false, encrypted: false },
+    { hostname: 'WS-BOS-001', type: 'Laptop', os: 'Windows 11 23H2', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'WS-ATL-001', type: 'Desktop', os: 'Windows 11 22H2', lastSeen: '2026-03-28', managed: true, compliant: true, encrypted: true },
+    { hostname: 'UNKNOWN-01', type: 'Laptop', os: 'Unknown', lastSeen: '2026-03-22', managed: false, compliant: false, encrypted: false },
+];
+
+const total = DEVICES.length;
+const managed = DEVICES.filter(d=>d.managed).length;
+const compliant = DEVICES.filter(d=>d.compliant).length;
+const outdated = DEVICES.filter(d=>d.os.includes('2016')||d.os.includes('21H2')||d.os.includes('Android 13')||d.os.includes('14.7')).length;
+const noEncrypt = DEVICES.filter(d=>!d.encrypted).length;
+
+const KPI = [
+    { label: 'Total Devices', value: total, color: '#3b82f6' },
+    { label: 'Managed', value: Math.round(managed/total*100)+'%', color: '#8b5cf6' },
+    { label: 'Compliant', value: Math.round(compliant/total*100)+'%', color: '#10b981' },
+    { label: 'Outdated OS', value: outdated, color: '#ef4444' },
+    { label: 'No Encryption', value: noEncrypt, color: '#f59e0b' },
+];
+
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+const typeCounts = {}; DEVICES.forEach(d => typeCounts[d.type]=(typeCounts[d.type]||0)+1);
+new Chart(document.getElementById('typeChart'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444'], borderWidth: 2, borderColor: '#fff' }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+});
+
+const osCounts = {}; DEVICES.forEach(d => { const os = d.os.split(' ')[0]; osCounts[os]=(osCounts[os]||0)+1; });
+new Chart(document.getElementById('osChart'), {
+    type: 'bar',
+    data: { labels: Object.keys(osCounts), datasets: [{ label: 'Devices', data: Object.values(osCounts), backgroundColor: ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#6366f1','#ec4899'], borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+let sortCol=-1, sortAsc=true;
+function sortBy(col){if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}renderTable();}
+
+function renderTable() {
+    const f = document.getElementById('filter').value;
+    let data = f==='all' ? [...DEVICES] : DEVICES.filter(d=>d.type===f);
+    if(sortCol>=0){const keys=['hostname','type','os'];data.sort((a,b)=>{const va=a[keys[sortCol]],vb=b[keys[sortCol]];return sortAsc?va.localeCompare(vb):vb.localeCompare(va);});}
+    document.getElementById('deviceBody').innerHTML = data.map(d => {
+        const yn = (v,good='Y') => v ? `<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">${good}</span>` : `<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-semibold">N</span>`;
+        return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${!d.managed?'bg-red-50':''}">
+            <td class="px-4 py-3 font-mono text-xs">${d.hostname}</td><td class="px-4 py-3">${d.type}</td>
+            <td class="px-4 py-3">${d.os}</td><td class="px-4 py-3">${d.lastSeen}</td>
+            <td class="px-4 py-3">${yn(d.managed)}</td><td class="px-4 py-3">${yn(d.compliant)}</td><td class="px-4 py-3">${yn(d.encrypted)}</td></tr>`;
+    }).join('');
+}
+
+document.getElementById('alerts').innerHTML = DEVICES.filter(d=>!d.managed).map(d =>
+    `<div class="bg-white rounded-lg p-3 border border-red-200">&#9888; <span class="font-semibold">${d.hostname}</span> (${d.type}) &mdash; ${d.os} &mdash; Last seen: ${d.lastSeen} &mdash; Not managed, not compliant${!d.encrypted?', no encryption':''}</div>`
+).join('');
+
+renderTable();
+</script>
+</body>
+</html>

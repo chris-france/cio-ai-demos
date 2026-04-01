@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Response Automation Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .scenario-card { transition: all 0.3s ease; cursor: pointer; }
+        .scenario-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .scenario-card.active { box-shadow: 0 0 0 3px rgba(99,102,241,0.4); }
+        .timeline-item { transition: all 0.4s ease; }
+        .timeline-item.completed { opacity: 1; }
+        .timeline-item.pending { opacity: 0.3; }
+        .timeline-item.active { opacity: 1; animation: itemPulse 1.5s ease-in-out infinite; }
+        @keyframes itemPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.3); } 50% { box-shadow: 0 0 0 8px rgba(59,130,246,0); } }
+        .sev-p1 { border-left: 4px solid #ef4444; }
+        .sev-p2 { border-left: 4px solid #f59e0b; }
+        .sev-p3 { border-left: 4px solid #3b82f6; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-gradient-to-r from-gray-900 via-slate-800 to-rose-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-400 text-sm font-medium tracking-wider uppercase">Course 4: AI Infrastructure Ops &mdash; Lecture 7 Demo</p>
+                    <h1 class="text-3xl font-bold mt-1">Incident Response Automation</h1>
+                    <p class="text-slate-300 text-sm mt-1">AI runs the playbook while you sleep &mdash; from detection to resolution</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-red-400">4h → 18m</p>
+                        <p class="text-xs text-slate-400">MTTR Improvement</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-green-400">93%</p>
+                        <p class="text-xs text-slate-400">Auto-Classified</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+        <!-- Scenario Cards -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Select an Incident Scenario</h2>
+            <p class="text-sm text-gray-500 mb-4">Click a scenario to watch the automated runbook execute</p>
+            <div class="grid grid-cols-3 gap-4" id="scenarioCards"></div>
+        </div>
+
+        <!-- Active Incident Banner -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6" id="incidentBanner" style="display:none;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900" id="incidentTitle">Incident Active</h2>
+                    <p class="text-sm text-gray-500" id="incidentMeta"></p>
+                </div>
+                <div class="flex gap-3">
+                    <div id="severityBadge"></div>
+                    <div id="statusBadge"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Runbook Timeline -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6" id="timelinePanel" style="display:none;">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Automated Runbook Execution</h2>
+            <div class="space-y-3" id="timelineItems"></div>
+        </div>
+
+        <!-- Resolution Summary -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6" id="resolutionPanel" style="display:none;">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Resolution Summary</h2>
+            <div id="resolutionContent"></div>
+        </div>
+
+        <!-- Metrics Comparison -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Manual vs AI-Automated Incident Response</h2>
+            <p class="text-sm text-gray-500 mb-4">Average metrics across P1-P3 incidents over 12 months</p>
+            <div class="h-72"><canvas id="metricsChart"></canvas></div>
+        </div>
+
+        <!-- Incident History -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Recent Incident History</h2>
+            <p class="text-sm text-gray-500 mb-4">Last 10 incidents with AI automation status</p>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b-2 border-gray-200">
+                        <th class="text-left py-3 px-3 font-semibold text-gray-600">Incident</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Severity</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Detected</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Resolved</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">MTTR</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">AI Actions</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Human Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTable"></tbody>
+            </table>
+        </div>
+
+        <div class="bg-gradient-to-r from-rose-50 to-red-50 border border-rose-200 rounded-xl p-6">
+            <h3 class="font-bold text-rose-900 text-lg">From War Room Chaos to Automated Precision</h3>
+            <p class="text-rose-800 mt-2">The average P1 incident used to take <strong>4 hours</strong> to resolve: 30 minutes to organize, 90 minutes to investigate, 60 minutes to fix, and another 60 minutes for verification and comms. With AI automation, the same incident resolves in <strong>18 minutes</strong> &mdash; because AI starts the playbook before anyone's phone rings.</p>
+        </div>
+    </div>
+
+<script>
+const SCENARIOS = [
+    {
+        id: 0, name: "Major Outage", icon: "🔴", severity: "P1",
+        desc: "Production API gateway down. All customer-facing services affected. Revenue impact: $8,000/minute.",
+        sevColor: "bg-red-100 text-red-700",
+        steps: [
+            { phase: "Detect", time: "00:00", action: "Synthetic monitor detects API gateway 503 errors. 12 endpoints failing simultaneously.", status: "auto", duration: "0s" },
+            { phase: "Classify", time: "00:03", action: "AI classifies as P1: customer-facing, revenue-impacting, multiple services affected. Severity confidence: 99%.", status: "auto", duration: "3s" },
+            { phase: "Notify", time: "00:05", action: "PagerDuty P1 alert to on-call SRE team. Slack #incident-war-room created. Status page updated to 'Investigating'.", status: "auto", duration: "2s" },
+            { phase: "Diagnose", time: "00:08", action: "AI correlates: API gateway pod restarting in loop. Last deploy: 4 min ago (v2.18.3). Config change detected in gateway routing rules.", status: "auto", duration: "3s" },
+            { phase: "Root Cause", time: "00:12", action: "Root cause identified: malformed regex in routing rule added in v2.18.3. Traffic matching '/api/v2/*' failing to route.", status: "auto", duration: "4s" },
+            { phase: "Remediate", time: "00:15", action: "Auto-rollback initiated: reverting gateway config to v2.18.2. Rolling restart of gateway pods.", status: "auto", duration: "3s" },
+            { phase: "Verify", time: "00:45", action: "All 12 endpoints returning 200. Error rate: 0%. Latency p99: 145ms (normal). Synthetic checks passing.", status: "auto", duration: "30s" },
+            { phase: "Communicate", time: "01:00", action: "Status page updated: 'Resolved'. Customer notification sent. Post-mortem draft generated with timeline.", status: "auto", duration: "15s" },
+            { phase: "Post-Mortem", time: "01:15", action: "AI-generated post-mortem: root cause, timeline, action items (add regex validation to CI pipeline). Assigned to team.", status: "auto", duration: "15s" }
+        ],
+        resolution: { ttd: "3s", ttr: "45s", total: "1m 15s", manualTotal: "3h 45m", impact: "$8K/min x 1.25min = $10K (vs $8K x 225min = $1.8M manual)", actions: 9, humanActions: 0 }
+    },
+    {
+        id: 1, name: "Security Breach", icon: "🔒", severity: "P1",
+        desc: "Anomalous login pattern detected. 4,000 failed attempts from 200+ IPs targeting admin portal.",
+        sevColor: "bg-red-100 text-red-700",
+        steps: [
+            { phase: "Detect", time: "00:00", action: "SIEM alert: 4,127 failed login attempts in 5 minutes to /admin from 214 unique IPs. Pattern: credential stuffing.", status: "auto", duration: "0s" },
+            { phase: "Classify", time: "00:02", action: "AI classifies as P1 Security: active credential stuffing attack. Cross-referenced with threat intel — IPs match known botnet.", status: "auto", duration: "2s" },
+            { phase: "Contain", time: "00:04", action: "WAF rule deployed: block all 214 source IPs. Rate limit /admin to 5 attempts/min per IP. Enable CAPTCHA on login.", status: "auto", duration: "2s" },
+            { phase: "Notify", time: "00:06", action: "Security team alerted (PagerDuty P1). CISO notified via SMS. Slack #security-incident created.", status: "auto", duration: "2s" },
+            { phase: "Investigate", time: "00:10", action: "AI analysis: 3 accounts had successful logins from attack IPs. Accounts: jsmith, admin_backup, svc_reporting.", status: "auto", duration: "4s" },
+            { phase: "Remediate", time: "00:14", action: "Force password reset on 3 compromised accounts. Revoke all active sessions. Enable MFA enforcement.", status: "human", duration: "4s (human approved)" },
+            { phase: "Sweep", time: "00:20", action: "Full audit: check lateral movement from compromised accounts. No privilege escalation detected. No data exfiltration.", status: "auto", duration: "6s" },
+            { phase: "Harden", time: "00:25", action: "Deployed: geo-blocking for admin portal (US-only). Added compromised credential check against HaveIBeenPwned database.", status: "auto", duration: "5s" },
+            { phase: "Report", time: "00:30", action: "Incident report generated: IOCs, compromised accounts, remediation steps, compliance notification drafted (if applicable).", status: "auto", duration: "5s" }
+        ],
+        resolution: { ttd: "instant", ttr: "14s containment / 30s full", total: "30 seconds", manualTotal: "4h+ (often days)", impact: "0 data exfiltrated (vs potential breach cost: $4.2M avg)", actions: 9, humanActions: 1 }
+    },
+    {
+        id: 2, name: "Data Corruption", icon: "💾", severity: "P2",
+        desc: "ETL pipeline writing malformed records. 12,000 orders affected in last 2 hours. Data integrity at risk.",
+        sevColor: "bg-amber-100 text-amber-700",
+        steps: [
+            { phase: "Detect", time: "00:00", action: "Data quality monitor: 12,247 records failing schema validation in orders table. Error rate jumped from 0.01% to 4.7%.", status: "auto", duration: "0s" },
+            { phase: "Classify", time: "00:03", action: "AI classifies as P2: data integrity issue, not customer-facing yet but will affect billing cycle in 6 hours.", status: "auto", duration: "3s" },
+            { phase: "Isolate", time: "00:05", action: "ETL pipeline paused. Downstream consumers (billing, reporting, analytics) quarantined from corrupted data range.", status: "auto", duration: "2s" },
+            { phase: "Notify", time: "00:07", action: "Data engineering team notified. Slack #data-incident created. Stakeholders (Finance, Ops) informed of billing delay.", status: "auto", duration: "2s" },
+            { phase: "Diagnose", time: "00:12", action: "Root cause: upstream API changed date format from ISO 8601 to Unix timestamp without notice. ETL parsing failed silently.", status: "auto", duration: "5s" },
+            { phase: "Fix Pipeline", time: "00:18", action: "ETL updated to handle both date formats. Schema validation added at ingestion layer. Deployed to staging for test.", status: "human", duration: "6s (human reviewed)" },
+            { phase: "Repair Data", time: "00:25", action: "AI-generated repair script: convert 12,247 malformed records. Backup taken first. Dry-run validated against 100 sample records.", status: "auto", duration: "7s" },
+            { phase: "Verify", time: "00:30", action: "All 12,247 records repaired. Schema validation: 100% pass. Downstream consumers unblocked. Billing cycle will proceed on time.", status: "auto", duration: "5s" },
+            { phase: "Prevent", time: "00:35", action: "Added contract tests for upstream API schema changes. Alert on any field format deviation. Post-mortem scheduled.", status: "auto", duration: "5s" }
+        ],
+        resolution: { ttd: "instant", ttr: "25s", total: "35 seconds", manualTotal: "6h (risk of missed billing cycle)", impact: "12,247 records repaired, billing on time (vs $340K delayed billing)", actions: 9, humanActions: 1 }
+    }
+];
+
+const HISTORY = [
+    { incident: "API Gateway Config Error", sev: "P1", detected: "Mar 24, 02:14", resolved: "Mar 24, 02:16", mttr: "2m", ai: 9, human: 0 },
+    { incident: "Credential Stuffing Attack", sev: "P1", detected: "Mar 22, 14:33", resolved: "Mar 22, 14:34", mttr: "1m", ai: 8, human: 1 },
+    { incident: "ETL Data Corruption", sev: "P2", detected: "Mar 20, 08:45", resolved: "Mar 20, 09:02", mttr: "17m", ai: 8, human: 1 },
+    { incident: "Redis Cache OOM", sev: "P2", detected: "Mar 18, 23:12", resolved: "Mar 18, 23:14", mttr: "2m", ai: 6, human: 0 },
+    { incident: "Certificate Renewal Failure", sev: "P3", detected: "Mar 16, 10:00", resolved: "Mar 16, 10:02", mttr: "2m", ai: 5, human: 0 },
+    { incident: "DNS Propagation Delay", sev: "P2", detected: "Mar 14, 16:22", resolved: "Mar 14, 16:45", mttr: "23m", ai: 4, human: 2 },
+    { incident: "Kubernetes Pod Eviction Storm", sev: "P2", detected: "Mar 12, 03:41", resolved: "Mar 12, 03:48", mttr: "7m", ai: 7, human: 0 },
+    { incident: "Payment Service Memory Leak", sev: "P1", detected: "Mar 10, 19:55", resolved: "Mar 10, 20:01", mttr: "6m", ai: 8, human: 1 },
+    { incident: "Load Balancer Health Check Flap", sev: "P3", detected: "Mar 08, 11:30", resolved: "Mar 08, 11:32", mttr: "2m", ai: 5, human: 0 },
+    { incident: "Database Replication Lag Spike", sev: "P2", detected: "Mar 06, 04:18", resolved: "Mar 06, 04:30", mttr: "12m", ai: 6, human: 1 }
+];
+
+// ===== SCENARIO CARDS =====
+document.getElementById('scenarioCards').innerHTML = SCENARIOS.map(s =>
+    `<div class="scenario-card bg-white border-2 border-gray-200 rounded-xl p-5 sev-${s.severity.toLowerCase()}" onclick="runIncident(${s.id})">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-3xl">${s.icon}</span>
+            <span class="${s.sevColor} text-xs font-bold px-2 py-1 rounded-full">${s.severity}</span>
+        </div>
+        <h3 class="font-bold text-gray-900">${s.name}</h3>
+        <p class="text-xs text-gray-500 mt-2">${s.desc}</p>
+        <div class="mt-3 text-xs text-gray-400">Click to simulate &rarr;</div>
+    </div>`
+).join('');
+
+// ===== HISTORY TABLE =====
+document.getElementById('historyTable').innerHTML = HISTORY.map(h => {
+    const sevBadge = { P1: 'bg-red-100 text-red-700', P2: 'bg-amber-100 text-amber-700', P3: 'bg-blue-100 text-blue-700' }[h.sev];
+    return `<tr class="border-b border-gray-100 hover:bg-gray-50">
+        <td class="py-2.5 px-3 font-medium text-gray-900 text-xs">${h.incident}</td>
+        <td class="py-2.5 px-3 text-center"><span class="${sevBadge} text-xs font-bold px-2 py-0.5 rounded-full">${h.sev}</span></td>
+        <td class="py-2.5 px-3 text-center text-xs text-gray-600">${h.detected}</td>
+        <td class="py-2.5 px-3 text-center text-xs text-gray-600">${h.resolved}</td>
+        <td class="py-2.5 px-3 text-center font-bold text-green-600">${h.mttr}</td>
+        <td class="py-2.5 px-3 text-center font-bold text-indigo-600">${h.ai}</td>
+        <td class="py-2.5 px-3 text-center font-bold text-gray-600">${h.human}</td>
+    </tr>`;
+}).join('');
+
+// ===== METRICS CHART =====
+new Chart(document.getElementById('metricsChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Time to Detect', 'Time to Classify', 'Time to Notify', 'Time to Remediate', 'Time to Verify', 'Total MTTR'],
+        datasets: [
+            { label: 'Manual (minutes)', data: [15, 20, 10, 120, 45, 240], backgroundColor: '#ef4444' },
+            { label: 'AI-Automated (minutes)', data: [0.05, 0.05, 0.03, 2, 0.5, 18], backgroundColor: '#22c55e' }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { title: { display: true, text: 'Minutes' } } },
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } } }
+    }
+});
+
+// ===== INCIDENT SIMULATION =====
+let simRunning = false;
+async function runIncident(id) {
+    if (simRunning) return;
+    simRunning = true;
+    const s = SCENARIOS[id];
+
+    document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.scenario-card')[id].classList.add('active');
+
+    // Show panels
+    document.getElementById('incidentBanner').style.display = 'block';
+    document.getElementById('timelinePanel').style.display = 'block';
+    document.getElementById('resolutionPanel').style.display = 'none';
+
+    document.getElementById('incidentTitle').textContent = `INCIDENT: ${s.name}`;
+    document.getElementById('incidentMeta').textContent = s.desc;
+    document.getElementById('severityBadge').innerHTML = `<span class="${s.sevColor} text-sm font-bold px-3 py-1 rounded-full">${s.severity}</span>`;
+    document.getElementById('statusBadge').innerHTML = `<span class="bg-yellow-100 text-yellow-700 text-sm font-bold px-3 py-1 rounded-full">IN PROGRESS</span>`;
+
+    // Build timeline items (all pending)
+    document.getElementById('timelineItems').innerHTML = s.steps.map((step, i) =>
+        `<div class="timeline-item pending border rounded-lg p-4 flex items-start gap-4" id="tl-${i}">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${step.status === 'auto' ? 'bg-indigo-100 text-indigo-600' : 'bg-amber-100 text-amber-600'}" id="tl-icon-${i}">
+                ${i + 1}
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-gray-900">${step.phase}</span>
+                    <span class="text-xs text-gray-400">T+${step.time}</span>
+                    <span class="${step.status === 'auto' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600'} text-xs px-2 py-0.5 rounded-full">${step.status === 'auto' ? 'AI Auto' : 'Human Approved'}</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">${step.action}</p>
+            </div>
+            <div class="flex-shrink-0 text-xs text-gray-400" id="tl-dur-${i}">${step.duration}</div>
+        </div>`
+    ).join('');
+
+    // Animate through steps
+    for (let i = 0; i < s.steps.length; i++) {
+        const el = document.getElementById(`tl-${i}`);
+        el.className = 'timeline-item active border-2 border-blue-300 rounded-lg p-4 flex items-start gap-4';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        await sleep(800);
+        el.className = 'timeline-item completed border rounded-lg p-4 flex items-start gap-4 bg-green-50 border-green-200';
+        document.getElementById(`tl-icon-${i}`).innerHTML = '&#10003;';
+        document.getElementById(`tl-icon-${i}`).className = 'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-green-100 text-green-600';
+    }
+
+    // Show resolution
+    document.getElementById('statusBadge').innerHTML = `<span class="bg-green-100 text-green-700 text-sm font-bold px-3 py-1 rounded-full">RESOLVED</span>`;
+    document.getElementById('resolutionPanel').style.display = 'block';
+    const r = s.resolution;
+    document.getElementById('resolutionContent').innerHTML = `
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <div class="bg-green-50 rounded-lg p-4 text-center">
+                <p class="text-2xl font-bold text-green-600">${r.total}</p>
+                <p class="text-xs text-green-500">Total Resolution Time</p>
+            </div>
+            <div class="bg-red-50 rounded-lg p-4 text-center">
+                <p class="text-2xl font-bold text-red-600">${r.manualTotal}</p>
+                <p class="text-xs text-red-500">Manual Equivalent</p>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                <p class="text-2xl font-bold text-blue-600">${r.actions} AI / ${r.humanActions} Human</p>
+                <p class="text-xs text-blue-500">Actions Taken</p>
+            </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <p class="text-sm text-amber-800"><strong>Business Impact:</strong> ${r.impact}</p>
+        </div>`;
+
+    simRunning = false;
+}
+
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+</script>
+</body>
+</html>

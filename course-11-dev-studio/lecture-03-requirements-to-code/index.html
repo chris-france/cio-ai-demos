@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requirements-to-Code Pipeline</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .kpi-card { transition: transform 0.15s ease; }
+        .kpi-card:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Requirements-to-Code Pipeline</h1>
+                <p class="text-slate-300 text-sm mt-1">Course 11: AI Development Studio &mdash; 200-Person Organization</p>
+            </div>
+            <div class="text-right text-sm">
+                <div class="text-slate-300">Reporting Period</div>
+                <div class="font-semibold text-lg">March 2026</div>
+                <div class="text-slate-400 text-xs mt-1">Updated daily at 06:00 UTC</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top: 3px solid #0891b2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Requirements Processed</span>
+                <div class="text-3xl font-extrabold mt-2" style="color:#0891b2">6 stages</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top: 3px solid #0891b2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Files Generated</span>
+                <div class="text-3xl font-extrabold mt-2" style="color:#0891b2">48 files</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top: 3px solid #0891b2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Test Coverage</span>
+                <div class="text-3xl font-extrabold mt-2" style="color:#0891b2">87%</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top: 3px solid #0891b2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg Time to Code</span>
+                <div class="text-3xl font-extrabold mt-2" style="color:#0891b2">33 hrs vs 176</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top: 3px solid #0891b2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Languages Supported</span>
+                <div class="text-3xl font-extrabold mt-2" style="color:#0891b2">5</div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Primary Analysis</h3>
+                <div style="height:300px"><canvas id="chart1"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Category Breakdown</h3>
+                <div style="height:300px"><canvas id="chart2"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-700">Detail View</h3>
+            </div>
+            <div class="p-6 text-sm text-gray-500">
+                <p>This is the starter dashboard for the <strong>Requirements-to-Code Pipeline</strong> demo.</p>
+                <p class="mt-2">When you run the Claude Code prompt from the demo panel, CC will replace this file with a fully interactive dashboard including charts, tables, and filters.</p>
+                <p class="mt-2">The workbook data for this lecture is available at: <code class="bg-gray-100 px-2 py-1 rounded">GET /api/workbook/82/code_pipeline</code></p>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Requirements-to-Code Pipeline &mdash; Course 11: AI Development Studio &mdash; Lecture 3 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+new Chart(document.getElementById('chart1'), {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{ label: 'Sample Data', data: [12, 19, 8, 15, 22, 14], backgroundColor: '#0891b240', borderColor: '#0891b2', borderWidth: 2 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { font: { family: 'Inter' } } }, x: { ticks: { font: { family: 'Inter' } } } } }
+});
+
+new Chart(document.getElementById('chart2'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Category A', 'Category B', 'Category C', 'Category D'],
+        datasets: [{ data: [35, 25, 22, 18], backgroundColor: ['#0891b2', '#0891b299', '#0891b266', '#0891b233'], borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { font: { family: 'Inter', size: 11 } } } } }
+});
+</script>
+</body>
+</html>

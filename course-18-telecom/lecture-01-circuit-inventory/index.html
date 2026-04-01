@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telecom Circuit Inventory Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .kpi-card { transition: transform 0.15s ease; }
+        .kpi-card:hover { transform: translateY(-2px); }
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { background: #f1f5f9; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Telecom Circuit Inventory Dashboard</h1>
+                <p class="text-blue-300 text-sm mt-1">IT Telecom &amp; Circuit Management &mdash; Enterprise WAN Overview</p>
+            </div>
+            <div class="text-right text-sm">
+                <div class="text-blue-300">Last Audit</div>
+                <div class="font-semibold text-lg">March 2026</div>
+                <div class="text-blue-400 text-xs mt-1">42 circuits across 18 locations</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Monthly Spend by Carrier</h3>
+                <div style="height:300px"><canvas id="carrierChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Circuit Distribution by Type</h3>
+                <div style="height:300px"><canvas id="typeChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-700">Circuit Inventory</h3>
+                <div>
+                    <label class="text-xs text-gray-500 mr-2">Filter:</label>
+                    <select id="typeFilter" onchange="renderTable()" class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-blue-500">
+                        <option value="all">All Types</option>
+                        <option value="MPLS">MPLS</option>
+                        <option value="DIA">DIA</option>
+                        <option value="Broadband">Broadband</option>
+                        <option value="LTE">LTE Backup</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 sortable" onclick="sortBy(0)">Circuit ID</th>
+                            <th class="px-4 py-3 sortable" onclick="sortBy(1)">Location</th>
+                            <th class="px-4 py-3 sortable" onclick="sortBy(2)">Carrier</th>
+                            <th class="px-4 py-3 sortable" onclick="sortBy(3)">Type</th>
+                            <th class="px-4 py-3 sortable" onclick="sortBy(4)">Bandwidth</th>
+                            <th class="px-4 py-3 sortable" onclick="sortBy(5)">Monthly Cost</th>
+                            <th class="px-4 py-3 sortable" onclick="sortBy(6)">Contract End</th>
+                            <th class="px-4 py-3 sortable" onclick="sortBy(7)">Utilization</th>
+                        </tr>
+                    </thead>
+                    <tbody id="circuitBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Contract Expirations &mdash; Next 24 Months</h3>
+            <div style="height:280px"><canvas id="expirationChart"></canvas></div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Telecom Circuit Inventory &mdash; Course 18: IT Telecom &amp; Circuit Management &mdash; Lecture 1 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+const CIRCUITS = [
+    { id: 'CKT-001', location: 'HQ - New York', carrier: 'AT&T', type: 'MPLS', bw: '500 Mbps', cost: 4200, contractEnd: '2026-09-30', util: 72 },
+    { id: 'CKT-002', location: 'HQ - New York', carrier: 'Verizon', type: 'DIA', bw: '1 Gbps', cost: 3800, contractEnd: '2026-06-15', util: 45 },
+    { id: 'CKT-003', location: 'Chicago Office', carrier: 'AT&T', type: 'MPLS', bw: '200 Mbps', cost: 2400, contractEnd: '2027-01-31', util: 68 },
+    { id: 'CKT-004', location: 'Chicago Office', carrier: 'Comcast', type: 'Broadband', bw: '500 Mbps', cost: 450, contractEnd: '2026-12-31', util: 82 },
+    { id: 'CKT-005', location: 'Dallas Data Center', carrier: 'Lumen', type: 'DIA', bw: '10 Gbps', cost: 8500, contractEnd: '2027-06-30', util: 61 },
+    { id: 'CKT-006', location: 'Dallas Data Center', carrier: 'Zayo', type: 'MPLS', bw: '1 Gbps', cost: 5200, contractEnd: '2026-04-30', util: 38 },
+    { id: 'CKT-007', location: 'San Francisco', carrier: 'AT&T', type: 'MPLS', bw: '500 Mbps', cost: 4400, contractEnd: '2026-11-30', util: 55 },
+    { id: 'CKT-008', location: 'San Francisco', carrier: 'Verizon', type: 'LTE', bw: '100 Mbps', cost: 350, contractEnd: '2026-08-31', util: 12 },
+    { id: 'CKT-009', location: 'Boston Office', carrier: 'Comcast', type: 'Broadband', bw: '1 Gbps', cost: 650, contractEnd: '2027-03-31', util: 71 },
+    { id: 'CKT-010', location: 'Boston Office', carrier: 'Lumen', type: 'MPLS', bw: '200 Mbps', cost: 2600, contractEnd: '2026-07-15', util: 24 },
+    { id: 'CKT-011', location: 'Atlanta Branch', carrier: 'AT&T', type: 'DIA', bw: '500 Mbps', cost: 2800, contractEnd: '2027-02-28', util: 56 },
+    { id: 'CKT-012', location: 'Atlanta Branch', carrier: 'T-Mobile', type: 'LTE', bw: '50 Mbps', cost: 275, contractEnd: '2026-05-31', util: 8 },
+    { id: 'CKT-013', location: 'Denver Office', carrier: 'Zayo', type: 'DIA', bw: '1 Gbps', cost: 3200, contractEnd: '2026-10-31', util: 43 },
+    { id: 'CKT-014', location: 'Denver Office', carrier: 'Comcast', type: 'Broadband', bw: '500 Mbps', cost: 400, contractEnd: '2027-04-30', util: 67 },
+    { id: 'CKT-015', location: 'Seattle Office', carrier: 'Lumen', type: 'MPLS', bw: '500 Mbps', cost: 4100, contractEnd: '2026-08-15', util: 29 },
+    { id: 'CKT-016', location: 'Seattle Office', carrier: 'Comcast', type: 'Broadband', bw: '1 Gbps', cost: 550, contractEnd: '2027-01-15', util: 78 },
+    { id: 'CKT-017', location: 'Miami Branch', carrier: 'AT&T', type: 'MPLS', bw: '100 Mbps', cost: 1800, contractEnd: '2026-05-15', util: 18 },
+    { id: 'CKT-018', location: 'Miami Branch', carrier: 'T-Mobile', type: 'LTE', bw: '50 Mbps', cost: 275, contractEnd: '2026-09-30', util: 5 },
+    { id: 'CKT-019', location: 'Phoenix Office', carrier: 'Verizon', type: 'DIA', bw: '500 Mbps', cost: 3100, contractEnd: '2027-05-31', util: 52 },
+    { id: 'CKT-020', location: 'Phoenix Office', carrier: 'Cox', type: 'Broadband', bw: '500 Mbps', cost: 380, contractEnd: '2026-12-15', util: 74 },
+    { id: 'CKT-021', location: 'Minneapolis Office', carrier: 'Lumen', type: 'DIA', bw: '200 Mbps', cost: 1950, contractEnd: '2026-06-30', util: 65 },
+    { id: 'CKT-022', location: 'DR Site - Virginia', carrier: 'Zayo', type: 'DIA', bw: '10 Gbps', cost: 7800, contractEnd: '2027-08-31', util: 15 },
+];
+
+const KPI_DATA = [
+    { label: 'Total Circuits', value: CIRCUITS.length, icon: '&#128268;', color: 'blue' },
+    { label: 'Monthly Spend', value: '$' + CIRCUITS.reduce((s,c) => s + c.cost, 0).toLocaleString(), icon: '&#128176;', color: 'amber' },
+    { label: 'Avg Cost/Circuit', value: '$' + Math.round(CIRCUITS.reduce((s,c) => s + c.cost, 0) / CIRCUITS.length).toLocaleString(), icon: '&#128200;', color: 'purple' },
+    { label: 'Expiring < 90 Days', value: CIRCUITS.filter(c => { const d = new Date(c.contractEnd); const now = new Date('2026-03-28'); return (d - now) / 86400000 < 90 && (d - now) > 0; }).length, icon: '&#9888;', color: 'red' },
+    { label: 'Under 30% Util', value: CIRCUITS.filter(c => c.util < 30).length, icon: '&#128269;', color: 'yellow' },
+];
+
+const COLORS_MAP = { blue: ['#3b82f6','#eff6ff'], amber: ['#f59e0b','#fffbeb'], red: ['#ef4444','#fef2f2'], yellow: ['#eab308','#fefce8'], purple: ['#8b5cf6','#f5f3ff'] };
+
+function renderKPIs() {
+    document.getElementById('kpiCards').innerHTML = KPI_DATA.map(k => {
+        const [main, bg] = COLORS_MAP[k.color];
+        return `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${main}">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+                <span class="text-xl">${k.icon}</span>
+            </div>
+            <div class="text-3xl font-extrabold" style="color:${main}">${k.value}</div>
+        </div>`;
+    }).join('');
+}
+
+function renderCharts() {
+    const carrierSpend = {};
+    CIRCUITS.forEach(c => { carrierSpend[c.carrier] = (carrierSpend[c.carrier] || 0) + c.cost; });
+    const carriers = Object.keys(carrierSpend).sort((a,b) => carrierSpend[b] - carrierSpend[a]);
+
+    new Chart(document.getElementById('carrierChart'), {
+        type: 'bar',
+        data: {
+            labels: carriers,
+            datasets: [{ label: 'Monthly Spend ($)', data: carriers.map(c => carrierSpend[c]),
+                backgroundColor: ['#3b82f6','#8b5cf6','#ef4444','#f59e0b','#10b981','#6366f1','#ec4899'],
+                borderRadius: 6 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '$' + v.toLocaleString() } } } }
+    });
+
+    const typeCounts = {};
+    CIRCUITS.forEach(c => { typeCounts[c.type] = (typeCounts[c.type] || 0) + 1; });
+    new Chart(document.getElementById('typeChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(typeCounts),
+            datasets: [{ data: Object.values(typeCounts), backgroundColor: ['#3b82f6','#8b5cf6','#10b981','#f59e0b'], borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { font: { family: 'Inter', size: 11 } } } } }
+    });
+
+    // Expiration timeline
+    const months = [];
+    for (let i = 0; i < 24; i++) {
+        const d = new Date(2026, 3 + i, 1);
+        months.push(d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+    }
+    const expByMonth = new Array(24).fill(0);
+    CIRCUITS.forEach(c => {
+        const d = new Date(c.contractEnd);
+        const idx = (d.getFullYear() - 2026) * 12 + d.getMonth() - 3;
+        if (idx >= 0 && idx < 24) expByMonth[idx]++;
+    });
+    new Chart(document.getElementById('expirationChart'), {
+        type: 'bar',
+        data: { labels: months, datasets: [{ label: 'Contracts Expiring', data: expByMonth, backgroundColor: expByMonth.map((v,i) => i < 3 ? '#ef4444' : '#3b82f6'), borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+}
+
+let sortCol = -1, sortAsc = true;
+function sortBy(col) { if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; } renderTable(); }
+
+function renderTable() {
+    const typeF = document.getElementById('typeFilter').value;
+    let data = typeF === 'all' ? [...CIRCUITS] : CIRCUITS.filter(c => c.type === typeF || (typeF === 'LTE' && c.type === 'LTE'));
+    if (sortCol >= 0) {
+        const keys = ['id','location','carrier','type','bw','cost','contractEnd','util'];
+        data.sort((a,b) => {
+            let va = a[keys[sortCol]], vb = b[keys[sortCol]];
+            if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            return sortAsc ? va - vb : vb - va;
+        });
+    }
+    document.getElementById('circuitBody').innerHTML = data.map(c => {
+        const utilColor = c.util < 30 ? 'text-red-600 font-semibold' : c.util < 50 ? 'text-amber-600' : 'text-green-600';
+        const expSoon = (new Date(c.contractEnd) - new Date('2026-03-28')) / 86400000 < 90;
+        return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${expSoon ? 'bg-red-50' : ''}">
+            <td class="px-4 py-3 font-mono text-xs">${c.id}</td>
+            <td class="px-4 py-3 font-medium">${c.location}</td>
+            <td class="px-4 py-3">${c.carrier}</td>
+            <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-semibold">${c.type}</span></td>
+            <td class="px-4 py-3">${c.bw}</td>
+            <td class="px-4 py-3 font-semibold">$${c.cost.toLocaleString()}</td>
+            <td class="px-4 py-3 ${expSoon ? 'text-red-600 font-semibold' : ''}">${c.contractEnd}</td>
+            <td class="px-4 py-3 ${utilColor}">${c.util}%</td>
+        </tr>`;
+    }).join('');
+}
+
+renderKPIs(); renderCharts(); renderTable();
+</script>
+</body>
+</html>

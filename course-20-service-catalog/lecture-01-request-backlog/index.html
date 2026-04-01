@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Backlog Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}.sortable{cursor:pointer;user-select:none;}.sortable:hover{background:#f1f5f9;}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div><h1 class="text-2xl font-extrabold">IT Request Backlog Analyzer</h1>
+            <p class="text-sky-300 text-sm mt-1">Service Request Pipeline &amp; SLA Analysis</p></div>
+            <div class="text-right text-sm"><div class="text-sky-300">As of</div><div class="font-semibold text-lg">March 28, 2026</div></div>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Open Requests by Category</h3>
+                <div style="height:300px"><canvas id="catChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Request Age Distribution</h3>
+                <div style="height:300px"><canvas id="ageChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Open Request Queue</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3 sortable" onclick="sortBy(0)">ID</th><th class="px-4 py-3 sortable" onclick="sortBy(1)">Category</th>
+                        <th class="px-4 py-3">Requester</th><th class="px-4 py-3 sortable" onclick="sortBy(3)">Submit Date</th>
+                        <th class="px-4 py-3 sortable" onclick="sortBy(4)">Age (days)</th><th class="px-4 py-3">SLA Target</th>
+                        <th class="px-4 py-3">Status</th><th class="px-4 py-3">Assigned To</th>
+                    </tr></thead>
+                    <tbody id="reqBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-red-50 border border-red-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-red-800 mb-3">SLA Breach Panel</h3>
+            <div id="breaches" class="space-y-2"></div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Weekly Volume &amp; Completion Rate &mdash; 12 Weeks</h3>
+            <div style="height:260px"><canvas id="trendChart"></canvas></div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">Request Backlog &mdash; Course 20: Building an AI Service Catalog &mdash; Lecture 1 &mdash; Confidential</footer>
+    </main>
+<script>
+const REQUESTS = [
+    { id: 'REQ-301', cat: 'Access', requester: 'Sarah Chen', date: '2026-03-25', age: 3, sla: '2 days', status: 'Breached', assigned: 'Help Desk' },
+    { id: 'REQ-298', cat: 'Software', requester: 'Marcus Johnson', date: '2026-03-22', age: 6, sla: '5 days', status: 'Breached', assigned: 'Desktop Eng' },
+    { id: 'REQ-295', cat: 'Hardware', requester: 'Priya Patel', date: '2026-03-18', age: 10, sla: '10 days', status: 'At Risk', assigned: 'Procurement' },
+    { id: 'REQ-290', cat: 'Network', requester: 'James Wilson', date: '2026-03-10', age: 18, sla: '5 days', status: 'Breached', assigned: 'Network Ops' },
+    { id: 'REQ-288', cat: 'Access', requester: 'Ana Rodriguez', date: '2026-03-08', age: 20, sla: '2 days', status: 'Breached', assigned: 'Unassigned' },
+    { id: 'REQ-302', cat: 'Software', requester: 'David Kim', date: '2026-03-27', age: 1, sla: '5 days', status: 'On Track', assigned: 'Desktop Eng' },
+    { id: 'REQ-303', cat: 'Access', requester: 'Tom Bradley', date: '2026-03-28', age: 0, sla: '2 days', status: 'On Track', assigned: 'Help Desk' },
+    { id: 'REQ-285', cat: 'Other', requester: 'Lisa Nguyen', date: '2026-03-01', age: 27, sla: '10 days', status: 'Breached', assigned: 'Unassigned' },
+    { id: 'REQ-300', cat: 'Hardware', requester: 'Chris Martinez', date: '2026-03-24', age: 4, sla: '10 days', status: 'On Track', assigned: 'Procurement' },
+    { id: 'REQ-292', cat: 'Network', requester: 'Rachel Foster', date: '2026-03-12', age: 16, sla: '5 days', status: 'Breached', assigned: 'Network Ops' },
+];
+
+const breached = REQUESTS.filter(r=>r.status==='Breached');
+const avgAge = Math.round(REQUESTS.reduce((s,r)=>s+r.age,0)/REQUESTS.length);
+const oldest = Math.max(...REQUESTS.map(r=>r.age));
+
+const KPI = [
+    { label: 'Open Requests', value: REQUESTS.length, color: '#0284c7' },
+    { label: 'Avg Age (days)', value: avgAge, color: '#8b5cf6' },
+    { label: 'SLA Breach Rate', value: Math.round(breached.length/REQUESTS.length*100)+'%', color: '#ef4444' },
+    { label: 'Oldest Request', value: oldest+' days', color: '#f59e0b' },
+    { label: 'This Week', value: '12', color: '#10b981' },
+];
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+const cats = {}; REQUESTS.forEach(r => cats[r.cat]=(cats[r.cat]||0)+1);
+new Chart(document.getElementById('catChart'), {
+    type: 'bar',
+    data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#0284c7','#8b5cf6','#10b981','#f59e0b','#ef4444'], borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: { labels: ['0-2 days','3-7 days','8-14 days','15-30 days','30+ days'], datasets: [{ data: [3,2,1,3,1], backgroundColor: ['#10b981','#3b82f6','#f59e0b','#ef4444','#991b1b'], borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+let sortCol=-1,sortAsc=true;
+function sortBy(c){if(sortCol===c)sortAsc=!sortAsc;else{sortCol=c;sortAsc=true;}renderTable();}
+function renderTable(){
+    let data=[...REQUESTS];
+    if(sortCol>=0){const k=['id','cat','requester','date','age'];data.sort((a,b)=>{const va=a[k[sortCol]],vb=b[k[sortCol]];return typeof va==='number'?(sortAsc?va-vb:vb-va):(sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va)));});}
+    document.getElementById('reqBody').innerHTML=data.map(r=>{
+        const sc=r.status==='Breached'?'bg-red-100 text-red-700':r.status==='At Risk'?'bg-amber-100 text-amber-700':'bg-green-100 text-green-700';
+        return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${r.status==='Breached'?'bg-red-50':''}">
+            <td class="px-4 py-3 font-mono text-xs">${r.id}</td><td class="px-4 py-3">${r.cat}</td><td class="px-4 py-3">${r.requester}</td>
+            <td class="px-4 py-3">${r.date}</td><td class="px-4 py-3 ${r.age>14?'text-red-600 font-semibold':''}">${r.age}</td>
+            <td class="px-4 py-3">${r.sla}</td><td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${sc} font-semibold">${r.status}</span></td>
+            <td class="px-4 py-3 ${r.assigned==='Unassigned'?'text-red-600 font-semibold':''}">${r.assigned}</td></tr>`;
+    }).join('');
+}
+
+document.getElementById('breaches').innerHTML = breached.map(r =>
+    `<div class="bg-white rounded-lg p-3 border border-red-200">&#9888; <strong>${r.id}</strong> (${r.cat}) &mdash; ${r.age} days old, SLA target ${r.sla} &mdash; Assigned: ${r.assigned}</div>`
+).join('');
+
+const weeks = Array.from({length:12},(_,i)=>'W'+(i+1));
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: { labels: weeks, datasets: [
+        { label: 'Submitted', data: [22,25,18,28,24,30,21,26,29,23,27,32], borderColor: '#0284c7', tension: 0.3 },
+        { label: 'Completed', data: [18,20,16,22,20,24,19,22,25,20,23,26], borderColor: '#10b981', tension: 0.3 },
+    ]},
+    options: { responsive: true, maintainAspectRatio: false }
+});
+renderTable();
+</script>
+</body>
+</html>

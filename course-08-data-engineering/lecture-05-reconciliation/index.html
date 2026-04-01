@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Reconciliation Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-orange-900 via-orange-800 to-orange-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">Cross-System Data Reconciliation</h1>
+            <p class="text-orange-300 text-sm mt-1">Find Discrepancies Between Systems Before Your Auditor Does</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Match Rate by System Pair</h3>
+                <div style="height:300px"><canvas id="matchChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Discrepancy Trend &mdash; 12 Weeks</h3>
+                <div style="height:300px"><canvas id="trendChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Reconciliation Results</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase">
+                    <th class="px-4 py-3">System A</th><th class="px-4 py-3">System B</th><th class="px-4 py-3">Data Type</th>
+                    <th class="px-4 py-3">Records A</th><th class="px-4 py-3">Records B</th><th class="px-4 py-3">Matched</th>
+                    <th class="px-4 py-3">Discrepancies</th><th class="px-4 py-3">Match Rate</th><th class="px-4 py-3">Status</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Data Reconciliation &mdash; Course 8 &mdash; Lecture 5 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const RECONS=[
+    {a:'Salesforce',b:'Snowflake',type:'Customer Records',recA:4280,recB:4275,matched:4268,disc:12,rate:99.7,status:'Pass'},
+    {a:'SAP',b:'Snowflake',type:'Invoices (Q1)',recA:12840,recB:12838,matched:12830,disc:10,rate:99.9,status:'Pass'},
+    {a:'Stripe',b:'SAP',type:'Payments',recA:8920,recB:8915,matched:8900,disc:20,rate:99.8,status:'Pass'},
+    {a:'Salesforce',b:'HubSpot',type:'Contact Sync',recA:4280,recB:4190,matched:4120,disc:160,rate:96.3,status:'Warning'},
+    {a:'Workday',b:'Active Directory',type:'Employee Records',recA:312,recB:325,matched:310,disc:15,rate:95.2,status:'Warning'},
+    {a:'Legacy Oracle',b:'Snowflake',type:'Inventory',recA:45600,recB:43200,matched:41800,disc:3800,rate:91.7,status:'Fail'},
+    {a:'GA4',b:'Salesforce',type:'Lead Attribution',recA:2340,recB:1890,matched:1750,disc:590,rate:74.8,status:'Fail'},
+    {a:'Zendesk',b:'Salesforce',type:'Support Cases',recA:1280,recB:1265,matched:1250,disc:30,rate:97.7,status:'Pass'},
+];
+
+document.getElementById('kpiCards').innerHTML=[
+    {label:'System Pairs',value:RECONS.length,color:'#f97316',trend:'Checked daily'},
+    {label:'Overall Match',value:'95.6%',color:'#10b981',trend:'Target: 99%'},
+    {label:'Pass',value:RECONS.filter(r=>r.status==='Pass').length,color:'#10b981',trend:'> 99% match'},
+    {label:'Warning',value:RECONS.filter(r=>r.status==='Warning').length,color:'#f59e0b',trend:'95-99% match'},
+    {label:'Fail',value:RECONS.filter(r=>r.status==='Fail').length,color:'#ef4444',trend:'< 95% match'}
+].map(k=>`<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+new Chart(document.getElementById('matchChart'),{type:'bar',data:{
+    labels:RECONS.map(r=>`${r.a} vs ${r.b}`),
+    datasets:[{label:'Match Rate %',data:RECONS.map(r=>r.rate),backgroundColor:RECONS.map(r=>r.rate>=99?'#10b981':r.rate>=95?'#f59e0b':'#ef4444')}]
+},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{min:70,max:100}},plugins:{legend:{display:false}}}});
+
+new Chart(document.getElementById('trendChart'),{type:'line',data:{
+    labels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'],
+    datasets:[
+        {label:'Total Discrepancies',data:[4200,3800,4100,3600,3900,3500,3200,3400,3100,2800,3000,2700],borderColor:'#f97316',tension:0.3},
+        {label:'Auto-Resolved',data:[2100,2000,2200,2000,2100,2000,1800,2000,1900,1700,1800,1700],borderColor:'#10b981',tension:0.3}
+    ]
+},options:{responsive:true,maintainAspectRatio:false}});
+
+document.getElementById('tableBody').innerHTML=RECONS.map(r=>{
+    const sc=r.status==='Pass'?'bg-green-100 text-green-700':r.status==='Warning'?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700';
+    const bg=r.status==='Fail'?'bg-red-50':'';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${bg}">
+        <td class="px-4 py-3 font-medium">${r.a}</td><td class="px-4 py-3">${r.b}</td>
+        <td class="px-4 py-3">${r.type}</td><td class="px-4 py-3">${r.recA.toLocaleString()}</td>
+        <td class="px-4 py-3">${r.recB.toLocaleString()}</td><td class="px-4 py-3">${r.matched.toLocaleString()}</td>
+        <td class="px-4 py-3 font-semibold ${r.disc>100?'text-red-600':'text-gray-700'}">${r.disc.toLocaleString()}</td>
+        <td class="px-4 py-3 font-semibold">${r.rate}%</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${sc}">${r.status}</span></td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

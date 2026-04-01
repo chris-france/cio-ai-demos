@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLA Prediction Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .risk-green { background: #f0fdf4; border-left: 4px solid #22c55e; }
+        .risk-yellow { background: #fffbeb; border-left: 4px solid #f59e0b; }
+        .risk-red { background: #fef2f2; border-left: 4px solid #ef4444; }
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { background: #f1f5f9; }
+        .pulse-red { animation: pulseRed 1.5s ease infinite; }
+        @keyframes pulseRed { 0%,100% { background: #fef2f2; } 50% { background: #fee2e2; } }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">SLA Prediction Dashboard</h1>
+                <p class="text-slate-300 text-sm mt-1">Breach Prevention &mdash; Predict and Prevent, Don't React</p>
+            </div>
+            <div class="text-right text-sm">
+                <div class="text-slate-300">Live View</div>
+                <div class="font-semibold text-lg" id="currentTime"></div>
+                <div class="text-slate-400 text-xs mt-1">Predictions update every 5 minutes</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+
+        <!-- KPIs -->
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #22c55e">
+                <div class="text-xs font-semibold text-gray-500 uppercase">On Track</div>
+                <div class="text-3xl font-extrabold text-green-600 mt-1" id="kpiGreen">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #f59e0b">
+                <div class="text-xs font-semibold text-gray-500 uppercase">At Risk</div>
+                <div class="text-3xl font-extrabold text-amber-600 mt-1" id="kpiYellow">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #ef4444">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Imminent Breach</div>
+                <div class="text-3xl font-extrabold text-red-600 mt-1" id="kpiRed">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #3b82f6">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Avg Time to SLA</div>
+                <div class="text-3xl font-extrabold text-blue-600 mt-1" id="kpiAvg">0h</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #8b5cf6">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Breaches Prevented (MTD)</div>
+                <div class="text-3xl font-extrabold text-purple-600 mt-1">47</div>
+            </div>
+        </section>
+
+        <!-- Filter -->
+        <section class="flex items-center gap-4">
+            <label class="text-sm font-medium text-gray-600">Filter by Risk:</label>
+            <select id="riskFilter" onchange="renderTable()" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                <option value="all">All Tickets</option>
+                <option value="red">Imminent Breach Only</option>
+                <option value="yellow">At Risk + Imminent</option>
+                <option value="green">On Track Only</option>
+            </select>
+            <span class="text-xs text-gray-400 ml-auto">Showing <span id="visibleCount">20</span> of 20 tickets</span>
+        </section>
+
+        <!-- Ticket Table -->
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 sortable" onclick="sortTickets(0)">Ticket ID</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTickets(1)">Category</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTickets(2)">Priority</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTickets(3)">Age (hrs)</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTickets(4)">SLA Deadline</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTickets(5)">Predicted Resolution</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTickets(6)">Time Remaining</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTickets(7)">Breach Probability</th>
+                            <th class="px-4 py-3">Risk</th>
+                            <th class="px-4 py-3">AI Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Charts -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Breach Probability by Category</h3>
+                <div style="height:300px"><canvas id="breachChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">SLA Performance &mdash; Last 30 Days</h3>
+                <div style="height:300px"><canvas id="perfChart"></canvas></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            SLA Prediction Dashboard &mdash; Course 3: AI-Powered IT Service Management &mdash; Lecture 6 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+const TICKETS = [
+    { id: 'TK-5201', cat: 'Password / Access', pri: 'High', age: 1.2, slaHrs: 4, predHrs: 1.8, breach: 5 },
+    { id: 'TK-5202', cat: 'Network / VPN', pri: 'Critical', age: 2.8, slaHrs: 4, predHrs: 3.5, breach: 42 },
+    { id: 'TK-5203', cat: 'Hardware', pri: 'Medium', age: 6.0, slaHrs: 24, predHrs: 8.2, breach: 3 },
+    { id: 'TK-5204', cat: 'Email / M365', pri: 'High', age: 3.1, slaHrs: 4, predHrs: 4.8, breach: 78 },
+    { id: 'TK-5205', cat: 'Software Install', pri: 'Low', age: 2.0, slaHrs: 48, predHrs: 6.0, breach: 1 },
+    { id: 'TK-5206', cat: 'Network / VPN', pri: 'Critical', age: 3.5, slaHrs: 4, predHrs: 4.2, breach: 85 },
+    { id: 'TK-5207', cat: 'Password / Access', pri: 'Medium', age: 0.5, slaHrs: 8, predHrs: 2.0, breach: 2 },
+    { id: 'TK-5208', cat: 'Hardware', pri: 'High', age: 7.2, slaHrs: 8, predHrs: 8.5, breach: 91 },
+    { id: 'TK-5209', cat: 'Printing', pri: 'Low', age: 4.0, slaHrs: 48, predHrs: 12.0, breach: 1 },
+    { id: 'TK-5210', cat: 'Email / M365', pri: 'Medium', age: 1.8, slaHrs: 8, predHrs: 5.0, breach: 15 },
+    { id: 'TK-5211', cat: 'Software Install', pri: 'Medium', age: 3.2, slaHrs: 24, predHrs: 4.5, breach: 2 },
+    { id: 'TK-5212', cat: 'Network / VPN', pri: 'High', age: 2.0, slaHrs: 4, predHrs: 3.0, breach: 35 },
+    { id: 'TK-5213', cat: 'Password / Access', pri: 'High', age: 3.8, slaHrs: 4, predHrs: 4.1, breach: 72 },
+    { id: 'TK-5214', cat: 'Hardware', pri: 'Low', age: 12.0, slaHrs: 48, predHrs: 18.0, breach: 4 },
+    { id: 'TK-5215', cat: 'Email / M365', pri: 'Critical', age: 1.5, slaHrs: 4, predHrs: 2.2, breach: 18 },
+    { id: 'TK-5216', cat: 'Printing', pri: 'Medium', age: 8.0, slaHrs: 24, predHrs: 10.0, breach: 5 },
+    { id: 'TK-5217', cat: 'Onboarding', pri: 'High', age: 5.0, slaHrs: 8, predHrs: 7.8, breach: 68 },
+    { id: 'TK-5218', cat: 'Software Install', pri: 'High', age: 1.0, slaHrs: 8, predHrs: 3.5, breach: 8 },
+    { id: 'TK-5219', cat: 'Network / VPN', pri: 'Medium', age: 0.8, slaHrs: 8, predHrs: 4.0, breach: 6 },
+    { id: 'TK-5220', cat: 'Password / Access', pri: 'Critical', age: 3.2, slaHrs: 4, predHrs: 3.9, breach: 62 }
+];
+
+let sortCol = -1, sortAsc = true;
+
+function riskLevel(t) {
+    if (t.breach >= 60) return 'red';
+    if (t.breach >= 20) return 'yellow';
+    return 'green';
+}
+
+function aiAction(t) {
+    const r = riskLevel(t);
+    if (r === 'red') return 'Auto-escalating + reassigning to available agent';
+    if (r === 'yellow') return 'Team lead notified + priority boosted';
+    return 'Monitoring — on track';
+}
+
+function renderTable() {
+    const filter = document.getElementById('riskFilter').value;
+    let filtered = [...TICKETS];
+    if (filter === 'red') filtered = filtered.filter(t => riskLevel(t) === 'red');
+    else if (filter === 'yellow') filtered = filtered.filter(t => riskLevel(t) !== 'green');
+    else if (filter === 'green') filtered = filtered.filter(t => riskLevel(t) === 'green');
+
+    if (sortCol >= 0) {
+        const keys = ['id','cat','pri','age','slaHrs','predHrs','remaining','breach'];
+        filtered.sort((a, b) => {
+            let va, vb;
+            if (sortCol === 6) { va = a.slaHrs - a.age; vb = b.slaHrs - b.age; }
+            else { va = a[keys[sortCol]]; vb = b[keys[sortCol]]; }
+            if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            return sortAsc ? va - vb : vb - va;
+        });
+    }
+
+    document.getElementById('visibleCount').textContent = filtered.length;
+
+    const green = TICKETS.filter(t => riskLevel(t) === 'green').length;
+    const yellow = TICKETS.filter(t => riskLevel(t) === 'yellow').length;
+    const red = TICKETS.filter(t => riskLevel(t) === 'red').length;
+    document.getElementById('kpiGreen').textContent = green;
+    document.getElementById('kpiYellow').textContent = yellow;
+    document.getElementById('kpiRed').textContent = red;
+    const avgRemaining = TICKETS.reduce((s, t) => s + (t.slaHrs - t.age), 0) / TICKETS.length;
+    document.getElementById('kpiAvg').textContent = avgRemaining.toFixed(1) + 'h';
+
+    document.getElementById('ticketBody').innerHTML = filtered.map(t => {
+        const risk = riskLevel(t);
+        const remaining = t.slaHrs - t.age;
+        const rowClass = risk === 'red' ? 'risk-red pulse-red' : risk === 'yellow' ? 'risk-yellow' : 'risk-green';
+        const priColors = { Critical: 'bg-red-100 text-red-700', High: 'bg-orange-100 text-orange-700', Medium: 'bg-amber-100 text-amber-700', Low: 'bg-green-100 text-green-700' };
+        const riskBadge = risk === 'red' ? '<span class="px-2 py-1 text-xs rounded-full bg-red-600 text-white font-bold">BREACH IMMINENT</span>' :
+                         risk === 'yellow' ? '<span class="px-2 py-1 text-xs rounded-full bg-amber-500 text-white font-bold">AT RISK</span>' :
+                         '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-semibold">On Track</span>';
+        const breachColor = t.breach >= 60 ? 'text-red-600 font-bold' : t.breach >= 20 ? 'text-amber-600 font-semibold' : 'text-green-600';
+
+        return `<tr class="${rowClass} hover:brightness-95 transition-all">
+            <td class="px-4 py-3 font-mono text-xs">${t.id}</td>
+            <td class="px-4 py-3">${t.cat}</td>
+            <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${priColors[t.pri]} font-semibold">${t.pri}</span></td>
+            <td class="px-4 py-3">${t.age.toFixed(1)}</td>
+            <td class="px-4 py-3">${t.slaHrs}h</td>
+            <td class="px-4 py-3">${t.predHrs.toFixed(1)}h</td>
+            <td class="px-4 py-3 font-semibold ${remaining <= 1 ? 'text-red-600' : remaining <= 3 ? 'text-amber-600' : 'text-green-600'}">${remaining.toFixed(1)}h</td>
+            <td class="px-4 py-3 ${breachColor}">${t.breach}%</td>
+            <td class="px-4 py-3">${riskBadge}</td>
+            <td class="px-4 py-3 text-xs text-gray-600">${aiAction(t)}</td>
+        </tr>`;
+    }).join('');
+}
+
+function sortTickets(col) {
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = true; }
+    renderTable();
+}
+
+function renderCharts() {
+    // Breach by category
+    const cats = {};
+    TICKETS.forEach(t => {
+        if (!cats[t.cat]) cats[t.cat] = { total: 0, breachSum: 0 };
+        cats[t.cat].total++;
+        cats[t.cat].breachSum += t.breach;
+    });
+    const catLabels = Object.keys(cats);
+    const avgBreachByCat = catLabels.map(c => Math.round(cats[c].breachSum / cats[c].total));
+
+    new Chart(document.getElementById('breachChart'), {
+        type: 'bar',
+        data: {
+            labels: catLabels,
+            datasets: [{ data: avgBreachByCat, backgroundColor: avgBreachByCat.map(v => v >= 40 ? '#ef4444' : v >= 15 ? '#f59e0b' : '#22c55e'), borderRadius: 4 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { family: 'Inter' } } }, x: { ticks: { font: { family: 'Inter', size: 10 } } } }
+        }
+    });
+
+    // 30-day SLA performance
+    const days = Array.from({length: 30}, (_, i) => 'Day ' + (i + 1));
+    const met = [95,93,97,91,94,98,96,92,88,91,94,96,93,97,95,89,92,94,97,96,93,95,91,98,96,94,97,95,93,96];
+    new Chart(document.getElementById('perfChart'), {
+        type: 'line',
+        data: {
+            labels: days,
+            datasets: [
+                { label: 'SLA Met %', data: met, borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.08)', fill: true, tension: 0.3, pointRadius: 2 },
+                { label: 'Target (95%)', data: Array(30).fill(95), borderColor: '#3b82f6', borderDash: [5,5], pointRadius: 0, borderWidth: 1.5 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
+            scales: { y: { min: 80, max: 100, ticks: { callback: v => v + '%', font: { family: 'Inter' } } }, x: { ticks: { font: { family: 'Inter', size: 9 }, maxRotation: 45 } } }
+        }
+    });
+}
+
+document.getElementById('currentTime').textContent = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+renderTable();
+renderCharts();
+</script>
+</body>
+</html>

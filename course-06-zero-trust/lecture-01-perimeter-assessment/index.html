@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Perimeter Assessment Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .kpi-card { transition: transform 0.15s ease; }
+        .kpi-card:hover { transform: translateY(-2px); }
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { background: #f1f5f9; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-violet-900 via-violet-800 to-violet-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Network Perimeter Assessment</h1>
+                <p class="text-violet-300 text-sm mt-1">Zero Trust Readiness &mdash; Beyond the Perimeter</p>
+            </div>
+            <div class="text-right text-sm">
+                <div class="text-violet-300">Assessment Date</div>
+                <div class="font-semibold text-lg">March 2026</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Attack Surface by Zone</h3>
+                <div style="height:300px"><canvas id="zoneChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Exposure Trend &mdash; 12 Months</h3>
+                <div style="height:300px"><canvas id="trendChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-700">Perimeter Entry Points &mdash; Risk Assessment</h3>
+                <select id="zoneFilter" onchange="renderTable()" class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
+                    <option value="all">All Zones</option>
+                    <option value="DMZ">DMZ</option>
+                    <option value="Cloud">Cloud</option>
+                    <option value="Remote">Remote</option>
+                    <option value="Partner">Partner</option>
+                </select>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 sortable" onclick="sortTable(0)">Entry Point</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTable(1)">Zone</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTable(2)">Protocol</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTable(3)">Open Ports</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTable(4)">Auth Method</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTable(5)">Last Audit</th>
+                            <th class="px-4 py-3 sortable" onclick="sortTable(6)">Risk Score</th>
+                            <th class="px-4 py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-red-50 border border-red-200 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-red-800 mb-3">Critical Findings</h3>
+            <div id="criticalFindings" class="space-y-2"></div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Network Perimeter Assessment &mdash; Course 6: Zero Trust for SMBs &mdash; Lecture 1 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+const KPI_DATA = [
+    { label: 'Entry Points', value: '47', icon: '&#128274;', color: '#8b5cf6', trend: '+8 since last audit' },
+    { label: 'High-Risk Items', value: '12', icon: '&#9888;', color: '#ef4444', trend: '26% of total' },
+    { label: 'Unaudited > 90d', value: '9', icon: '&#128337;', color: '#f59e0b', trend: 'Policy: 30 days' },
+    { label: 'Legacy Auth', value: '6', icon: '&#128275;', color: '#dc2626', trend: 'Password-only access' },
+    { label: 'Zero Trust Score', value: '34%', icon: '&#127919;', color: '#10b981', trend: 'Target: 80%' }
+];
+
+const ENTRY_POINTS = [
+    { name: 'Corporate VPN Gateway', zone: 'Remote', protocol: 'IPSec/SSL', ports: '443, 500, 4500', auth: 'Password + RADIUS', lastAudit: '2025-11-15', risk: 82 },
+    { name: 'AWS Public ALB', zone: 'Cloud', protocol: 'HTTPS', ports: '443', auth: 'OAuth 2.0', lastAudit: '2026-02-28', risk: 35 },
+    { name: 'Partner SFTP Server', zone: 'Partner', protocol: 'SFTP', ports: '22', auth: 'SSH Key', lastAudit: '2025-08-10', risk: 71 },
+    { name: 'Email Gateway (Exchange)', zone: 'DMZ', protocol: 'SMTP/HTTPS', ports: '25, 443', auth: 'Certificate', lastAudit: '2026-01-20', risk: 48 },
+    { name: 'Remote Desktop Gateway', zone: 'Remote', protocol: 'RDP/HTTPS', ports: '443, 3389', auth: 'Password Only', lastAudit: '2025-06-12', risk: 95 },
+    { name: 'Azure AD SSO Proxy', zone: 'Cloud', protocol: 'HTTPS', ports: '443', auth: 'SAML + MFA', lastAudit: '2026-03-01', risk: 18 },
+    { name: 'Vendor VPN Tunnel', zone: 'Partner', protocol: 'IPSec', ports: '500, 4500', auth: 'PSK', lastAudit: '2025-09-22', risk: 78 },
+    { name: 'Web Application Firewall', zone: 'DMZ', protocol: 'HTTPS', ports: '443', auth: 'N/A (proxy)', lastAudit: '2026-02-15', risk: 28 },
+    { name: 'Legacy FTP Server', zone: 'DMZ', protocol: 'FTP', ports: '21, 20', auth: 'Password Only', lastAudit: '2024-12-01', risk: 97 },
+    { name: 'Site-to-Site VPN (Branch)', zone: 'Remote', protocol: 'IPSec', ports: '500, 4500', auth: 'Certificate', lastAudit: '2026-01-10', risk: 42 },
+    { name: 'API Gateway (Kong)', zone: 'Cloud', protocol: 'HTTPS', ports: '443, 8443', auth: 'API Key + JWT', lastAudit: '2026-03-05', risk: 31 },
+    { name: 'Customer Portal', zone: 'DMZ', protocol: 'HTTPS', ports: '443', auth: 'Password + CAPTCHA', lastAudit: '2026-02-20', risk: 55 },
+    { name: 'Contractor WiFi', zone: 'Remote', protocol: '802.1X', ports: 'N/A', auth: 'WPA2-PSK', lastAudit: '2025-07-15', risk: 88 },
+    { name: 'Database Replication Link', zone: 'Partner', protocol: 'MySQL/TLS', ports: '3306', auth: 'Username/Password', lastAudit: '2025-10-30', risk: 74 },
+    { name: 'CI/CD Pipeline (Jenkins)', zone: 'Cloud', protocol: 'HTTPS', ports: '443, 8080', auth: 'LDAP', lastAudit: '2025-12-18', risk: 67 },
+];
+
+let sortCol = -1, sortAsc = true;
+
+function renderKPIs() {
+    document.getElementById('kpiCards').innerHTML = KPI_DATA.map(k => `
+        <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+                <span class="text-xl">${k.icon}</span>
+            </div>
+            <div class="text-3xl font-extrabold" style="color:${k.color}">${k.value}</div>
+            <div class="text-xs mt-2 text-gray-500 font-medium">${k.trend}</div>
+        </div>`).join('');
+}
+
+function renderCharts() {
+    new Chart(document.getElementById('zoneChart'), {
+        type: 'bar',
+        data: {
+            labels: ['DMZ', 'Cloud', 'Remote', 'Partner'],
+            datasets: [
+                { label: 'High Risk', data: [3, 1, 4, 3], backgroundColor: '#ef4444' },
+                { label: 'Medium Risk', data: [2, 2, 1, 1], backgroundColor: '#f59e0b' },
+                { label: 'Low Risk', data: [1, 3, 1, 0], backgroundColor: '#10b981' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
+            scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+        }
+    });
+
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+            datasets: [
+                { label: 'Total Entry Points', data: [32,34,35,37,38,39,40,42,43,44,46,47], borderColor: '#8b5cf6', tension: 0.3, pointRadius: 3, fill: false },
+                { label: 'High Risk', data: [6,7,7,8,9,9,10,10,11,11,12,12], borderColor: '#ef4444', tension: 0.3, pointRadius: 3, fill: false }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
+
+function renderTable() {
+    const zone = document.getElementById('zoneFilter').value;
+    let filtered = zone === 'all' ? [...ENTRY_POINTS] : ENTRY_POINTS.filter(e => e.zone === zone);
+    if (sortCol >= 0) {
+        const keys = ['name','zone','protocol','ports','auth','lastAudit','risk'];
+        filtered.sort((a, b) => {
+            let va = a[keys[sortCol]], vb = b[keys[sortCol]];
+            if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            return sortAsc ? va - vb : vb - va;
+        });
+    }
+    document.getElementById('tableBody').innerHTML = filtered.map(e => {
+        const riskColor = e.risk >= 80 ? 'text-red-600 font-bold' : e.risk >= 50 ? 'text-amber-600 font-semibold' : 'text-green-600';
+        const badge = e.risk >= 80 ? '<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700">Critical</span>' :
+                      e.risk >= 50 ? '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700">Warning</span>' :
+                      '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">Secure</span>';
+        const rowClass = e.risk >= 80 ? 'bg-red-50' : '';
+        return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${rowClass}">
+            <td class="px-4 py-3 font-medium">${e.name}</td>
+            <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-violet-100 text-violet-700">${e.zone}</span></td>
+            <td class="px-4 py-3">${e.protocol}</td>
+            <td class="px-4 py-3 font-mono text-xs">${e.ports}</td>
+            <td class="px-4 py-3">${e.auth}</td>
+            <td class="px-4 py-3">${e.lastAudit}</td>
+            <td class="px-4 py-3 ${riskColor}">${e.risk}/100</td>
+            <td class="px-4 py-3">${badge}</td>
+        </tr>`;
+    }).join('');
+}
+
+function sortTable(col) {
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = true; }
+    renderTable();
+}
+
+function renderCritical() {
+    const critical = ENTRY_POINTS.filter(e => e.risk >= 80).sort((a,b) => b.risk - a.risk);
+    document.getElementById('criticalFindings').innerHTML = critical.map(e => `
+        <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-red-200">
+            <span class="text-red-600 font-bold text-lg">${e.risk}</span>
+            <div>
+                <div class="font-semibold text-gray-900">${e.name}</div>
+                <div class="text-xs text-gray-600">Auth: ${e.auth} | Last Audit: ${e.lastAudit} | Zone: ${e.zone}</div>
+            </div>
+        </div>`).join('');
+}
+
+renderKPIs();
+renderCharts();
+renderTable();
+renderCritical();
+</script>
+</body>
+</html>

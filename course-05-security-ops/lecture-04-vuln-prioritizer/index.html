@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Vulnerability Prioritizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: #4f46e5; }
+    th.sortable::after { content: ' \2195'; font-size: 10px; color: #9ca3af; }
+    .sev-critical { background: #dc2626; color: #fff; }
+    .sev-high { background: #f97316; color: #fff; }
+    .sev-medium { background: #eab308; color: #1c1917; }
+    .sev-low { background: #22c55e; color: #fff; }
+    .priority-bar { height: 8px; border-radius: 4px; background: #e5e7eb; }
+    .priority-fill { height: 100%; border-radius: 4px; }
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-indigo-600 text-sm font-medium tracking-wide uppercase">Course 5, Lecture 4 — Vulnerability Management</p>
+                <h1 class="text-3xl font-bold text-gray-900 mt-1">AI Vulnerability Prioritizer</h1>
+                <p class="text-gray-500 mt-1">50 vulnerabilities from Nessus scan, AI-prioritized by exploitability, exposure, and business impact</p>
+            </div>
+            <div class="text-right text-sm text-gray-400">
+                <div>Scan target: Meridian Engineering — all assets</div>
+                <div>Scan date: March 27, 2026</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Distribution Chart + Summary -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Severity Distribution</h2>
+            <canvas id="distChart" height="200"></canvas>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">AI Priority vs CVSS Score</h2>
+            <canvas id="scatterChart" height="200"></canvas>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-2">AI Triage Summary</h2>
+            <p class="text-xs text-gray-400 mb-4">Of 50 CVEs, AI recommends focusing on these first:</p>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
+                    <div>
+                        <div class="text-sm font-bold text-red-800">Patch Immediately</div>
+                        <div class="text-xs text-red-600">Exploitable, internet-facing, high impact</div>
+                    </div>
+                    <div class="text-2xl font-extrabold text-red-600">5</div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-100">
+                    <div>
+                        <div class="text-sm font-bold text-orange-800">Patch This Week</div>
+                        <div class="text-xs text-orange-600">High risk but mitigating controls exist</div>
+                    </div>
+                    <div class="text-2xl font-extrabold text-orange-600">8</div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                    <div>
+                        <div class="text-sm font-bold text-yellow-800">Schedule This Month</div>
+                        <div class="text-xs text-yellow-600">Moderate risk, internal only</div>
+                    </div>
+                    <div class="text-2xl font-extrabold text-yellow-600">15</div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+                    <div>
+                        <div class="text-sm font-bold text-green-800">Accept / Defer</div>
+                        <div class="text-xs text-green-600">Low risk, compensating controls in place</div>
+                    </div>
+                    <div class="text-2xl font-extrabold text-green-600">22</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Remediation Timeline -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Remediation Timeline</h2>
+        <canvas id="timelineChart" height="80"></canvas>
+    </div>
+</div>
+
+<!-- Vulnerability Table -->
+<div class="max-w-7xl mx-auto px-6 mt-6 mb-12">
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900">All 50 Vulnerabilities — Sortable</h2>
+            <div class="flex gap-2">
+                <select id="sevFilter" onchange="applyFilters()" class="text-xs border border-gray-200 rounded px-2 py-1">
+                    <option value="all">All Severities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+                <select id="priorityFilter" onchange="applyFilters()" class="text-xs border border-gray-200 rounded px-2 py-1">
+                    <option value="all">All Priorities</option>
+                    <option value="Patch Immediately">Patch Immediately</option>
+                    <option value="Patch This Week">Patch This Week</option>
+                    <option value="Schedule This Month">Schedule This Month</option>
+                    <option value="Accept / Defer">Accept / Defer</option>
+                </select>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="vulnTable">
+                <thead>
+                    <tr class="text-xs text-gray-400 uppercase border-b border-gray-200">
+                        <th class="text-left py-3 px-2 sortable" onclick="sortTable(0)">CVE ID</th>
+                        <th class="text-left py-3 px-2 sortable" onclick="sortTable(1)">Description</th>
+                        <th class="text-center py-3 px-2 sortable" onclick="sortTable(2)">CVSS</th>
+                        <th class="text-center py-3 px-2 sortable" onclick="sortTable(3)">Exploitability</th>
+                        <th class="text-center py-3 px-2 sortable" onclick="sortTable(4)">Exposure</th>
+                        <th class="text-center py-3 px-2 sortable" onclick="sortTable(5)">Business Impact</th>
+                        <th class="text-center py-3 px-2 sortable" onclick="sortTable(6)">AI Priority</th>
+                        <th class="text-left py-3 px-2">AI Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody id="vulnBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-white text-gray-400 text-center py-6 text-xs border-t border-gray-200">
+    CIO AI Security Operations Course — Lecture 4 Demo Output &bull; AI Vulnerability Prioritizer &bull; Generated March 2026
+</footer>
+
+<script>
+const vulns = [
+    { cve: 'CVE-2024-21887', desc: 'Ivanti Connect Secure command injection (VPN)', cvss: 9.1, exploit: 'Active', exposure: 'Internet', impact: 'Critical', priority: 98, action: 'Patch Immediately', rec: 'Apply Ivanti patch immediately; this is actively exploited by APT groups' },
+    { cve: 'CVE-2024-3400', desc: 'Palo Alto PAN-OS GlobalProtect command injection', cvss: 10.0, exploit: 'Active', exposure: 'Internet', impact: 'Critical', priority: 99, action: 'Patch Immediately', rec: 'Emergency patch; CISA KEV listed; full device compromise possible' },
+    { cve: 'CVE-2023-44228', desc: 'Apache Struts path traversal (file read)', cvss: 9.8, exploit: 'Active', exposure: 'Internet', impact: 'High', priority: 95, action: 'Patch Immediately', rec: 'Update Struts to 6.4.0+; WAF rule as interim mitigation' },
+    { cve: 'CVE-2024-1709', desc: 'ConnectWise ScreenConnect auth bypass', cvss: 10.0, exploit: 'Active', exposure: 'Internet', impact: 'Critical', priority: 97, action: 'Patch Immediately', rec: 'Patch or disable ScreenConnect immediately; trivial to exploit' },
+    { cve: 'CVE-2024-27198', desc: 'JetBrains TeamCity auth bypass', cvss: 9.8, exploit: 'Active', exposure: 'Internal', impact: 'High', priority: 88, action: 'Patch Immediately', rec: 'Update TeamCity; restrict network access to build server' },
+    { cve: 'CVE-2023-46604', desc: 'Apache ActiveMQ RCE', cvss: 10.0, exploit: 'Active', exposure: 'Internal', impact: 'High', priority: 85, action: 'Patch This Week', rec: 'Update ActiveMQ; internal-only reduces risk but RCE is trivial' },
+    { cve: 'CVE-2024-0012', desc: 'Palo Alto PAN-OS management interface auth bypass', cvss: 9.3, exploit: 'Active', exposure: 'Internal', impact: 'High', priority: 82, action: 'Patch This Week', rec: 'Restrict management access to dedicated VLAN; apply hotfix' },
+    { cve: 'CVE-2023-4966', desc: 'Citrix NetScaler (Citrix Bleed) session hijack', cvss: 9.4, exploit: 'Active', exposure: 'Internet', impact: 'Medium', priority: 80, action: 'Patch This Week', rec: 'Patch NetScaler; rotate all session tokens post-patch' },
+    { cve: 'CVE-2024-23897', desc: 'Jenkins arbitrary file read via CLI', cvss: 9.8, exploit: 'PoC', exposure: 'Internal', impact: 'Medium', priority: 72, action: 'Patch This Week', rec: 'Update Jenkins; disable CLI if not needed' },
+    { cve: 'CVE-2023-38545', desc: 'curl SOCKS5 heap buffer overflow', cvss: 9.8, exploit: 'PoC', exposure: 'Internal', impact: 'Medium', priority: 68, action: 'Patch This Week', rec: 'Update curl/libcurl across all systems; low exploitability in practice' },
+    { cve: 'CVE-2023-36884', desc: 'Microsoft Office HTML RCE (Storm-0978)', cvss: 8.8, exploit: 'Active', exposure: 'Email', impact: 'High', priority: 78, action: 'Patch This Week', rec: 'Apply Office updates; block external HTML in Office docs via GPO' },
+    { cve: 'CVE-2024-21762', desc: 'Fortinet FortiOS out-of-bound write', cvss: 9.6, exploit: 'Active', exposure: 'Internet', impact: 'High', priority: 90, action: 'Patch This Week', rec: 'Emergency FortiOS update; disable SSL VPN if unpatched' },
+    { cve: 'CVE-2023-20198', desc: 'Cisco IOS XE web UI privilege escalation', cvss: 10.0, exploit: 'Active', exposure: 'Internal', impact: 'Medium', priority: 75, action: 'Patch This Week', rec: 'Disable HTTP/HTTPS server on IOS XE; patch when available' },
+    { cve: 'CVE-2024-6387', desc: 'OpenSSH regreSSHion RCE (glibc)', cvss: 8.1, exploit: 'PoC', exposure: 'Internet', impact: 'High', priority: 70, action: 'Schedule This Month', rec: 'Update OpenSSH to 9.8+; difficult to exploit but high impact' },
+    { cve: 'CVE-2023-48788', desc: 'Fortinet FortiClient EMS SQL injection', cvss: 9.3, exploit: 'Active', exposure: 'Internal', impact: 'Medium', priority: 65, action: 'Schedule This Month', rec: 'Patch FortiClient EMS; restrict management interface access' },
+    { cve: 'CVE-2024-4577', desc: 'PHP CGI argument injection on Windows', cvss: 9.8, exploit: 'Active', exposure: 'Internal', impact: 'Low', priority: 55, action: 'Schedule This Month', rec: 'Update PHP; low impact as only internal web apps affected' },
+    { cve: 'CVE-2023-42793', desc: 'JetBrains TeamCity auth bypass (older)', cvss: 9.8, exploit: 'Active', exposure: 'Internal', impact: 'Medium', priority: 60, action: 'Schedule This Month', rec: 'Already patched in latest TeamCity; verify patch applied' },
+    { cve: 'CVE-2024-29849', desc: 'Veeam Backup Enterprise Manager auth bypass', cvss: 9.8, exploit: 'PoC', exposure: 'Internal', impact: 'High', priority: 68, action: 'Schedule This Month', rec: 'Update Veeam; critical for backup integrity' },
+    { cve: 'CVE-2023-27997', desc: 'Fortinet FortiOS SSL VPN heap overflow', cvss: 9.2, exploit: 'Active', exposure: 'Internet', impact: 'Medium', priority: 62, action: 'Schedule This Month', rec: 'Superseded by newer patch; verify FortiOS is current' },
+    { cve: 'CVE-2024-1086', desc: 'Linux kernel nf_tables use-after-free LPE', cvss: 7.8, exploit: 'PoC', exposure: 'Internal', impact: 'Medium', priority: 52, action: 'Schedule This Month', rec: 'Kernel update during next maintenance window' },
+    { cve: 'CVE-2023-35078', desc: 'Ivanti EPMM auth bypass', cvss: 10.0, exploit: 'Active', exposure: 'N/A', impact: 'Low', priority: 30, action: 'Accept / Defer', rec: 'Not deployed in environment; no action needed' },
+    { cve: 'CVE-2024-20353', desc: 'Cisco ASA/FTD DoS via HTTP', cvss: 8.6, exploit: 'Active', exposure: 'Internet', impact: 'Low', priority: 45, action: 'Schedule This Month', rec: 'Apply ASA update; DoS only, no data compromise' },
+    { cve: 'CVE-2023-22518', desc: 'Atlassian Confluence improper authorization', cvss: 9.1, exploit: 'Active', exposure: 'Internal', impact: 'Medium', priority: 58, action: 'Schedule This Month', rec: 'Update Confluence; restrict anonymous access' },
+    { cve: 'CVE-2024-3094', desc: 'XZ Utils backdoor (liblzma)', cvss: 10.0, exploit: 'Active', exposure: 'Internal', impact: 'Low', priority: 35, action: 'Accept / Defer', rec: 'Only affects xz 5.6.0/5.6.1; verify installed versions' },
+    { cve: 'CVE-2023-44487', desc: 'HTTP/2 Rapid Reset DoS', cvss: 7.5, exploit: 'Active', exposure: 'Internet', impact: 'Low', priority: 40, action: 'Accept / Defer', rec: 'Update web servers; DDoS mitigation at CDN layer' },
+    { cve: 'CVE-2024-21893', desc: 'Ivanti Connect Secure SSRF', cvss: 8.2, exploit: 'Active', exposure: 'Internet', impact: 'Medium', priority: 58, action: 'Schedule This Month', rec: 'Patch alongside CVE-2024-21887 (same appliance)' },
+    { cve: 'CVE-2023-34362', desc: 'MOVEit Transfer SQL injection', cvss: 9.8, exploit: 'Active', exposure: 'N/A', impact: 'Low', priority: 25, action: 'Accept / Defer', rec: 'MOVEit not deployed; no action needed' },
+    { cve: 'CVE-2024-0519', desc: 'Chrome V8 out-of-bounds access', cvss: 8.8, exploit: 'Active', exposure: 'Endpoint', impact: 'Medium', priority: 48, action: 'Schedule This Month', rec: 'Force Chrome auto-update via GPO; verify compliance' },
+    { cve: 'CVE-2023-32315', desc: 'Openfire admin console path traversal', cvss: 7.5, exploit: 'Active', exposure: 'Internal', impact: 'Low', priority: 32, action: 'Accept / Defer', rec: 'Update Openfire if deployed; low usage in org' },
+    { cve: 'CVE-2024-38077', desc: 'Windows Licensing RCE (MadLicense)', cvss: 9.8, exploit: 'PoC', exposure: 'Internal', impact: 'Medium', priority: 55, action: 'Schedule This Month', rec: 'Apply Windows updates; RDS licensing service not widely exposed' },
+    { cve: 'CVE-2023-36025', desc: 'Windows SmartScreen bypass', cvss: 8.8, exploit: 'Active', exposure: 'Endpoint', impact: 'Medium', priority: 50, action: 'Schedule This Month', rec: 'Apply Windows update; important for endpoint protection' },
+    { cve: 'CVE-2024-21412', desc: 'Windows Defender SmartScreen bypass (Water Hydra)', cvss: 8.1, exploit: 'Active', exposure: 'Endpoint', impact: 'Medium', priority: 52, action: 'Schedule This Month', rec: 'Patch endpoints; actively exploited in targeted attacks' },
+    { cve: 'CVE-2023-36802', desc: 'MSKSSRV streaming service EoP', cvss: 7.8, exploit: 'Active', exposure: 'Internal', impact: 'Low', priority: 28, action: 'Accept / Defer', rec: 'Local privilege escalation; lower risk with limited physical access' },
+    { cve: 'CVE-2024-30088', desc: 'Windows Kernel EoP', cvss: 7.0, exploit: 'PoC', exposure: 'Internal', impact: 'Low', priority: 25, action: 'Accept / Defer', rec: 'Include in standard patch cycle; no urgency' },
+    { cve: 'CVE-2023-38146', desc: 'Windows Themes RCE (ThemeBleed)', cvss: 8.8, exploit: 'PoC', exposure: 'Endpoint', impact: 'Low', priority: 30, action: 'Accept / Defer', rec: 'Patch when convenient; requires user interaction' },
+    { cve: 'CVE-2024-27199', desc: 'JetBrains TeamCity path traversal', cvss: 7.3, exploit: 'Active', exposure: 'Internal', impact: 'Low', priority: 35, action: 'Accept / Defer', rec: 'Fixed with TeamCity update for CVE-2024-27198' },
+    { cve: 'CVE-2023-29357', desc: 'SharePoint Server EoP', cvss: 9.8, exploit: 'Active', exposure: 'Internal', impact: 'Medium', priority: 58, action: 'Schedule This Month', rec: 'Apply SharePoint CU; restrict anonymous access' },
+    { cve: 'CVE-2024-24919', desc: 'Check Point VPN information disclosure', cvss: 8.6, exploit: 'Active', exposure: 'N/A', impact: 'Low', priority: 20, action: 'Accept / Defer', rec: 'Check Point not deployed; no action needed' },
+    { cve: 'CVE-2023-42115', desc: 'Exim AUTH out-of-bounds write', cvss: 9.8, exploit: 'PoC', exposure: 'Internet', impact: 'Low', priority: 38, action: 'Accept / Defer', rec: 'Using Exchange, not Exim; no action needed' },
+    { cve: 'CVE-2024-47575', desc: 'Fortinet FortiManager missing auth (FortiJump)', cvss: 9.8, exploit: 'Active', exposure: 'Internal', impact: 'High', priority: 72, action: 'Patch This Week', rec: 'Patch FortiManager; restrict management plane access' },
+    { cve: 'CVE-2023-46747', desc: 'F5 BIG-IP unauthenticated RCE', cvss: 9.8, exploit: 'Active', exposure: 'N/A', impact: 'Low', priority: 22, action: 'Accept / Defer', rec: 'BIG-IP not deployed; no action needed' },
+    { cve: 'CVE-2024-12356', desc: 'BeyondTrust PRA/RS command injection', cvss: 9.8, exploit: 'Active', exposure: 'Internal', impact: 'Medium', priority: 62, action: 'Schedule This Month', rec: 'Patch BeyondTrust; limit access to admin network' },
+    { cve: 'CVE-2023-49103', desc: 'ownCloud graphapi info disclosure', cvss: 10.0, exploit: 'Active', exposure: 'N/A', impact: 'Low', priority: 18, action: 'Accept / Defer', rec: 'ownCloud not deployed; no action needed' },
+    { cve: 'CVE-2024-20399', desc: 'Cisco NX-OS CLI command injection', cvss: 6.0, exploit: 'Active', exposure: 'Internal', impact: 'Low', priority: 22, action: 'Accept / Defer', rec: 'Requires admin CLI access; very limited attack surface' },
+    { cve: 'CVE-2023-48365', desc: 'Qlik Sense HTTP tunneling RCE', cvss: 9.9, exploit: 'Active', exposure: 'N/A', impact: 'Low', priority: 15, action: 'Accept / Defer', rec: 'Qlik Sense not deployed; no action needed' },
+    { cve: 'CVE-2024-9680', desc: 'Firefox use-after-free in animation timelines', cvss: 9.8, exploit: 'Active', exposure: 'Endpoint', impact: 'Medium', priority: 48, action: 'Schedule This Month', rec: 'Update Firefox; most users on Chrome so limited exposure' },
+    { cve: 'CVE-2023-35082', desc: 'Ivanti EPMM auth bypass (older)', cvss: 10.0, exploit: 'Active', exposure: 'N/A', impact: 'Low', priority: 15, action: 'Accept / Defer', rec: 'Not deployed; no action needed' },
+    { cve: 'CVE-2024-50623', desc: 'Cleo file transfer unrestricted upload', cvss: 9.8, exploit: 'Active', exposure: 'N/A', impact: 'Low', priority: 18, action: 'Accept / Defer', rec: 'Cleo not deployed; no action needed' },
+    { cve: 'CVE-2023-22515', desc: 'Atlassian Confluence broken access control', cvss: 10.0, exploit: 'Active', exposure: 'Internal', impact: 'Medium', priority: 55, action: 'Schedule This Month', rec: 'Verify Confluence is patched; restrict external access' },
+    { cve: 'CVE-2024-28995', desc: 'SolarWinds Serv-U path traversal', cvss: 8.6, exploit: 'Active', exposure: 'Internet', impact: 'Low', priority: 38, action: 'Accept / Defer', rec: 'Serv-U deployed but on isolated segment; monitor for exploitation' },
+];
+
+// Sort state
+let sortCol = 6;
+let sortDir = -1;
+
+function getSeverity(cvss) {
+    if (cvss >= 9.0) return 'Critical';
+    if (cvss >= 7.0) return 'High';
+    if (cvss >= 4.0) return 'Medium';
+    return 'Low';
+}
+
+function renderTable() {
+    const sevFilter = document.getElementById('sevFilter').value;
+    const priFilter = document.getElementById('priorityFilter').value;
+    let data = [...vulns];
+    if (sevFilter !== 'all') data = data.filter(v => getSeverity(v.cvss) === sevFilter);
+    if (priFilter !== 'all') data = data.filter(v => v.action === priFilter);
+
+    const keys = ['cve', 'desc', 'cvss', 'exploit', 'exposure', 'impact', 'priority'];
+    data.sort((a, b) => {
+        let va = keys[sortCol] === 'priority' ? a.priority : a[keys[sortCol]];
+        let vb = keys[sortCol] === 'priority' ? b.priority : b[keys[sortCol]];
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        if (va < vb) return -1 * sortDir;
+        if (va > vb) return 1 * sortDir;
+        return 0;
+    });
+
+    const tbody = document.getElementById('vulnBody');
+    tbody.innerHTML = '';
+    data.forEach(v => {
+        const sev = getSeverity(v.cvss);
+        const sevClass = `sev-${sev.toLowerCase()}`;
+        const priFill = v.priority >= 80 ? 'bg-red-500' : v.priority >= 60 ? 'bg-orange-500' : v.priority >= 40 ? 'bg-yellow-500' : 'bg-green-500';
+        const exploitColor = v.exploit === 'Active' ? 'text-red-600 font-semibold' : 'text-gray-500';
+        const expColor = v.exposure === 'Internet' ? 'text-red-600 font-semibold' : v.exposure === 'Email' || v.exposure === 'Endpoint' ? 'text-orange-600' : v.exposure === 'N/A' ? 'text-gray-300' : 'text-gray-600';
+        tbody.innerHTML += `<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2 px-2 text-xs font-mono text-indigo-600">${v.cve}</td>
+            <td class="py-2 px-2 text-xs text-gray-700">${v.desc}</td>
+            <td class="py-2 px-2 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold ${sevClass}">${v.cvss}</span></td>
+            <td class="py-2 px-2 text-center text-xs ${exploitColor}">${v.exploit}</td>
+            <td class="py-2 px-2 text-center text-xs ${expColor}">${v.exposure}</td>
+            <td class="py-2 px-2 text-center text-xs">${v.impact}</td>
+            <td class="py-2 px-2 text-center">
+                <div class="flex items-center gap-2">
+                    <div class="priority-bar flex-1"><div class="priority-fill ${priFill}" style="width:${v.priority}%"></div></div>
+                    <span class="text-xs font-bold w-6 text-right">${v.priority}</span>
+                </div>
+            </td>
+            <td class="py-2 px-2 text-xs text-gray-500">${v.rec}</td>
+        </tr>`;
+    });
+}
+
+function sortTable(col) {
+    if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = -1; }
+    renderTable();
+}
+
+function applyFilters() { renderTable(); }
+
+renderTable();
+
+// === CHARTS ===
+const sevCounts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
+vulns.forEach(v => sevCounts[getSeverity(v.cvss)]++);
+
+new Chart(document.getElementById('distChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Critical (' + sevCounts.Critical + ')', 'High (' + sevCounts.High + ')', 'Medium (' + sevCounts.Medium + ')', 'Low (' + sevCounts.Low + ')'],
+        datasets: [{ data: Object.values(sevCounts), backgroundColor: ['#dc2626', '#f97316', '#eab308', '#22c55e'], borderWidth: 0 }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } } } }
+});
+
+new Chart(document.getElementById('scatterChart'), {
+    type: 'scatter',
+    data: {
+        datasets: [{
+            label: 'Vulnerabilities',
+            data: vulns.map(v => ({ x: v.cvss, y: v.priority })),
+            backgroundColor: vulns.map(v => v.priority >= 80 ? '#dc2626' : v.priority >= 60 ? '#f97316' : v.priority >= 40 ? '#eab308' : '#22c55e'),
+            pointRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { title: { display: true, text: 'CVSS Score', font: { size: 11, family: 'Inter' } }, min: 5, max: 10.5 },
+            y: { title: { display: true, text: 'AI Priority Score', font: { size: 11, family: 'Inter' } }, min: 0, max: 100 }
+        }
+    }
+});
+
+new Chart(document.getElementById('timelineChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Week 1 (Immediate)', 'Week 2', 'Week 3', 'Week 4', 'Deferred'],
+        datasets: [
+            { label: 'Critical', data: [5, 0, 0, 0, 0], backgroundColor: '#dc2626' },
+            { label: 'High', data: [3, 5, 0, 0, 0], backgroundColor: '#f97316' },
+            { label: 'Medium', data: [0, 0, 8, 7, 0], backgroundColor: '#eab308' },
+            { label: 'Low/Accept', data: [0, 0, 0, 0, 22], backgroundColor: '#22c55e' }
+        ]
+    },
+    options: {
+        responsive: true, indexAxis: 'y',
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } } },
+        scales: { x: { stacked: true }, y: { stacked: true } }
+    }
+});
+</script>
+</body>
+</html>

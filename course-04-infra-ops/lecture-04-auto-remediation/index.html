@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Remediation Pipeline Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .scenario-btn { transition: all 0.3s ease; cursor: pointer; }
+        .scenario-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .scenario-btn.active { box-shadow: 0 0 0 3px rgba(99,102,241,0.4); }
+        .pipeline-step { transition: all 0.5s ease; }
+        .pipeline-step.completed { background: #f0fdf4; border-color: #22c55e; }
+        .pipeline-step.active { background: #eff6ff; border-color: #3b82f6; animation: stepPulse 1.5s ease-in-out infinite; }
+        .pipeline-step.pending { background: #f9fafb; border-color: #d1d5db; opacity: 0.6; }
+        @keyframes stepPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.3); } 50% { box-shadow: 0 0 0 8px rgba(59,130,246,0); } }
+        .log-line { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .connector { width: 40px; height: 2px; background: #d1d5db; }
+        .connector.completed { background: #22c55e; }
+        .connector.active { background: #3b82f6; animation: connectorPulse 1s ease-in-out infinite; }
+        @keyframes connectorPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-gradient-to-r from-gray-900 via-slate-800 to-emerald-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-400 text-sm font-medium tracking-wider uppercase">Course 4: AI Infrastructure Ops &mdash; Lecture 4 Demo</p>
+                    <h1 class="text-3xl font-bold mt-1">Auto-Remediation Pipeline</h1>
+                    <p class="text-slate-300 text-sm mt-1">Watch AI detect, diagnose, fix, verify, and notify &mdash; in seconds</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-green-400">3s</p>
+                        <p class="text-xs text-slate-400">Avg Fix Time</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-amber-400">45m</p>
+                        <p class="text-xs text-slate-400">Old Manual Time</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-cyan-400">99.2%</p>
+                        <p class="text-xs text-slate-400">Success Rate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+        <!-- Scenario Selection -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Select a Scenario</h2>
+            <p class="text-sm text-gray-500 mb-4">Click a scenario to watch the auto-remediation pipeline execute in real time</p>
+            <div class="grid grid-cols-5 gap-3" id="scenarioButtons"></div>
+        </div>
+
+        <!-- Pipeline Visualization -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Remediation Pipeline</h2>
+            <div class="flex items-center justify-between" id="pipelineSteps">
+                <div class="pipeline-step pending flex-1 border-2 rounded-xl p-4 text-center" id="step-detect">
+                    <div class="text-2xl mb-2">🔍</div>
+                    <h3 class="font-bold text-sm">Detection</h3>
+                    <p class="text-xs text-gray-500 mt-1" id="step-detect-detail">Waiting...</p>
+                </div>
+                <div class="connector" id="conn-1"></div>
+                <div class="pipeline-step pending flex-1 border-2 rounded-xl p-4 text-center" id="step-diagnose">
+                    <div class="text-2xl mb-2">🧠</div>
+                    <h3 class="font-bold text-sm">Diagnosis</h3>
+                    <p class="text-xs text-gray-500 mt-1" id="step-diagnose-detail">Waiting...</p>
+                </div>
+                <div class="connector" id="conn-2"></div>
+                <div class="pipeline-step pending flex-1 border-2 rounded-xl p-4 text-center" id="step-action">
+                    <div class="text-2xl mb-2">⚡</div>
+                    <h3 class="font-bold text-sm">Action</h3>
+                    <p class="text-xs text-gray-500 mt-1" id="step-action-detail">Waiting...</p>
+                </div>
+                <div class="connector" id="conn-3"></div>
+                <div class="pipeline-step pending flex-1 border-2 rounded-xl p-4 text-center" id="step-verify">
+                    <div class="text-2xl mb-2">✅</div>
+                    <h3 class="font-bold text-sm">Verification</h3>
+                    <p class="text-xs text-gray-500 mt-1" id="step-verify-detail">Waiting...</p>
+                </div>
+                <div class="connector" id="conn-4"></div>
+                <div class="pipeline-step pending flex-1 border-2 rounded-xl p-4 text-center" id="step-notify">
+                    <div class="text-2xl mb-2">📢</div>
+                    <h3 class="font-bold text-sm">Notification</h3>
+                    <p class="text-xs text-gray-500 mt-1" id="step-notify-detail">Waiting...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Log Output -->
+        <div class="bg-gray-900 rounded-xl shadow-sm border border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm font-bold text-gray-300">Remediation Log</h2>
+                <span class="text-xs text-gray-500 font-mono" id="logTimer">00:00.000</span>
+            </div>
+            <div class="font-mono text-xs space-y-1 max-h-64 overflow-y-auto" id="logOutput">
+                <p class="text-gray-500">Select a scenario above to begin...</p>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Manual vs Auto-Remediation</h2>
+            <p class="text-sm text-gray-500 mb-4">Time and cost comparison across all 5 scenarios</p>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b-2 border-gray-200">
+                        <th class="text-left py-3 px-3 font-semibold text-gray-600">Scenario</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Manual Time</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Auto Time</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Speedup</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Annual Occurrences</th>
+                        <th class="text-center py-3 px-3 font-semibold text-gray-600">Hours Saved/Year</th>
+                    </tr>
+                </thead>
+                <tbody id="comparisonTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Bottom Insight -->
+        <div class="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-6">
+            <h3 class="font-bold text-emerald-900 text-lg">The Real Win: Sarah Can Sleep</h3>
+            <p class="text-emerald-800 mt-2">These 5 scenarios represent the most common 2am wake-up calls in IT operations. Automated, they resolve in <strong>3 seconds instead of 45 minutes</strong>, with a complete audit trail. Your on-call engineer gets paged only for novel problems the AI hasn't seen before &mdash; which, after 90 days of learning, is less than 5% of incidents.</p>
+        </div>
+    </div>
+
+<script>
+const SCENARIOS = [
+    {
+        id: 0, name: "Disk Full", icon: "💾", server: "prod-db-01",
+        desc: "/var/log at 95% capacity",
+        steps: {
+            detect: { detail: "Disk /var/log at 95.2% on prod-db-01", time: 0.1 },
+            diagnose: { detail: "Log rotation stalled. Oldest: 45 days. Policy: 14 days.", time: 0.4 },
+            action: { detail: "Archived 12.3 GB of logs older than 14 days to /archive/", time: 1.8 },
+            verify: { detail: "Disk at 62.1% after cleanup. Service healthy.", time: 0.3 },
+            notify: { detail: "Slack #ops: Auto-fixed disk full on prod-db-01. 12.3 GB freed.", time: 0.1 }
+        },
+        logs: [
+            { t: "0.000", level: "INFO", msg: "Alert received: disk_full on prod-db-01 (/var/log at 95.2%)" },
+            { t: "0.102", level: "INFO", msg: "Diagnosing... checking log rotation policy" },
+            { t: "0.215", level: "WARN", msg: "logrotate last ran 3 days ago — cron job stalled (exit code 1)" },
+            { t: "0.318", level: "INFO", msg: "Found 12.3 GB of logs older than 14-day retention policy" },
+            { t: "0.420", level: "INFO", msg: "Executing: compress and move logs > 14d to /archive/2026/03/" },
+            { t: "1.100", level: "INFO", msg: "Archived: syslog.8.gz through syslog.45.gz (247 files)" },
+            { t: "1.450", level: "INFO", msg: "Archived: postgresql-2026-02-*.log (28 files, 4.1 GB)" },
+            { t: "1.800", level: "INFO", msg: "Fixing logrotate: reset cron, cleared stale PID file" },
+            { t: "2.100", level: "INFO", msg: "Verification: /var/log now at 62.1% (was 95.2%)" },
+            { t: "2.300", level: "INFO", msg: "Service check: postgresql — running, accepting connections" },
+            { t: "2.500", level: "INFO", msg: "Notification sent to #ops-alerts (Slack) and on-call engineer" },
+            { t: "2.600", level: "DONE", msg: "Remediation complete. Total time: 2.6 seconds. No human intervention required." }
+        ],
+        manual: "45 min", auto: "2.6s", speedup: "1,038x", annual: 156, hoursSaved: 117
+    },
+    {
+        id: 1, name: "Service Down", icon: "🔴", server: "prod-app-02",
+        desc: "Payment service not responding",
+        steps: {
+            detect: { detail: "payment-svc health check failed 3x consecutive", time: 0.1 },
+            diagnose: { detail: "Process crashed (OOM kill). Exit code 137. Heap exceeded 4GB limit.", time: 0.5 },
+            action: { detail: "Restarted payment-svc with increased heap (6GB). Applied memory guard.", time: 2.1 },
+            verify: { detail: "Service responding. 200 OK. Latency p99: 180ms (normal).", time: 0.4 },
+            notify: { detail: "PagerDuty: Informational. payment-svc auto-restarted on prod-app-02.", time: 0.1 }
+        },
+        logs: [
+            { t: "0.000", level: "CRIT", msg: "Alert: payment-svc DOWN on prod-app-02 (3 consecutive health check failures)" },
+            { t: "0.098", level: "INFO", msg: "Diagnosing... checking process status and system logs" },
+            { t: "0.201", level: "WARN", msg: "Process PID 24891 killed by OOM killer (exit 137)" },
+            { t: "0.310", level: "INFO", msg: "dmesg: Out of memory: Killed process 24891 (java) total-vm:5242880kB" },
+            { t: "0.415", level: "INFO", msg: "Root cause: heap grew to 4.8 GB (limit 4 GB). Known leak in v3.14.2." },
+            { t: "0.520", level: "INFO", msg: "Executing: restart with -Xmx6g and GC logging enabled" },
+            { t: "1.200", level: "INFO", msg: "Process started: PID 25012, heap allocated 6 GB" },
+            { t: "1.800", level: "INFO", msg: "Service warming up... loading payment processor connections" },
+            { t: "2.100", level: "INFO", msg: "Health check: 200 OK (latency: 180ms)" },
+            { t: "2.400", level: "INFO", msg: "Queued payments processing: 12 transactions cleared in 0.8s" },
+            { t: "2.600", level: "INFO", msg: "Filed JIRA: INFRA-4421 'payment-svc memory leak requires v3.14.3 hotfix'" },
+            { t: "2.800", level: "DONE", msg: "Remediation complete. Total time: 2.8 seconds. Downtime: 8 seconds total." }
+        ],
+        manual: "38 min", auto: "2.8s", speedup: "814x", annual: 89, hoursSaved: 56
+    },
+    {
+        id: 2, name: "Memory Leak", icon: "🧠", server: "prod-web-01",
+        desc: "Node.js worker at 92% memory",
+        steps: {
+            detect: { detail: "Worker PID 8832 memory at 92.4% (7.4 GB / 8 GB)", time: 0.1 },
+            diagnose: { detail: "Heap snapshot: 2.1M event listeners (expected: ~5K). WebSocket handler leak.", time: 0.6 },
+            action: { detail: "Graceful worker restart with connection drain (15s). New worker healthy.", time: 3.2 },
+            verify: { detail: "Memory at 23%. All WebSocket clients reconnected. Zero dropped.", time: 0.5 },
+            notify: { detail: "Slack #ops: Memory leak auto-mitigated on prod-web-01 worker.", time: 0.1 }
+        },
+        logs: [
+            { t: "0.000", level: "WARN", msg: "Alert: memory_high on prod-web-01 worker PID 8832 (92.4%)" },
+            { t: "0.105", level: "INFO", msg: "Taking heap snapshot for analysis..." },
+            { t: "0.380", level: "WARN", msg: "Heap analysis: 2,134,891 EventListener objects (expected ~5,000)" },
+            { t: "0.520", level: "INFO", msg: "Pattern match: WebSocket handler not cleaning up on disconnect" },
+            { t: "0.610", level: "INFO", msg: "This matches known issue INFRA-4205 (introduced in deploy #847)" },
+            { t: "0.700", level: "INFO", msg: "Executing: graceful worker restart with 15s connection drain" },
+            { t: "0.800", level: "INFO", msg: "Draining: 342 active WebSocket connections being migrated..." },
+            { t: "2.100", level: "INFO", msg: "All connections drained. Old worker shutting down." },
+            { t: "2.500", level: "INFO", msg: "New worker started: PID 8901, memory 1.8 GB (23%)" },
+            { t: "3.200", level: "INFO", msg: "342 WebSocket clients reconnected. Zero dropped messages." },
+            { t: "3.500", level: "INFO", msg: "Verification: memory stable at 23%. No leak in new process (monitoring)." },
+            { t: "3.700", level: "DONE", msg: "Remediation complete. Total time: 3.7 seconds. Zero client impact." }
+        ],
+        manual: "52 min", auto: "3.7s", speedup: "843x", annual: 52, hoursSaved: 45
+    },
+    {
+        id: 3, name: "Cert Expiring", icon: "🔐", server: "prod-lb-01",
+        desc: "SSL cert expires in 48 hours",
+        steps: {
+            detect: { detail: "*.company.com cert expires in 47h 22m", time: 0.1 },
+            diagnose: { detail: "Let's Encrypt auto-renewal failed (DNS challenge timeout). 3 retries failed.", time: 0.3 },
+            action: { detail: "Fixed DNS propagation delay. Forced renewal. New cert valid 90 days.", time: 4.1 },
+            verify: { detail: "New cert deployed to all 4 load balancers. TLS handshake verified.", time: 0.8 },
+            notify: { detail: "Email to security team: cert renewed. Root cause: DNS provider latency.", time: 0.1 }
+        },
+        logs: [
+            { t: "0.000", level: "WARN", msg: "Alert: ssl_cert_expiry — *.company.com expires in 47h 22m" },
+            { t: "0.095", level: "INFO", msg: "Checking auto-renewal status..." },
+            { t: "0.210", level: "WARN", msg: "certbot.log: DNS-01 challenge failed 3 times (timeout after 120s)" },
+            { t: "0.315", level: "INFO", msg: "Root cause: Cloudflare API rate limit hit during batch DNS update at 02:00" },
+            { t: "0.400", level: "INFO", msg: "Executing: retry with exponential backoff and dedicated API token" },
+            { t: "1.200", level: "INFO", msg: "DNS challenge record created: _acme-challenge.company.com" },
+            { t: "2.500", level: "INFO", msg: "DNS propagation confirmed (4/4 nameservers)" },
+            { t: "3.200", level: "INFO", msg: "Certificate issued: *.company.com (valid until Jun 26, 2026)" },
+            { t: "3.800", level: "INFO", msg: "Deploying to load balancers: prod-lb-01, prod-lb-02, prod-lb-03, prod-lb-04" },
+            { t: "4.500", level: "INFO", msg: "TLS handshake test: all 4 LBs serving new cert (SHA256: a8f3...)" },
+            { t: "4.800", level: "INFO", msg: "Updated renewal config to avoid Cloudflare rate limit window" },
+            { t: "5.000", level: "DONE", msg: "Remediation complete. Total time: 5.0 seconds. Cert valid 90 days." }
+        ],
+        manual: "35 min", auto: "5.0s", speedup: "420x", annual: 24, hoursSaved: 14
+    },
+    {
+        id: 4, name: "Log Rotation", icon: "📄", server: "prod-app-cluster",
+        desc: "Application logs consuming 89% of /var",
+        steps: {
+            detect: { detail: "/var at 89% across 6 app servers. Log files avg 2.1 GB each.", time: 0.1 },
+            diagnose: { detail: "Debug logging left on after incident #4201. Generating 800 MB/day.", time: 0.4 },
+            action: { detail: "Set log level to WARN. Compressed and archived 14.2 GB. Rotated all logs.", time: 2.8 },
+            verify: { detail: "All 6 servers at <55% disk. Log write rate dropped 94%.", time: 0.6 },
+            notify: { detail: "Slack #dev: Debug logging disabled on prod-app-cluster. Filed cleanup ticket.", time: 0.1 }
+        },
+        logs: [
+            { t: "0.000", level: "WARN", msg: "Alert: disk_warning on prod-app-[01-06] (/var at 89% avg)" },
+            { t: "0.098", level: "INFO", msg: "Scanning /var/log across 6 servers..." },
+            { t: "0.250", level: "WARN", msg: "app.log files averaging 2.1 GB each (normal: ~200 MB)" },
+            { t: "0.380", level: "INFO", msg: "Log analysis: DEBUG level active since Mar 12 (incident #4201 debugging)" },
+            { t: "0.420", level: "INFO", msg: "Incident #4201 was resolved Mar 14 — debug logging was never reverted" },
+            { t: "0.500", level: "INFO", msg: "Executing across 6 servers: set log level to WARN, compress old logs" },
+            { t: "1.200", level: "INFO", msg: "prod-app-01: compressed 2.3 GB, freed to 51% disk" },
+            { t: "1.500", level: "INFO", msg: "prod-app-02: compressed 2.1 GB, freed to 49% disk" },
+            { t: "1.800", level: "INFO", msg: "prod-app-03: compressed 2.4 GB, freed to 52% disk" },
+            { t: "2.100", level: "INFO", msg: "prod-app-04: compressed 2.2 GB, freed to 50% disk" },
+            { t: "2.400", level: "INFO", msg: "prod-app-05: compressed 2.1 GB, freed to 48% disk" },
+            { t: "2.800", level: "INFO", msg: "prod-app-06: compressed 2.1 GB, freed to 53% disk. All 6 complete." },
+            { t: "3.200", level: "INFO", msg: "Log write rate: dropped from 800 MB/day to 45 MB/day (94% reduction)" },
+            { t: "3.400", level: "INFO", msg: "Filed JIRA: DEV-2891 'Add auto-revert for debug logging after incident close'" },
+            { t: "3.500", level: "DONE", msg: "Remediation complete. Total time: 3.5 seconds. 14.2 GB freed across cluster." }
+        ],
+        manual: "60 min", auto: "3.5s", speedup: "1,029x", annual: 78, hoursSaved: 78
+    }
+];
+
+// ===== RENDER SCENARIO BUTTONS =====
+document.getElementById('scenarioButtons').innerHTML = SCENARIOS.map(s =>
+    `<button class="scenario-btn bg-white border-2 border-gray-200 rounded-xl p-4 text-center" onclick="runScenario(${s.id})">
+        <div class="text-3xl mb-2">${s.icon}</div>
+        <h3 class="font-bold text-sm text-gray-900">${s.name}</h3>
+        <p class="text-xs text-gray-500 mt-1">${s.server}</p>
+        <p class="text-xs text-gray-400">${s.desc}</p>
+    </button>`
+).join('');
+
+// ===== COMPARISON TABLE =====
+document.getElementById('comparisonTable').innerHTML = SCENARIOS.map(s =>
+    `<tr class="border-b border-gray-100 hover:bg-gray-50">
+        <td class="py-3 px-3 font-medium text-gray-900">${s.icon} ${s.name}</td>
+        <td class="py-3 px-3 text-center text-red-600 font-bold">${s.manual}</td>
+        <td class="py-3 px-3 text-center text-green-600 font-bold">${s.auto}</td>
+        <td class="py-3 px-3 text-center font-bold text-indigo-600">${s.speedup}</td>
+        <td class="py-3 px-3 text-center text-gray-600">${s.annual}/yr</td>
+        <td class="py-3 px-3 text-center text-green-700 font-bold">${s.hoursSaved}h</td>
+    </tr>`
+).join('') + `<tr class="border-t-2 border-gray-300 bg-gray-50">
+    <td class="py-3 px-3 font-bold text-gray-900">TOTAL</td>
+    <td class="py-3 px-3 text-center"></td><td class="py-3 px-3 text-center"></td><td class="py-3 px-3 text-center"></td>
+    <td class="py-3 px-3 text-center font-bold">${SCENARIOS.reduce((a,s) => a+s.annual, 0)}/yr</td>
+    <td class="py-3 px-3 text-center text-green-700 font-bold">${SCENARIOS.reduce((a,s) => a+s.hoursSaved, 0)}h</td>
+</tr>`;
+
+// ===== PIPELINE ANIMATION =====
+let animationRunning = false;
+
+async function runScenario(id) {
+    if (animationRunning) return;
+    animationRunning = true;
+
+    const s = SCENARIOS[id];
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.scenario-btn')[id].classList.add('active');
+
+    // Reset pipeline
+    const stepNames = ['detect', 'diagnose', 'action', 'verify', 'notify'];
+    stepNames.forEach(name => {
+        document.getElementById(`step-${name}`).className = 'pipeline-step pending flex-1 border-2 rounded-xl p-4 text-center';
+        document.getElementById(`step-${name}-detail`).textContent = 'Waiting...';
+    });
+    for (let i = 1; i <= 4; i++) document.getElementById(`conn-${i}`).className = 'connector';
+
+    // Reset log
+    const logEl = document.getElementById('logOutput');
+    logEl.innerHTML = '';
+    const timerEl = document.getElementById('logTimer');
+
+    // Animate each step
+    for (let i = 0; i < stepNames.length; i++) {
+        const name = stepNames[i];
+        const step = s.steps[name];
+
+        // Activate step
+        document.getElementById(`step-${name}`).className = 'pipeline-step active flex-1 border-2 rounded-xl p-4 text-center';
+        document.getElementById(`step-${name}-detail`).textContent = step.detail;
+
+        // Add relevant logs
+        const stepLogs = s.logs.filter((_, li) => {
+            const ranges = [[0,1],[1,4],[4,8],[8,10],[10,12]];
+            return li >= ranges[i][0] && li < ranges[i][1];
+        });
+
+        for (const log of stepLogs) {
+            const color = { INFO: 'text-green-400', WARN: 'text-yellow-400', CRIT: 'text-red-400', DONE: 'text-cyan-400' }[log.level] || 'text-gray-400';
+            logEl.innerHTML += `<p class="log-line"><span class="text-gray-600">[${log.t}s]</span> <span class="${color}">${log.level}</span> ${log.msg}</p>`;
+            timerEl.textContent = log.t + 's';
+            logEl.scrollTop = logEl.scrollHeight;
+            await sleep(300);
+        }
+
+        // Complete step
+        document.getElementById(`step-${name}`).className = 'pipeline-step completed flex-1 border-2 rounded-xl p-4 text-center';
+        if (i < 4) document.getElementById(`conn-${i+1}`).className = 'connector completed';
+        await sleep(200);
+    }
+
+    animationRunning = false;
+}
+
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+</script>
+</body>
+</html>

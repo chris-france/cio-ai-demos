@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Noise Analyzer — 90 Days of Infrastructure Alerts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .kpi-card { transition: all 0.3s ease; }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { color: #1d4ed8; }
+        .noise-high { background: #fef2f2; border-left: 3px solid #ef4444; }
+        .noise-medium { background: #fffbeb; border-left: 3px solid #f59e0b; }
+        .noise-low { background: #f0fdf4; border-left: 3px solid #22c55e; }
+        .filter-btn { transition: all 0.2s; }
+        .filter-btn.active { background: #1e40af; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-gray-900 via-slate-800 to-red-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-400 text-sm font-medium tracking-wider uppercase">Course 4: AI Infrastructure Ops &mdash; Lecture 1 Demo</p>
+                    <h1 class="text-3xl font-bold mt-1">Alert Noise Analyzer</h1>
+                    <p class="text-slate-300 text-sm mt-1">90-day analysis &mdash; proving 90% of your alerts are lying to you</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-red-400" id="kpi-total">547</p>
+                        <p class="text-xs text-slate-400">Total Alerts (90d)</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-amber-400" id="kpi-fp">91.2%</p>
+                        <p class="text-xs text-slate-400">False Positive Rate</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-cyan-400" id="kpi-mtta">23m</p>
+                        <p class="text-xs text-slate-400">Mean Time to Ack</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-orange-400" id="kpi-fatigue">8.7</p>
+                        <p class="text-xs text-slate-400">Fatigue Index /10</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-2 gap-6">
+            <!-- Pie Chart: Real vs Noise -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Alert Classification</h2>
+                <p class="text-sm text-gray-500 mb-4">Real incidents vs noise over 90 days</p>
+                <div class="h-72"><canvas id="pieChart"></canvas></div>
+            </div>
+
+            <!-- Bar Chart: Alerts by Category and Time of Day -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Alerts by Category &amp; Time of Day</h2>
+                <p class="text-sm text-gray-500 mb-4">When and what fires most</p>
+                <div class="h-72"><canvas id="barChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Trend Chart -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Daily Alert Volume &mdash; 90 Day Trend</h2>
+            <p class="text-sm text-gray-500 mb-4">Notice the pattern: noise is constant, real incidents are rare spikes</p>
+            <div class="h-64"><canvas id="trendChart"></canvas></div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex items-center gap-3">
+            <span class="text-sm font-semibold text-gray-600">Filter:</span>
+            <button class="filter-btn active px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300" onclick="filterTable('all')">All</button>
+            <button class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300" onclick="filterTable('high')">High Noise</button>
+            <button class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300" onclick="filterTable('medium')">Medium</button>
+            <button class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300" onclick="filterTable('low')">Low Noise</button>
+        </div>
+
+        <!-- Top 20 Noisiest Alert Rules -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Top 20 Noisiest Alert Rules</h2>
+            <p class="text-sm text-gray-500 mb-4">These rules generate the most false positives. Click column headers to sort.</p>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm" id="alertTable">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="text-left py-3 px-3 font-semibold text-gray-600 sortable" onclick="sortTable(0)">#</th>
+                            <th class="text-left py-3 px-3 font-semibold text-gray-600 sortable" onclick="sortTable(1)">Alert Rule</th>
+                            <th class="text-left py-3 px-3 font-semibold text-gray-600 sortable" onclick="sortTable(2)">Source</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-600 sortable" onclick="sortTable(3)">Fires (90d)</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-600 sortable" onclick="sortTable(4)">False Positive %</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-600 sortable" onclick="sortTable(5)">Avg Ack Time</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-600 sortable" onclick="sortTable(6)">Wasted Hours</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-600">Recommendation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bottom Insight -->
+        <div class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-6">
+            <h3 class="font-bold text-red-900 text-lg">The Bottom Line</h3>
+            <p class="text-red-800 mt-2">Your ops team spent <strong>312 hours</strong> over the last 90 days acknowledging alerts that turned out to be nothing. At a blended rate of $85/hour, that is <strong>$26,520 in wasted labor</strong> &mdash; plus the incalculable cost of alert fatigue causing your team to miss the 48 alerts that actually mattered.</p>
+        </div>
+    </div>
+
+<script>
+// ===== DATA =====
+const ALERT_RULES = [
+    { rule: "CPU > 80%", source: "Nagios", fires: 89, fp: 97, ack: "31m", wasted: 44.2, noise: "high", rec: "Replace with dynamic baseline" },
+    { rule: "Disk > 90%", source: "Zabbix", fires: 67, fp: 82, ack: "18m", wasted: 16.4, noise: "high", rec: "Add trend prediction" },
+    { rule: "Memory > 85%", source: "Nagios", fires: 54, fp: 94, ack: "27m", wasted: 22.7, noise: "high", rec: "Switch to anomaly detection" },
+    { rule: "HTTP 5xx > 5/min", source: "Datadog", fires: 41, fp: 73, ack: "12m", wasted: 5.9, noise: "medium", rec: "Increase threshold to 15/min" },
+    { rule: "SSL Cert < 30 days", source: "PagerDuty", fires: 38, fp: 100, ack: "45m", wasted: 28.5, noise: "high", rec: "Auto-renew with Let's Encrypt" },
+    { rule: "Ping Timeout > 5s", source: "Nagios", fires: 34, fp: 88, ack: "8m", wasted: 4.0, noise: "high", rec: "Add retry logic, increase timeout" },
+    { rule: "Swap Usage > 50%", source: "Zabbix", fires: 31, fp: 96, ack: "22m", wasted: 10.9, noise: "high", rec: "Delete this rule entirely" },
+    { rule: "NTP Drift > 100ms", source: "Nagios", fires: 28, fp: 100, ack: "35m", wasted: 16.3, noise: "high", rec: "Auto-sync, alert only > 500ms" },
+    { rule: "Load Avg > 4", source: "Datadog", fires: 24, fp: 91, ack: "19m", wasted: 6.9, noise: "high", rec: "Correlate with response time" },
+    { rule: "Docker Container Restart", source: "Kubernetes", fires: 22, fp: 68, ack: "9m", wasted: 2.2, noise: "medium", rec: "Alert only on 3+ restarts in 10min" },
+    { rule: "Log Error Rate Spike", source: "Splunk", fires: 19, fp: 63, ack: "14m", wasted: 2.8, noise: "medium", rec: "Use AI log classification" },
+    { rule: "Network Packet Loss > 1%", source: "PRTG", fires: 18, fp: 89, ack: "21m", wasted: 5.7, noise: "high", rec: "Raise threshold to 3%" },
+    { rule: "DB Connection Pool > 80%", source: "Datadog", fires: 16, fp: 75, ack: "11m", wasted: 2.2, noise: "medium", rec: "Auto-scale pool, alert at 95%" },
+    { rule: "DNS Resolution > 200ms", source: "Nagios", fires: 14, fp: 92, ack: "25m", wasted: 5.4, noise: "high", rec: "Cache more aggressively" },
+    { rule: "Backup Job Warning", source: "Veeam", fires: 13, fp: 84, ack: "40m", wasted: 7.3, noise: "high", rec: "Alert on failure only, not warnings" },
+    { rule: "Queue Depth > 1000", source: "RabbitMQ", fires: 11, fp: 54, ack: "7m", wasted: 0.7, noise: "low", rec: "Good threshold, keep" },
+    { rule: "API Latency p99 > 2s", source: "Datadog", fires: 10, fp: 40, ack: "6m", wasted: 0.4, noise: "low", rec: "Solid rule, consider auto-scale trigger" },
+    { rule: "Disk I/O Wait > 30%", source: "Zabbix", fires: 9, fp: 88, ack: "20m", wasted: 2.6, noise: "high", rec: "Correlate with workload schedule" },
+    { rule: "Failed SSH Login > 10", source: "OSSEC", fires: 8, fp: 25, ack: "4m", wasted: 0.3, noise: "low", rec: "Keep — real security signal" },
+    { rule: "Service Health Check Fail", source: "Consul", fires: 7, fp: 42, ack: "5m", wasted: 0.2, noise: "low", rec: "Add retry, alert on consecutive failures" }
+];
+
+const CATEGORIES = {
+    "Infrastructure": { total: 198, noise: 178, real: 20, color: "#ef4444" },
+    "Application": { total: 112, noise: 89, real: 23, color: "#f59e0b" },
+    "Network": { total: 87, noise: 81, real: 6, color: "#8b5cf6" },
+    "Security": { total: 62, noise: 38, real: 24, color: "#3b82f6" },
+    "Database": { total: 51, noise: 44, real: 7, color: "#10b981" },
+    "Backup/Storage": { total: 37, noise: 32, real: 5, color: "#6366f1" }
+};
+
+const TIME_DIST = {
+    "12am-4am": { infra: 42, app: 18, network: 22, security: 8, db: 12, backup: 15 },
+    "4am-8am": { infra: 28, app: 15, network: 10, security: 12, db: 8, backup: 9 },
+    "8am-12pm": { infra: 45, app: 32, network: 18, security: 14, db: 10, backup: 5 },
+    "12pm-4pm": { infra: 38, app: 28, network: 15, security: 11, db: 9, backup: 3 },
+    "4pm-8pm": { infra: 25, app: 12, network: 12, security: 9, db: 7, backup: 2 },
+    "8pm-12am": { infra: 20, app: 7, network: 10, security: 8, db: 5, backup: 3 }
+};
+
+// ===== PIE CHART =====
+new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['False Positives (499)', 'Real Incidents (48)'],
+        datasets: [{
+            data: [499, 48],
+            backgroundColor: ['#fca5a5', '#22c55e'],
+            borderColor: ['#ef4444', '#16a34a'],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } }
+        }
+    }
+});
+
+// ===== BAR CHART =====
+const timeLabels = Object.keys(TIME_DIST);
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: timeLabels,
+        datasets: [
+            { label: 'Infrastructure', data: timeLabels.map(t => TIME_DIST[t].infra), backgroundColor: '#ef4444' },
+            { label: 'Application', data: timeLabels.map(t => TIME_DIST[t].app), backgroundColor: '#f59e0b' },
+            { label: 'Network', data: timeLabels.map(t => TIME_DIST[t].network), backgroundColor: '#8b5cf6' },
+            { label: 'Security', data: timeLabels.map(t => TIME_DIST[t].security), backgroundColor: '#3b82f6' },
+            { label: 'Database', data: timeLabels.map(t => TIME_DIST[t].db), backgroundColor: '#10b981' },
+            { label: 'Backup', data: timeLabels.map(t => TIME_DIST[t].backup), backgroundColor: '#6366f1' }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Alert Count' } } },
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10 } } } }
+    }
+});
+
+// ===== TREND CHART =====
+const days = Array.from({length: 90}, (_, i) => `Day ${i+1}`);
+const noiseData = days.map(() => Math.floor(Math.random() * 4) + 4);
+const realData = days.map((_, i) => {
+    if (i === 12 || i === 34 || i === 56 || i === 71 || i === 85) return Math.floor(Math.random() * 3) + 2;
+    return Math.random() < 0.15 ? 1 : 0;
+});
+
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: days,
+        datasets: [
+            { label: 'Noise Alerts', data: noiseData, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true, tension: 0.3, pointRadius: 0 },
+            { label: 'Real Incidents', data: realData, borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.2)', fill: true, tension: 0.3, pointRadius: 2 }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { x: { display: false }, y: { title: { display: true, text: 'Alerts/Day' } } },
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } } }
+    }
+});
+
+// ===== TABLE =====
+let currentFilter = 'all';
+let sortCol = 3;
+let sortAsc = false;
+
+function renderTable() {
+    const tbody = document.getElementById('alertTableBody');
+    let filtered = currentFilter === 'all' ? ALERT_RULES : ALERT_RULES.filter(r => r.noise === currentFilter);
+
+    filtered.sort((a, b) => {
+        const valA = [null, a.rule, a.source, a.fires, a.fp, parseInt(a.ack), a.wasted][sortCol];
+        const valB = [null, b.rule, b.source, b.fires, b.fp, parseInt(b.ack), b.wasted][sortCol];
+        if (typeof valA === 'string') return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        return sortAsc ? valA - valB : valB - valA;
+    });
+
+    tbody.innerHTML = filtered.map((r, i) => {
+        const noiseClass = r.noise === 'high' ? 'noise-high' : r.noise === 'medium' ? 'noise-medium' : 'noise-low';
+        const fpColor = r.fp >= 90 ? 'text-red-600 font-bold' : r.fp >= 70 ? 'text-amber-600 font-bold' : 'text-green-600';
+        return `<tr class="border-b border-gray-100 hover:bg-gray-50 ${noiseClass}">
+            <td class="py-2.5 px-3 text-gray-400">${i + 1}</td>
+            <td class="py-2.5 px-3 font-medium text-gray-900">${r.rule}</td>
+            <td class="py-2.5 px-3 text-gray-600">${r.source}</td>
+            <td class="py-2.5 px-3 text-center font-bold">${r.fires}</td>
+            <td class="py-2.5 px-3 text-center ${fpColor}">${r.fp}%</td>
+            <td class="py-2.5 px-3 text-center text-gray-600">${r.ack}</td>
+            <td class="py-2.5 px-3 text-center text-gray-900 font-semibold">${r.wasted}h</td>
+            <td class="py-2.5 px-3 text-center text-xs text-gray-600">${r.rec}</td>
+        </tr>`;
+    }).join('');
+}
+
+function sortTable(col) {
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = false; }
+    renderTable();
+}
+
+function filterTable(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    renderTable();
+}
+
+renderTable();
+</script>
+</body>
+</html>

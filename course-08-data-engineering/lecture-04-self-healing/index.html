@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Healing Pipeline Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-orange-900 via-orange-800 to-orange-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Self-Healing Pipeline Simulator</h1>
+                <p class="text-orange-300 text-sm mt-1">Watch AI Detect, Diagnose, and Fix Pipeline Failures</p>
+            </div>
+            <button onclick="simulateFailure()" id="simBtn" class="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold hover:bg-orange-700">Inject Failure</button>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #10b981">
+                <span class="text-xs font-semibold text-gray-500 uppercase">Auto-Healed (30d)</span>
+                <div class="text-3xl font-extrabold mt-1 text-green-600">23</div>
+                <div class="text-xs mt-2 text-gray-500">No human intervention needed</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #f97316">
+                <span class="text-xs font-semibold text-gray-500 uppercase">Avg Recovery Time</span>
+                <div class="text-3xl font-extrabold mt-1 text-orange-600">2.3 min</div>
+                <div class="text-xs mt-2 text-gray-500">Was: 4.5 hours manual</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #0ea5e9">
+                <span class="text-xs font-semibold text-gray-500 uppercase">Heal Success Rate</span>
+                <div class="text-3xl font-extrabold mt-1 text-sky-600">87%</div>
+                <div class="text-xs mt-2 text-gray-500">13% escalated to engineer</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #ef4444">
+                <span class="text-xs font-semibold text-gray-500 uppercase">Downtime Prevented</span>
+                <div class="text-3xl font-extrabold mt-1 text-red-500">103 hrs</div>
+                <div class="text-xs mt-2 text-gray-500">Estimated cost saved: $62K</div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm" id="simSection">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Failure & Recovery Simulation</h3>
+            <div id="simLog" class="space-y-2 font-mono text-xs max-h-64 overflow-y-auto"></div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Recent Auto-Heal Events</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase">
+                    <th class="px-4 py-3">Timestamp</th><th class="px-4 py-3">Pipeline</th><th class="px-4 py-3">Failure Type</th>
+                    <th class="px-4 py-3">Root Cause</th><th class="px-4 py-3">Healing Action</th>
+                    <th class="px-4 py-3">Recovery</th><th class="px-4 py-3">Result</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Self-Healing Pipeline Simulator &mdash; Course 8 &mdash; Lecture 4 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const EVENTS=[
+    {ts:'2026-03-28 02:15',pipeline:'CRM Sync',failure:'Connection Timeout',root:'Salesforce API rate limit exceeded',action:'Exponential backoff + retry (3 attempts)',recovery:'1.8 min',result:'Healed'},
+    {ts:'2026-03-27 05:02',pipeline:'ERP Extract',failure:'Schema Mismatch',root:'SAP added new column in nightly update',action:'Auto-detected new column, updated schema mapping',recovery:'3.2 min',result:'Healed'},
+    {ts:'2026-03-26 14:30',pipeline:'Payment Recon',failure:'Data Volume Spike',root:'3x normal volume (end-of-month)',action:'Auto-scaled compute, split into micro-batches',recovery:'2.1 min',result:'Healed'},
+    {ts:'2026-03-25 03:45',pipeline:'HR Sync',failure:'Auth Token Expired',root:'OAuth token refresh failed',action:'Re-authenticated with stored refresh token',recovery:'0.8 min',result:'Healed'},
+    {ts:'2026-03-24 08:12',pipeline:'Analytics Import',failure:'Duplicate Records',root:'Source sent same batch twice',action:'Dedup via hash comparison, loaded delta only',recovery:'1.5 min',result:'Healed'},
+    {ts:'2026-03-23 22:00',pipeline:'Partner SFTP',failure:'File Format Change',root:'Partner changed CSV delimiter from comma to pipe',action:'Auto-detected delimiter, reprocessed file',recovery:'4.2 min',result:'Healed'},
+    {ts:'2026-03-22 06:30',pipeline:'Inventory Sync',failure:'Memory Overflow',root:'Full table scan on 50M row table',action:'Attempted partitioned query — still too large',recovery:'N/A',result:'Escalated'},
+    {ts:'2026-03-21 01:15',pipeline:'Support ETL',failure:'API Rate Limit',root:'Zendesk rate limit hit during bulk export',action:'Throttled to 100 req/min with queue',recovery:'2.8 min',result:'Healed'},
+];
+
+document.getElementById('tableBody').innerHTML=EVENTS.map(e=>{
+    const rc=e.result==='Healed'?'bg-green-100 text-green-700':'bg-amber-100 text-amber-700';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50">
+        <td class="px-4 py-3 font-mono text-xs">${e.ts}</td><td class="px-4 py-3 font-medium">${e.pipeline}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700">${e.failure}</span></td>
+        <td class="px-4 py-3 text-xs">${e.root}</td><td class="px-4 py-3 text-xs">${e.action}</td>
+        <td class="px-4 py-3">${e.recovery}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${rc}">${e.result}</span></td></tr>`;
+}).join('');
+
+const FAILURE_SCENARIOS=[
+    {steps:['[ERROR] CRM Sync pipeline failed: Connection timeout to Salesforce API','[DETECT] AI analyzing failure pattern...','[DIAGNOSE] Root cause: API rate limit exceeded (429 Too Many Requests)','[HEAL] Applying exponential backoff: retry in 2s, 4s, 8s...','[RETRY] Attempt 2: Success! Connection re-established.','[VERIFY] Data integrity check: 142,380 records validated','[RESOLVED] Pipeline auto-healed in 1.8 minutes. No data loss.']},
+    {steps:['[ERROR] ERP Extract failed: Schema validation error on SAP_ORDERS table','[DETECT] AI comparing expected vs actual schema...','[DIAGNOSE] New column detected: SUSTAINABILITY_FLAG (VARCHAR). Not in mapping.','[HEAL] Auto-generating column mapping. Adding to transform layer.','[MIGRATE] Schema migration applied to staging table.','[RETRY] Re-running extract with updated schema...','[VERIFY] 89,210 records loaded. New column populated for 34% of records.','[RESOLVED] Pipeline auto-healed in 3.2 minutes. Schema updated.']},
+];
+
+async function simulateFailure(){
+    document.getElementById('simBtn').disabled=true;
+    const log=document.getElementById('simLog');
+    log.innerHTML='';
+    const scenario=FAILURE_SCENARIOS[Math.floor(Math.random()*FAILURE_SCENARIOS.length)];
+    for(const step of scenario.steps){
+        const div=document.createElement('div');
+        const color=step.includes('[ERROR]')?'text-red-600':step.includes('[DETECT]')||step.includes('[DIAGNOSE]')?'text-amber-600':step.includes('[HEAL]')||step.includes('[RETRY]')||step.includes('[MIGRATE]')?'text-sky-600':'text-green-600';
+        div.className=color;div.textContent=step;
+        log.appendChild(div);log.scrollTop=log.scrollHeight;
+        await new Promise(r=>setTimeout(r,800));
+    }
+    document.getElementById('simBtn').disabled=false;
+}
+</script>
+</body>
+</html>

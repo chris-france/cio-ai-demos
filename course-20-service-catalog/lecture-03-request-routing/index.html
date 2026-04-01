@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Request Routing Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto"><h1 class="text-2xl font-extrabold">AI-Powered Request Routing</h1>
+        <p class="text-sky-300 text-sm mt-1">Routing Simulator &amp; Accuracy Tracker</p></div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Routing Results</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">ID</th><th class="px-4 py-3">Description</th><th class="px-4 py-3">AI Team</th>
+                        <th class="px-4 py-3">Correct Team</th><th class="px-4 py-3">Confidence</th><th class="px-4 py-3">Match</th><th class="px-4 py-3">Time (ms)</th>
+                    </tr></thead>
+                    <tbody id="routeBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Confidence Distribution</h3>
+                <div style="height:280px"><canvas id="confChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">AI vs Manual Routing</h3>
+                <div style="height:280px"><canvas id="compareChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-amber-800 mb-3">Low-Confidence Queue (needs human review)</h3>
+            <div id="lowConf" class="space-y-2"></div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">AI Request Routing &mdash; Course 20 &mdash; Lecture 3 &mdash; Confidential</footer>
+    </main>
+<script>
+const ROUTES = [
+    { id: 'RTE-01', desc: 'Cannot access shared drive from home', aiTeam: 'Network Ops', correct: 'Network Ops', conf: 94, match: true, time: 120 },
+    { id: 'RTE-02', desc: 'Need Photoshop installed on my laptop', aiTeam: 'Desktop Eng', correct: 'Desktop Eng', conf: 98, match: true, time: 85 },
+    { id: 'RTE-03', desc: 'Printer on 3rd floor not working', aiTeam: 'Desktop Eng', correct: 'Facilities', conf: 72, match: false, time: 145 },
+    { id: 'RTE-04', desc: 'New hire needs all standard accounts', aiTeam: 'Help Desk', correct: 'Help Desk', conf: 96, match: true, time: 92 },
+    { id: 'RTE-05', desc: 'VPN keeps disconnecting', aiTeam: 'Network Ops', correct: 'Network Ops', conf: 91, match: true, time: 110 },
+    { id: 'RTE-06', desc: 'Need budget approval for new server', aiTeam: 'Procurement', correct: 'IT Management', conf: 58, match: false, time: 180 },
+    { id: 'RTE-07', desc: 'Password expired and locked out', aiTeam: 'Help Desk', correct: 'Help Desk', conf: 99, match: true, time: 45 },
+    { id: 'RTE-08', desc: 'Outlook calendar not syncing with Teams', aiTeam: 'Desktop Eng', correct: 'Desktop Eng', conf: 88, match: true, time: 130 },
+    { id: 'RTE-09', desc: 'Security camera footage request for incident', aiTeam: 'Security', correct: 'Facilities', conf: 65, match: false, time: 165 },
+    { id: 'RTE-10', desc: 'Laptop running very slow, 4+ years old', aiTeam: 'Desktop Eng', correct: 'Desktop Eng', conf: 85, match: true, time: 115 },
+    { id: 'RTE-11', desc: 'New conference room needs AV setup', aiTeam: 'Desktop Eng', correct: 'Desktop Eng', conf: 82, match: true, time: 140 },
+    { id: 'RTE-12', desc: 'Suspicious email received', aiTeam: 'Security', correct: 'Security', conf: 97, match: true, time: 78 },
+    { id: 'RTE-13', desc: 'WiFi very slow in building B', aiTeam: 'Network Ops', correct: 'Network Ops', conf: 93, match: true, time: 95 },
+    { id: 'RTE-14', desc: 'Need access to Salesforce reports module', aiTeam: 'Help Desk', correct: 'Help Desk', conf: 89, match: true, time: 105 },
+    { id: 'RTE-15', desc: 'Office move - need desk phone relocated', aiTeam: 'Network Ops', correct: 'Facilities', conf: 62, match: false, time: 155 },
+];
+
+const matches = ROUTES.filter(r=>r.match).length;
+const aiAccuracy = Math.round(matches/ROUTES.length*100);
+const avgTime = Math.round(ROUTES.reduce((s,r)=>s+r.time,0)/ROUTES.length);
+const lowConf = ROUTES.filter(r=>r.conf<75);
+
+const KPI = [
+    { label: 'Requests Routed', value: ROUTES.length, color: '#0284c7' },
+    { label: 'AI Accuracy', value: aiAccuracy+'%', color: '#10b981' },
+    { label: 'Avg Routing Time', value: avgTime+'ms', color: '#8b5cf6' },
+    { label: 'Human Accuracy', value: '78%', color: '#f59e0b' },
+    { label: 'Misroute Reduction', value: '55%', color: '#3b82f6' },
+];
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+document.getElementById('routeBody').innerHTML = ROUTES.map(r => {
+    const confColor = r.conf>=90?'bg-green-100 text-green-700':r.conf>=75?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${!r.match?'bg-red-50':''}">
+        <td class="px-4 py-3 font-mono text-xs">${r.id}</td><td class="px-4 py-3 text-xs">${r.desc}</td>
+        <td class="px-4 py-3 font-semibold">${r.aiTeam}</td><td class="px-4 py-3">${r.correct}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${confColor} font-semibold">${r.conf}%</span></td>
+        <td class="px-4 py-3">${r.match?'<span class="text-green-600 font-bold">Y</span>':'<span class="text-red-600 font-bold">N</span>'}</td>
+        <td class="px-4 py-3">${r.time}</td></tr>`;
+}).join('');
+
+new Chart(document.getElementById('confChart'), {
+    type: 'bar',
+    data: { labels: ['<60%','60-74%','75-89%','90-100%'], datasets: [{ data: [1,3,4,7], backgroundColor: ['#ef4444','#f59e0b','#3b82f6','#10b981'], borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+new Chart(document.getElementById('compareChart'), {
+    type: 'bar',
+    data: { labels: ['Accuracy','Speed (min)','Cost/Request'], datasets: [
+        { label: 'AI Routing', data: [aiAccuracy, 0.002, 0.05], backgroundColor: '#3b82f6', borderRadius: 4 },
+        { label: 'Manual Routing', data: [78, 8, 4.50], backgroundColor: '#f59e0b', borderRadius: 4 },
+    ]},
+    options: { responsive: true, maintainAspectRatio: false }
+});
+
+document.getElementById('lowConf').innerHTML = lowConf.map(r =>
+    `<div class="bg-white rounded-lg p-3 border border-amber-200">&#9888; <strong>${r.id}</strong>: "${r.desc}" &mdash; AI routed to <strong>${r.aiTeam}</strong> (${r.conf}% confidence) &mdash; Needs human review</div>`
+).join('');
+</script>
+</body>
+</html>

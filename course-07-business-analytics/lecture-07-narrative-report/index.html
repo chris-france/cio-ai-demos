@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Narrative Report Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Narrative Report Generator</h1>
+                <p class="text-sky-300 text-sm mt-1">Data Storytelling &mdash; From Numbers to Narrative</p>
+            </div>
+            <button onclick="generateReport()" class="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-semibold hover:bg-sky-700">Generate Report</button>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #0ea5e9">
+                <span class="text-xs font-semibold text-gray-500 uppercase">Q1 Revenue</span>
+                <div class="text-3xl font-extrabold mt-1 text-sky-700">$7.15M</div>
+                <div class="text-xs mt-2 text-green-600 font-medium">+8.2% vs Q4</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #10b981">
+                <span class="text-xs font-semibold text-gray-500 uppercase">New Customers</span>
+                <div class="text-3xl font-extrabold mt-1 text-green-600">47</div>
+                <div class="text-xs mt-2 text-green-600 font-medium">+22% vs Q4</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #f59e0b">
+                <span class="text-xs font-semibold text-gray-500 uppercase">Churn Rate</span>
+                <div class="text-3xl font-extrabold mt-1 text-amber-600">5.2%</div>
+                <div class="text-xs mt-2 text-red-600 font-medium">+0.8% vs Q4 (concern)</div>
+            </div>
+            <div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #ef4444">
+                <span class="text-xs font-semibold text-gray-500 uppercase">NPS Score</span>
+                <div class="text-3xl font-extrabold mt-1 text-red-500">38</div>
+                <div class="text-xs mt-2 text-red-600 font-medium">-7 pts vs Q4 (alert)</div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Revenue by Segment</h3>
+                <div style="height:280px"><canvas id="segChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Customer Health Distribution</h3>
+                <div style="height:280px"><canvas id="healthChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm" id="narrativeSection">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">AI-Generated Executive Narrative</h3>
+            <div id="narrative" class="prose prose-sm max-w-none">
+                <h4 class="text-sky-800 font-bold">Q1 2026 Business Review</h4>
+                <p><strong>The headline:</strong> Revenue grew 8.2% to $7.15M, driven by strong Enterprise and Mid-Market performance. However, customer satisfaction is deteriorating — NPS dropped 7 points and churn increased 0.8% — signaling a retention problem that will erode growth if unaddressed.</p>
+                <h4 class="text-sky-800 font-bold mt-4">What Went Right</h4>
+                <p>Enterprise revenue hit $3.2M (+12%), fueled by 3 six-figure deals closed in March. Mid-Market grew 9% with the new self-service onboarding reducing time-to-value from 14 days to 3. New customer acquisition increased 22% — the strongest quarter in 2 years.</p>
+                <h4 class="text-sky-800 font-bold mt-4">What Needs Attention</h4>
+                <p>SMB churn spiked to 14.2% (from 11.8%) after the January price increase. NPS dropped from 45 to 38 — the lowest in 4 quarters. Support response times increased 28% in February due to staffing gaps. <strong>If these trends continue, we will lose $840K in ARR over the next two quarters.</strong></p>
+                <h4 class="text-sky-800 font-bold mt-4">Recommended Actions</h4>
+                <ol class="list-decimal list-inside space-y-1">
+                    <li>Launch SMB retention campaign with targeted pricing for at-risk accounts ($120K budget, 3:1 expected ROI)</li>
+                    <li>Hire 2 additional support engineers by May to restore response time SLAs</li>
+                    <li>Schedule quarterly business reviews with all Enterprise accounts over $100K ARR</li>
+                    <li>Investigate NPS decline — deploy targeted survey to detractors within 2 weeks</li>
+                </ol>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Narrative Report Generator &mdash; Course 7 &mdash; Lecture 7 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+new Chart(document.getElementById('segChart'),{type:'bar',data:{labels:['Enterprise','Mid-Market','SMB','Startup'],datasets:[
+    {label:'Q4 2025',data:[2860,1420,1680,650],backgroundColor:'#94a3b8'},
+    {label:'Q1 2026',data:[3200,1550,1750,650],backgroundColor:'#0ea5e9'}
+]},options:{responsive:true,maintainAspectRatio:false}});
+
+new Chart(document.getElementById('healthChart'),{type:'doughnut',data:{
+    labels:['Healthy','At Risk','Critical','New'],
+    datasets:[{data:[62,18,8,12],backgroundColor:['#10b981','#f59e0b','#ef4444','#0ea5e9']}]
+},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});
+
+function generateReport(){
+    const section=document.getElementById('narrativeSection');
+    section.style.transition='opacity 0.3s';section.style.opacity='0.5';
+    setTimeout(()=>{section.style.opacity='1';},800);
+}
+</script>
+</body>
+</html>

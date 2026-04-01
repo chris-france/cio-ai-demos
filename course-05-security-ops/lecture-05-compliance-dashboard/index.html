@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Compliance Automation Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+    .cell-compliant { background: #dcfce7; color: #166534; }
+    .cell-partial { background: #fef9c3; color: #854d0e; }
+    .cell-noncompliant { background: #fecaca; color: #991b1b; }
+    .cell-na { background: #f3f4f6; color: #9ca3af; }
+    .matrix-cell { padding: 6px 4px; text-align: center; font-size: 11px; font-weight: 600; border: 1px solid #e5e7eb; min-width: 80px; }
+    .quickwin { border-left: 3px solid #22c55e; }
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-indigo-600 text-sm font-medium tracking-wide uppercase">Course 5, Lecture 5 — Compliance Automation</p>
+                <h1 class="text-3xl font-bold text-gray-900 mt-1">Multi-Framework Compliance Dashboard</h1>
+                <p class="text-gray-500 mt-1">30 controls mapped across SOC 2, HIPAA, PCI-DSS, GDPR, and NIST CSF</p>
+            </div>
+            <div class="text-right text-sm text-gray-400">
+                <div>Organization: Meridian Engineering</div>
+                <div>Continuous monitoring: <span class="text-green-600 font-medium">Active</span></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Framework Scores -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="frameworkScores"></div>
+</div>
+
+<!-- Compliance Trend Chart -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Compliance Score Trend (6 Months)</h2>
+        <canvas id="trendChart" height="80"></canvas>
+    </div>
+</div>
+
+<!-- Compliance Matrix -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900">Control Compliance Matrix</h2>
+            <div class="flex gap-3 text-xs">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-200 border border-green-300"></span> Compliant</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-yellow-200 border border-yellow-300"></span> Partial</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-200 border border-red-300"></span> Non-Compliant</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-gray-100 border border-gray-300"></span> N/A</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="matrixTable">
+                <thead>
+                    <tr class="text-xs text-gray-400 uppercase">
+                        <th class="text-left py-3 px-3 border-b border-gray-200">#</th>
+                        <th class="text-left py-3 px-3 border-b border-gray-200 min-w-[250px]">Control</th>
+                        <th class="matrix-cell border-b border-gray-200">SOC 2</th>
+                        <th class="matrix-cell border-b border-gray-200">HIPAA</th>
+                        <th class="matrix-cell border-b border-gray-200">PCI-DSS</th>
+                        <th class="matrix-cell border-b border-gray-200">GDPR</th>
+                        <th class="matrix-cell border-b border-gray-200">NIST CSF</th>
+                    </tr>
+                </thead>
+                <tbody id="matrixBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Gap Analysis / Quick Wins -->
+<div class="max-w-7xl mx-auto px-6 mt-6 mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Quick Wins — Fastest Path to Compliance</h2>
+            <p class="text-xs text-gray-400 mb-4">Controls that improve the most frameworks with the least effort:</p>
+            <div class="space-y-3" id="quickWins"></div>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Framework Gap Summary</h2>
+            <canvas id="gapChart" height="250"></canvas>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-white text-gray-400 text-center py-6 text-xs border-t border-gray-200">
+    CIO AI Security Operations Course — Lecture 5 Demo Output &bull; Compliance Automation Dashboard &bull; Generated March 2026
+</footer>
+
+<script>
+const controls = [
+    { id: 1, name: 'Access control policy documented', soc2: 'C', hipaa: 'C', pci: 'C', gdpr: 'C', nist: 'C' },
+    { id: 2, name: 'Multi-factor authentication enforced', soc2: 'N', hipaa: 'N', pci: 'N', gdpr: 'P', nist: 'N' },
+    { id: 3, name: 'Role-based access control (RBAC)', soc2: 'P', hipaa: 'P', pci: 'P', gdpr: 'P', nist: 'P' },
+    { id: 4, name: 'User access reviews (quarterly)', soc2: 'N', hipaa: 'N', pci: 'N', gdpr: 'N', nist: 'N' },
+    { id: 5, name: 'Privileged access management (PAM)', soc2: 'N', hipaa: 'P', pci: 'N', gdpr: '-', nist: 'N' },
+    { id: 6, name: 'Data encryption at rest (AES-256)', soc2: 'C', hipaa: 'C', pci: 'C', gdpr: 'C', nist: 'C' },
+    { id: 7, name: 'Data encryption in transit (TLS 1.2+)', soc2: 'C', hipaa: 'C', pci: 'C', gdpr: 'C', nist: 'C' },
+    { id: 8, name: 'Data classification framework', soc2: 'P', hipaa: 'P', pci: 'P', gdpr: 'P', nist: 'P' },
+    { id: 9, name: 'Data retention and disposal policy', soc2: 'N', hipaa: 'N', pci: 'P', gdpr: 'N', nist: 'N' },
+    { id: 10, name: 'Data loss prevention (DLP) controls', soc2: 'N', hipaa: 'N', pci: 'P', gdpr: 'N', nist: 'N' },
+    { id: 11, name: 'Incident response plan documented', soc2: 'N', hipaa: 'N', pci: 'N', gdpr: 'N', nist: 'N' },
+    { id: 12, name: 'Incident response testing (annual)', soc2: 'N', hipaa: 'N', pci: 'N', gdpr: '-', nist: 'N' },
+    { id: 13, name: 'Security event logging enabled', soc2: 'P', hipaa: 'P', pci: 'P', gdpr: '-', nist: 'P' },
+    { id: 14, name: 'Centralized log management (SIEM)', soc2: 'N', hipaa: 'N', pci: 'N', gdpr: '-', nist: 'N' },
+    { id: 15, name: 'Log retention (90+ days)', soc2: 'N', hipaa: 'P', pci: 'N', gdpr: '-', nist: 'N' },
+    { id: 16, name: 'Vulnerability scanning (monthly)', soc2: 'P', hipaa: 'P', pci: 'P', gdpr: '-', nist: 'P' },
+    { id: 17, name: 'Patch management process', soc2: 'P', hipaa: 'P', pci: 'P', gdpr: '-', nist: 'P' },
+    { id: 18, name: 'Penetration testing (annual)', soc2: 'N', hipaa: '-', pci: 'N', gdpr: '-', nist: 'N' },
+    { id: 19, name: 'Network segmentation', soc2: 'N', hipaa: 'P', pci: 'N', gdpr: '-', nist: 'N' },
+    { id: 20, name: 'Firewall rules reviewed (quarterly)', soc2: 'N', hipaa: '-', pci: 'N', gdpr: '-', nist: 'N' },
+    { id: 21, name: 'Security awareness training program', soc2: 'N', hipaa: 'N', pci: 'N', gdpr: 'N', nist: 'N' },
+    { id: 22, name: 'Phishing simulation testing', soc2: 'N', hipaa: '-', pci: 'N', gdpr: '-', nist: 'N' },
+    { id: 23, name: 'Background checks for employees', soc2: 'C', hipaa: 'C', pci: 'C', gdpr: '-', nist: 'C' },
+    { id: 24, name: 'Vendor risk management program', soc2: 'N', hipaa: 'P', pci: 'P', gdpr: 'P', nist: 'N' },
+    { id: 25, name: 'Business continuity plan (BCP)', soc2: 'P', hipaa: 'P', pci: '-', gdpr: '-', nist: 'P' },
+    { id: 26, name: 'Disaster recovery testing (annual)', soc2: 'N', hipaa: 'N', pci: '-', gdpr: '-', nist: 'N' },
+    { id: 27, name: 'Change management process', soc2: 'P', hipaa: 'P', pci: 'P', gdpr: '-', nist: 'P' },
+    { id: 28, name: 'Privacy impact assessments (DPIA)', soc2: '-', hipaa: 'P', pci: '-', gdpr: 'N', nist: '-' },
+    { id: 29, name: 'Data subject access request process', soc2: '-', hipaa: 'C', pci: '-', gdpr: 'N', nist: '-' },
+    { id: 30, name: 'Breach notification procedures', soc2: 'P', hipaa: 'P', pci: 'P', gdpr: 'N', nist: 'P' },
+];
+
+const frameworks = ['soc2', 'hipaa', 'pci', 'gdpr', 'nist'];
+const fwNames = { soc2: 'SOC 2', hipaa: 'HIPAA', pci: 'PCI-DSS', gdpr: 'GDPR', nist: 'NIST CSF' };
+
+// Calculate scores
+function calcScore(fw) {
+    let applicable = 0, compliant = 0, partial = 0;
+    controls.forEach(c => {
+        const v = c[fw];
+        if (v === '-') return;
+        applicable++;
+        if (v === 'C') compliant++;
+        else if (v === 'P') partial += 0.5;
+    });
+    return applicable > 0 ? Math.round(((compliant + partial) / applicable) * 100) : 0;
+}
+
+// Framework score cards
+const scoresEl = document.getElementById('frameworkScores');
+frameworks.forEach(fw => {
+    const score = calcScore(fw);
+    const color = score >= 70 ? 'text-green-600' : score >= 50 ? 'text-yellow-600' : 'text-red-600';
+    const bg = score >= 70 ? 'bg-green-50' : score >= 50 ? 'bg-yellow-50' : 'bg-red-50';
+    scoresEl.innerHTML += `<div class="card p-5 text-center ${bg}">
+        <div class="text-3xl font-extrabold ${color}">${score}%</div>
+        <div class="text-sm font-medium text-gray-700 mt-1">${fwNames[fw]}</div>
+        <div class="text-xs text-gray-400 mt-1">Compliance Score</div>
+    </div>`;
+});
+
+// Matrix table
+const matrixBody = document.getElementById('matrixBody');
+controls.forEach(c => {
+    const cells = frameworks.map(fw => {
+        const v = c[fw];
+        const cls = v === 'C' ? 'cell-compliant' : v === 'P' ? 'cell-partial' : v === 'N' ? 'cell-noncompliant' : 'cell-na';
+        const label = v === 'C' ? 'Compliant' : v === 'P' ? 'Partial' : v === 'N' ? 'Gap' : 'N/A';
+        return `<td class="matrix-cell ${cls}">${label}</td>`;
+    }).join('');
+    matrixBody.innerHTML += `<tr class="hover:bg-gray-50">
+        <td class="py-2 px-3 text-gray-400 text-xs">${c.id}</td>
+        <td class="py-2 px-3 text-sm text-gray-700">${c.name}</td>
+        ${cells}
+    </tr>`;
+});
+
+// Quick Wins
+const quickWins = [
+    { control: 'Multi-factor authentication', effort: 'Low (2 weeks)', frameworks: 5, impact: 'Closes gaps in ALL 5 frameworks. Single biggest compliance improvement.', current: 'Non-compliant in 4/5 frameworks' },
+    { control: 'Incident response plan', effort: 'Low (1 week to draft)', frameworks: 5, impact: 'Required by every framework. Document + tabletop exercise = compliant.', current: 'Non-compliant in all 5 frameworks' },
+    { control: 'Security awareness training', effort: 'Low (SaaS platform, $3/user/mo)', frameworks: 4, impact: 'KnowBe4 or similar solves SOC 2, HIPAA, PCI, and NIST requirements.', current: 'Non-compliant in 4 frameworks' },
+    { control: 'Centralized log management', effort: 'Medium (Wazuh = free, 1 week setup)', frameworks: 4, impact: 'Enables evidence collection for all audits. Foundation for detection.', current: 'Non-compliant in 4 frameworks' },
+    { control: 'User access reviews', effort: 'Low (quarterly calendar reminder + spreadsheet)', frameworks: 5, impact: 'Process-only change — no technology needed. Just document the review.', current: 'Non-compliant in all 5 frameworks' },
+];
+
+const quickEl = document.getElementById('quickWins');
+quickWins.forEach((w, i) => {
+    quickEl.innerHTML += `<div class="quickwin bg-white border border-gray-200 rounded-lg p-4">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-sm font-bold text-gray-900">${i + 1}. ${w.control}</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium">${w.frameworks} frameworks</span>
+        </div>
+        <div class="text-xs text-gray-500"><span class="text-gray-400">Current:</span> ${w.current}</div>
+        <div class="text-xs text-gray-500"><span class="text-gray-400">Effort:</span> ${w.effort}</div>
+        <div class="text-xs text-green-700 mt-1 font-medium">${w.impact}</div>
+    </div>`;
+});
+
+// Gap Chart
+const gapData = frameworks.map(fw => {
+    let c = 0, p = 0, n = 0, na = 0;
+    controls.forEach(ctrl => {
+        const v = ctrl[fw];
+        if (v === 'C') c++;
+        else if (v === 'P') p++;
+        else if (v === 'N') n++;
+        else na++;
+    });
+    return { c, p, n, na };
+});
+
+new Chart(document.getElementById('gapChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.values(fwNames),
+        datasets: [
+            { label: 'Compliant', data: gapData.map(d => d.c), backgroundColor: '#22c55e', borderRadius: 2 },
+            { label: 'Partial', data: gapData.map(d => d.p), backgroundColor: '#eab308', borderRadius: 2 },
+            { label: 'Non-Compliant', data: gapData.map(d => d.n), backgroundColor: '#dc2626', borderRadius: 2 },
+            { label: 'N/A', data: gapData.map(d => d.na), backgroundColor: '#e5e7eb', borderRadius: 2 },
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } } },
+        scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Controls', font: { size: 11 } } } }
+    }
+});
+
+// Trend Chart
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: ['Oct 2025', 'Nov 2025', 'Dec 2025', 'Jan 2026', 'Feb 2026', 'Mar 2026'],
+        datasets: [
+            { label: 'SOC 2', data: [18, 22, 25, 28, 30, calcScore('soc2')], borderColor: '#6366f1', tension: 0.3, pointRadius: 3 },
+            { label: 'HIPAA', data: [22, 25, 28, 32, 35, calcScore('hipaa')], borderColor: '#f59e0b', tension: 0.3, pointRadius: 3 },
+            { label: 'PCI-DSS', data: [15, 18, 22, 25, 28, calcScore('pci')], borderColor: '#10b981', tension: 0.3, pointRadius: 3 },
+            { label: 'GDPR', data: [12, 15, 18, 20, 22, calcScore('gdpr')], borderColor: '#ef4444', tension: 0.3, pointRadius: 3 },
+            { label: 'NIST CSF', data: [20, 22, 25, 28, 30, calcScore('nist')], borderColor: '#8b5cf6', tension: 0.3, pointRadius: 3 },
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } } },
+        scales: { y: { min: 0, max: 100, title: { display: true, text: 'Compliance %', font: { size: 11 } } } }
+    }
+});
+</script>
+</body>
+</html>

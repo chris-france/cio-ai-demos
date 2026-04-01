@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telecom Contract Lifecycle Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}.sortable{cursor:pointer;user-select:none;}.sortable:hover{background:#f1f5f9;}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div><h1 class="text-2xl font-extrabold tracking-tight">Contract Lifecycle Management</h1>
+            <p class="text-blue-300 text-sm mt-1">Telecom Contract Calendar &amp; Renewal Alerts</p></div>
+            <div class="text-right text-sm"><div class="text-blue-300">As of</div><div class="font-semibold text-lg">March 2026</div></div>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Contract Timeline &mdash; Renewal Windows</h3>
+            <div style="height:320px"><canvas id="timelineChart"></canvas></div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">All Telecom Contracts</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Vendor</th><th class="px-4 py-3">Service</th><th class="px-4 py-3">Monthly Cost</th>
+                        <th class="px-4 py-3">Term</th><th class="px-4 py-3">Start</th><th class="px-4 py-3">End</th>
+                        <th class="px-4 py-3">Auto-Renew</th><th class="px-4 py-3">ETF</th><th class="px-4 py-3">Notice Period</th>
+                    </tr></thead>
+                    <tbody id="contractBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+                <h3 class="text-sm font-semibold text-red-800 mb-3">Action Required &mdash; Next 90 Days</h3>
+                <div id="alerts" class="space-y-2"></div>
+            </div>
+            <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+                <h3 class="text-sm font-semibold text-green-800 mb-3">Renegotiation Opportunities</h3>
+                <div id="renego" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Contract Lifecycle Management &mdash; Course 18 &mdash; Lecture 3 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const CONTRACTS = [
+    { vendor: 'AT&T', service: 'MPLS WAN (5 sites)', monthly: 14800, term: '36 mo', start: '2024-04-01', end: '2027-03-31', autoRenew: true, etf: '$22,000', notice: '90 days', savings: 3200 },
+    { vendor: 'Verizon', service: 'DIA (2 sites)', monthly: 6900, term: '24 mo', start: '2024-07-01', end: '2026-06-30', autoRenew: true, etf: '$8,500', notice: '60 days', savings: 1800 },
+    { vendor: 'Lumen', service: 'MPLS + DIA (3 sites)', monthly: 15150, term: '36 mo', start: '2024-09-01', end: '2027-08-31', autoRenew: false, etf: '$18,000', notice: '90 days', savings: 2400 },
+    { vendor: 'Zayo', service: 'Dark Fiber + DIA', monthly: 8400, term: '60 mo', start: '2023-01-01', end: '2027-12-31', autoRenew: true, etf: '$25,000', notice: '120 days', savings: 0 },
+    { vendor: 'Comcast', service: 'Business Broadband (4 sites)', monthly: 2050, term: '24 mo', start: '2025-01-01', end: '2026-12-31', autoRenew: true, etf: '$2,400', notice: '30 days', savings: 600 },
+    { vendor: 'T-Mobile', service: 'LTE Backup (3 sites)', monthly: 825, term: '12 mo', start: '2025-06-01', end: '2026-05-31', autoRenew: true, etf: '$0', notice: '30 days', savings: 200 },
+    { vendor: 'Cox', service: 'Broadband (1 site)', monthly: 380, term: '24 mo', start: '2025-01-01', end: '2026-12-31', autoRenew: false, etf: '$500', notice: '30 days', savings: 0 },
+];
+
+const totalMonthly = CONTRACTS.reduce((s,c) => s + c.monthly, 0);
+const autoRenewCount = CONTRACTS.filter(c => c.autoRenew).length;
+const now = new Date('2026-03-28');
+const expiring90 = CONTRACTS.filter(c => { const d = new Date(c.end); return (d - now)/86400000 < 90 && (d - now) > 0; });
+const totalSavings = CONTRACTS.reduce((s,c) => s + c.savings, 0);
+
+const KPI = [
+    { label: 'Active Contracts', value: CONTRACTS.length, color: '#3b82f6' },
+    { label: 'Annual Commitment', value: '$' + (totalMonthly * 12).toLocaleString(), color: '#8b5cf6' },
+    { label: 'Expiring < 90 Days', value: expiring90.length, color: '#ef4444' },
+    { label: 'Auto-Renewal Traps', value: autoRenewCount, color: '#f59e0b' },
+    { label: 'Est. Renego Savings/Mo', value: '$' + totalSavings.toLocaleString(), color: '#10b981' },
+];
+
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div>
+    </div>`
+).join('');
+
+// Timeline chart
+new Chart(document.getElementById('timelineChart'), {
+    type: 'bar',
+    data: {
+        labels: CONTRACTS.map(c => c.vendor),
+        datasets: [
+            { label: 'Months Elapsed', data: CONTRACTS.map(c => Math.max(0, Math.round((now - new Date(c.start))/2592000000))), backgroundColor: '#3b82f6', borderRadius: 4 },
+            { label: 'Months Remaining', data: CONTRACTS.map(c => Math.max(0, Math.round((new Date(c.end) - now)/2592000000))), backgroundColor: CONTRACTS.map(c => (new Date(c.end) - now)/86400000 < 90 ? '#ef4444' : '#93c5fd'), borderRadius: 4 },
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { position: 'top' } }, scales: { x: { stacked: true, title: { display: true, text: 'Months' } }, y: { stacked: true } } }
+});
+
+document.getElementById('contractBody').innerHTML = CONTRACTS.map(c => {
+    const expSoon = (new Date(c.end) - now)/86400000 < 90 && (new Date(c.end) - now) > 0;
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${expSoon?'bg-red-50':''}">
+        <td class="px-4 py-3 font-semibold">${c.vendor}</td><td class="px-4 py-3">${c.service}</td>
+        <td class="px-4 py-3 font-semibold">$${c.monthly.toLocaleString()}</td><td class="px-4 py-3">${c.term}</td>
+        <td class="px-4 py-3">${c.start}</td><td class="px-4 py-3 ${expSoon?'text-red-600 font-semibold':''}">${c.end}</td>
+        <td class="px-4 py-3">${c.autoRenew?'<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 font-semibold">Yes</span>':'No'}</td>
+        <td class="px-4 py-3">${c.etf}</td><td class="px-4 py-3">${c.notice}</td></tr>`;
+}).join('');
+
+document.getElementById('alerts').innerHTML = expiring90.length ? expiring90.map(c =>
+    `<div class="bg-white rounded-lg p-3 border border-red-200"><span class="font-semibold text-red-800">${c.vendor}</span> &mdash; ${c.service} expires ${c.end}. ${c.autoRenew?'<span class="text-amber-600 font-semibold">Auto-renews!</span>':''} Notice: ${c.notice}</div>`
+).join('') : '<div class="text-red-700">No contracts expiring in the next 90 days.</div>';
+
+document.getElementById('renego').innerHTML = CONTRACTS.filter(c => c.savings > 0).map(c =>
+    `<div class="bg-white rounded-lg p-3 border border-green-200"><span class="font-semibold text-green-800">${c.vendor}</span> &mdash; Est. savings: <span class="font-semibold text-green-600">$${c.savings.toLocaleString()}/mo</span> with market-rate renegotiation</div>`
+).join('');
+</script>
+</body>
+</html>

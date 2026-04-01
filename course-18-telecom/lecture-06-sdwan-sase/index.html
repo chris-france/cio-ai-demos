@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SD-WAN &amp; SASE Migration Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto"><h1 class="text-2xl font-extrabold">SD-WAN &amp; SASE Migration Assessment</h1>
+        <p class="text-blue-300 text-sm mt-1">Readiness Scoring &amp; Cost Comparison</p></div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">36-Month Cost Comparison</h3>
+            <div style="height:300px"><canvas id="costChart"></canvas></div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Site Readiness Assessment</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Location</th><th class="px-4 py-3">Current Circuit</th><th class="px-4 py-3">BW Needs</th>
+                        <th class="px-4 py-3">Internet Avail</th><th class="px-4 py-3">Readiness Score</th><th class="px-4 py-3">Phase</th>
+                    </tr></thead>
+                    <tbody id="siteBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+                <h3 class="text-sm font-semibold text-red-800 mb-3">Migration Risks</h3>
+                <div class="space-y-2">
+                    <div class="bg-white rounded-lg p-3 border border-red-200"><span class="font-semibold">Application Performance</span> &mdash; Real-time apps (VoIP, video) may degrade on internet underlay. Mitigation: QoS policies + dual ISP.</div>
+                    <div class="bg-white rounded-lg p-3 border border-red-200"><span class="font-semibold">Security Gaps</span> &mdash; Direct internet access increases attack surface. Mitigation: SASE with inline CASB + ZTNA.</div>
+                    <div class="bg-white rounded-lg p-3 border border-red-200"><span class="font-semibold">Vendor Lock-in</span> &mdash; SD-WAN appliances create new dependency. Mitigation: Choose vendor with open APIs.</div>
+                </div>
+            </div>
+            <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+                <h3 class="text-sm font-semibold text-green-800 mb-3">ROI Projection</h3>
+                <div class="space-y-3 text-sm text-green-800">
+                    <div class="flex justify-between"><span>Current MPLS Annual Cost</span><span class="font-bold">$594,000</span></div>
+                    <div class="flex justify-between"><span>Projected SD-WAN Annual Cost</span><span class="font-bold">$312,000</span></div>
+                    <div class="flex justify-between"><span>Migration Cost (one-time)</span><span class="font-bold">$185,000</span></div>
+                    <div class="flex justify-between border-t border-green-300 pt-2"><span class="font-bold">Breakeven</span><span class="font-bold text-green-700">Month 8</span></div>
+                    <div class="flex justify-between"><span class="font-bold">3-Year Net Savings</span><span class="font-bold text-green-700">$661,000</span></div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            SD-WAN &amp; SASE Migration &mdash; Course 18 &mdash; Lecture 6 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const SITES = [
+    { location: 'HQ - New York', circuit: 'MPLS 500M', bw: '500 Mbps', internet: 'Dual ISP available', score: 95, phase: 'Phase 1' },
+    { location: 'Chicago Office', circuit: 'MPLS 200M', bw: '200 Mbps', internet: 'Single ISP + LTE', score: 82, phase: 'Phase 1' },
+    { location: 'Dallas Data Center', circuit: 'DIA 10G', bw: '10 Gbps', internet: 'Dual ISP available', score: 70, phase: 'Phase 3' },
+    { location: 'San Francisco', circuit: 'MPLS 500M', bw: '300 Mbps', internet: 'Dual ISP available', score: 90, phase: 'Phase 1' },
+    { location: 'Boston Office', circuit: 'MPLS 200M', bw: '200 Mbps', internet: 'Single ISP only', score: 65, phase: 'Phase 2' },
+    { location: 'Atlanta Branch', circuit: 'DIA 500M', bw: '200 Mbps', internet: 'Dual ISP available', score: 88, phase: 'Phase 1' },
+    { location: 'Denver Office', circuit: 'DIA 1G', bw: '500 Mbps', internet: 'Single ISP + LTE', score: 75, phase: 'Phase 2' },
+    { location: 'Seattle Office', circuit: 'MPLS 500M', bw: '200 Mbps', internet: 'Dual ISP available', score: 92, phase: 'Phase 1' },
+    { location: 'Miami Branch', circuit: 'MPLS 100M', bw: '100 Mbps', internet: 'Single ISP only', score: 58, phase: 'Phase 3' },
+    { location: 'Phoenix Office', circuit: 'DIA 500M', bw: '300 Mbps', internet: 'Dual ISP available', score: 85, phase: 'Phase 2' },
+];
+
+const KPI = [
+    { label: 'Current MPLS/Mo', value: '$49,500', color: '#ef4444' },
+    { label: 'Projected SD-WAN/Mo', value: '$26,000', color: '#10b981' },
+    { label: 'Annual Savings', value: '$282,000', color: '#3b82f6' },
+    { label: 'Sites Ready', value: SITES.filter(s=>s.score>=80).length+'/'+SITES.length, color: '#8b5cf6' },
+    { label: 'Migration Timeline', value: '9 months', color: '#f59e0b' },
+];
+
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+const months = Array.from({length:36}, (_,i) => 'M'+(i+1));
+const mpls = months.map((_,i) => 49500*(i+1));
+const sdwan = months.map((_,i) => 185000 + 26000*(i+1));
+const sase = months.map((_,i) => 220000 + 31000*(i+1));
+new Chart(document.getElementById('costChart'), {
+    type: 'line',
+    data: { labels: months, datasets: [
+        { label: 'MPLS (Current)', data: mpls, borderColor: '#ef4444', tension: 0.1 },
+        { label: 'SD-WAN', data: sdwan, borderColor: '#3b82f6', tension: 0.1 },
+        { label: 'SASE', data: sase, borderColor: '#8b5cf6', tension: 0.1 },
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: v => '$'+(v/1000)+'K' } } } }
+});
+
+document.getElementById('siteBody').innerHTML = SITES.map(s => {
+    const scoreColor = s.score >= 85 ? 'text-green-600' : s.score >= 70 ? 'text-amber-600' : 'text-red-600';
+    const phaseBadge = s.phase === 'Phase 1' ? 'bg-green-100 text-green-700' : s.phase === 'Phase 2' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50">
+        <td class="px-4 py-3 font-medium">${s.location}</td><td class="px-4 py-3">${s.circuit}</td>
+        <td class="px-4 py-3">${s.bw}</td><td class="px-4 py-3">${s.internet}</td>
+        <td class="px-4 py-3 font-bold ${scoreColor}">${s.score}%</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${phaseBadge} font-semibold">${s.phase}</span></td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

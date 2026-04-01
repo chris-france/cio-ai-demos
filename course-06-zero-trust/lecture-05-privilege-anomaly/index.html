@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privilege Escalation Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-violet-900 via-violet-800 to-violet-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">Privilege Escalation Detector</h1>
+            <p class="text-violet-300 text-sm mt-1">Privilege Anomaly Detection &mdash; Catch Escalation Before Breach</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Privilege Events &mdash; 30 Days</h3>
+                <div style="height:300px"><canvas id="timelineChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Anomaly Types</h3>
+                <div style="height:300px"><canvas id="typeChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-700">Detected Anomalies &mdash; Last 30 Days</h3>
+            </div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th class="px-4 py-3">Timestamp</th><th class="px-4 py-3">User</th><th class="px-4 py-3">Action</th>
+                    <th class="px-4 py-3">Target</th><th class="px-4 py-3">Anomaly Type</th>
+                    <th class="px-4 py-3">Severity</th><th class="px-4 py-3">Status</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <section class="bg-red-50 border border-red-200 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-red-800 mb-3">Active Alerts Requiring Investigation</h3>
+            <div id="alerts" class="space-y-3"></div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Privilege Escalation Detector &mdash; Course 6: Zero Trust for SMBs &mdash; Lecture 5 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const ANOMALIES = [
+    { ts: '2026-03-27 23:42', user: 'jsmith', action: 'Added to Domain Admins', target: 'Active Directory', type: 'Self-Escalation', severity: 'Critical', status: 'Open' },
+    { ts: '2026-03-26 14:15', user: 'svc_deploy', action: 'New IAM policy attached', target: 'AWS IAM', type: 'Policy Change', severity: 'High', status: 'Investigating' },
+    { ts: '2026-03-26 02:30', user: 'contractor_kim', action: 'Accessed prod database', target: 'PostgreSQL Prod', type: 'Unusual Access', severity: 'Critical', status: 'Open' },
+    { ts: '2026-03-25 16:22', user: 'mhernandez', action: 'Created new admin account', target: 'Azure AD', type: 'Account Creation', severity: 'High', status: 'Resolved' },
+    { ts: '2026-03-25 09:10', user: 'alee', action: 'Exported 50K records', target: 'Salesforce', type: 'Data Exfiltration', severity: 'Critical', status: 'Investigating' },
+    { ts: '2026-03-24 11:45', user: 'jsmith', action: 'Disabled audit logging', target: 'Windows Server', type: 'Audit Tampering', severity: 'Critical', status: 'Open' },
+    { ts: '2026-03-23 08:30', user: 'rjones', action: 'Elevated to root', target: 'Linux Prod Server', type: 'Sudo Escalation', severity: 'Medium', status: 'Resolved' },
+    { ts: '2026-03-22 19:55', user: 'svc_backup', action: 'Modified backup schedule', target: 'Veeam', type: 'Config Change', severity: 'Low', status: 'Resolved' },
+    { ts: '2026-03-21 13:20', user: 'dkim', action: 'Added SSH key to jump box', target: 'Bastion Host', type: 'Credential Plant', severity: 'High', status: 'Investigating' },
+    { ts: '2026-03-20 07:00', user: 'admin_old', action: 'Login after 8 months', target: 'VPN Gateway', type: 'Dormant Activation', severity: 'High', status: 'Open' },
+];
+
+document.getElementById('kpiCards').innerHTML = [
+    { label: 'Anomalies (30d)', value: '47', color: '#8b5cf6', trend: '+12 vs last month' },
+    { label: 'Critical', value: '4', color: '#ef4444', trend: 'Require immediate action' },
+    { label: 'Open Investigations', value: '7', color: '#f59e0b', trend: 'Avg age: 2.3 days' },
+    { label: 'Resolved', value: '36', color: '#10b981', trend: '77% resolution rate' },
+    { label: 'Mean Time to Detect', value: '18 min', color: '#3b82f6', trend: 'Was: 4.2 days manual' }
+].map(k => `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+new Chart(document.getElementById('timelineChart'), {
+    type: 'bar', data: {
+        labels: Array.from({length:30},(_,i)=>`Mar ${i+1}`),
+        datasets: [
+            { label: 'Critical', data: [0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,1,1,1,0,0], backgroundColor: '#ef4444' },
+            { label: 'High', data: [1,0,0,1,1,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,0,0,1,0], backgroundColor: '#f59e0b' },
+            { label: 'Medium/Low', data: [0,1,1,0,0,1,0,1,1,0,1,0,1,0,1,1,0,1,0,1,0,0,1,0,0,0,1,1,0,1], backgroundColor: '#3b82f6' }
+        ]
+    }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, ticks: { maxRotation: 45, font: { size: 9 } } }, y: { stacked: true, beginAtZero: true } } }
+});
+
+new Chart(document.getElementById('typeChart'), {
+    type: 'doughnut', data: {
+        labels: ['Self-Escalation','Policy Change','Unusual Access','Data Exfiltration','Audit Tampering','Dormant Activation','Other'],
+        datasets: [{ data: [8,12,9,4,3,6,5], backgroundColor: ['#ef4444','#f59e0b','#8b5cf6','#dc2626','#b91c1c','#6366f1','#94a3b8'] }]
+    }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+});
+
+document.getElementById('tableBody').innerHTML = ANOMALIES.map(a => {
+    const sc = a.severity==='Critical'?'bg-red-100 text-red-700':a.severity==='High'?'bg-amber-100 text-amber-700':a.severity==='Medium'?'bg-blue-100 text-blue-700':'bg-gray-100 text-gray-600';
+    const stc = a.status==='Open'?'bg-red-100 text-red-700':a.status==='Investigating'?'bg-amber-100 text-amber-700':'bg-green-100 text-green-700';
+    const bg = a.severity==='Critical'&&a.status!=='Resolved'?'bg-red-50':'';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${bg}">
+        <td class="px-4 py-3 font-mono text-xs">${a.ts}</td><td class="px-4 py-3 font-medium">${a.user}</td>
+        <td class="px-4 py-3">${a.action}</td><td class="px-4 py-3">${a.target}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-violet-100 text-violet-700">${a.type}</span></td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${sc}">${a.severity}</span></td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${stc}">${a.status}</span></td></tr>`;
+}).join('');
+
+document.getElementById('alerts').innerHTML = ANOMALIES.filter(a => a.status==='Open' && a.severity==='Critical').map(a => `
+    <div class="bg-white rounded-lg p-4 border border-red-300">
+        <div class="flex items-center justify-between">
+            <div><span class="font-bold text-red-700">${a.user}</span> &mdash; ${a.action}</div>
+            <span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700">${a.severity}</span>
+        </div>
+        <div class="text-xs text-gray-600 mt-1">Target: ${a.target} | Detected: ${a.ts} | Type: ${a.type}</div>
+    </div>`).join('');
+</script>
+</body>
+</html>

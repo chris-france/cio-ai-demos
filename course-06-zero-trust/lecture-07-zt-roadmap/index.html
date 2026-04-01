@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Trust Maturity Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}.phase-card{transition:all 0.2s ease;}.phase-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-violet-900 via-violet-800 to-violet-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">Zero Trust Maturity Assessment</h1>
+            <p class="text-violet-300 text-sm mt-1">Your Zero Trust Roadmap &mdash; From Assessment to Implementation</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Zero Trust Maturity by Pillar</h3>
+            <div style="height:350px"><canvas id="radarChart"></canvas></div>
+        </section>
+
+        <section>
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Implementation Roadmap &mdash; 4 Phases</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="phases"></div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-700">Pillar Detail Assessment</h3>
+            </div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th class="px-4 py-3">Pillar</th><th class="px-4 py-3">Current</th><th class="px-4 py-3">Target</th>
+                    <th class="px-4 py-3">Gap</th><th class="px-4 py-3">Priority Actions</th><th class="px-4 py-3">Timeline</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Zero Trust Maturity Assessment &mdash; Course 6: Zero Trust for SMBs &mdash; Lecture 7 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const PILLARS = [
+    { name: 'Identity', current: 55, target: 90, actions: 'SSO for all apps, MFA everywhere, conditional access', timeline: 'Q2 2026' },
+    { name: 'Devices', current: 40, target: 85, actions: 'MDM enrollment, device health checks, endpoint detection', timeline: 'Q3 2026' },
+    { name: 'Network', current: 30, target: 80, actions: 'Micro-segmentation, ZTNA replacing VPN, encrypted tunnels', timeline: 'Q3-Q4 2026' },
+    { name: 'Applications', current: 45, target: 85, actions: 'App-level auth, API gateway, CASB for SaaS', timeline: 'Q2-Q3 2026' },
+    { name: 'Data', current: 25, target: 75, actions: 'Data classification, DLP policies, encryption at rest', timeline: 'Q4 2026' },
+    { name: 'Visibility', current: 60, target: 90, actions: 'SIEM correlation, user behavior analytics, automated alerts', timeline: 'Q2 2026' },
+    { name: 'Automation', current: 20, target: 70, actions: 'SOAR playbooks, automated provisioning, self-healing', timeline: 'Q4 2026-Q1 2027' },
+];
+
+const PHASES = [
+    { name: 'Phase 1: Foundation', time: 'Q2 2026', color: '#10b981', items: ['Deploy SSO (Okta/Azure AD)', 'MFA for all users', 'Identity governance baseline', 'Asset inventory'] },
+    { name: 'Phase 2: Visibility', time: 'Q3 2026', color: '#3b82f6', items: ['SIEM deployment', 'Device health monitoring', 'Network traffic analysis', 'User behavior baseline'] },
+    { name: 'Phase 3: Control', time: 'Q4 2026', color: '#8b5cf6', items: ['Micro-segmentation', 'Conditional access policies', 'Data classification', 'DLP implementation'] },
+    { name: 'Phase 4: Automation', time: 'Q1 2027', color: '#f59e0b', items: ['SOAR playbooks', 'Automated response', 'Continuous verification', 'Policy-as-code'] },
+];
+
+const avgCurrent = Math.round(PILLARS.reduce((s,p)=>s+p.current,0)/PILLARS.length);
+const avgTarget = Math.round(PILLARS.reduce((s,p)=>s+p.target,0)/PILLARS.length);
+
+document.getElementById('kpiCards').innerHTML = [
+    { label: 'Overall Maturity', value: `${avgCurrent}%`, color: '#f59e0b', trend: `Target: ${avgTarget}%` },
+    { label: 'Strongest Pillar', value: 'Visibility', color: '#10b981', trend: '60% maturity' },
+    { label: 'Weakest Pillar', value: 'Automation', color: '#ef4444', trend: '20% maturity' },
+    { label: 'Estimated Budget', value: '$185K', color: '#8b5cf6', trend: '12-month roadmap' },
+    { label: 'Time to Target', value: '12 mo', color: '#3b82f6', trend: 'Q2 2026 - Q1 2027' }
+].map(k => `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+new Chart(document.getElementById('radarChart'), {
+    type: 'radar', data: {
+        labels: PILLARS.map(p=>p.name),
+        datasets: [
+            { label: 'Current', data: PILLARS.map(p=>p.current), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', pointRadius: 4 },
+            { label: 'Target', data: PILLARS.map(p=>p.target), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', pointRadius: 4 }
+        ]
+    }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } },
+        plugins: { legend: { position: 'top' } } }
+});
+
+document.getElementById('phases').innerHTML = PHASES.map(p => `
+    <div class="phase-card border-2 rounded-xl p-5" style="border-color:${p.color}">
+        <div class="font-bold text-sm" style="color:${p.color}">${p.name}</div>
+        <div class="text-xs text-gray-500 mb-3">${p.time}</div>
+        <ul class="space-y-1">${p.items.map(i=>`<li class="text-xs text-gray-700 flex items-start gap-1"><span style="color:${p.color}">&#8226;</span> ${i}</li>`).join('')}</ul>
+    </div>`).join('');
+
+document.getElementById('tableBody').innerHTML = PILLARS.map(p => {
+    const gap = p.target - p.current;
+    const gc = gap > 40 ? 'text-red-600 font-bold' : gap > 20 ? 'text-amber-600 font-semibold' : 'text-green-600';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50">
+        <td class="px-4 py-3 font-medium">${p.name}</td>
+        <td class="px-4 py-3"><div class="flex items-center gap-2"><div class="w-20 bg-gray-200 rounded-full h-2"><div class="h-2 rounded-full" style="width:${p.current}%;background:${p.current>=50?'#10b981':p.current>=30?'#f59e0b':'#ef4444'}"></div></div><span class="text-xs">${p.current}%</span></div></td>
+        <td class="px-4 py-3 text-xs">${p.target}%</td>
+        <td class="px-4 py-3 ${gc}">-${gap}%</td>
+        <td class="px-4 py-3 text-xs">${p.actions}</td>
+        <td class="px-4 py-3 text-xs">${p.timeline}</td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

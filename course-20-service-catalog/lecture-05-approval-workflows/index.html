@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approval Workflow Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto"><h1 class="text-2xl font-extrabold">Approval Workflow Analyzer</h1>
+        <p class="text-sky-300 text-sm mt-1">Finding Bottlenecks &amp; Eliminating Delays</p></div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Avg Wait Time by Approval Stage (hours)</h3>
+            <div style="height:280px"><canvas id="stageChart"></canvas></div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Approver Performance</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Approver</th><th class="px-4 py-3">Pending</th><th class="px-4 py-3">Avg Response (hrs)</th>
+                        <th class="px-4 py-3">Delegation</th><th class="px-4 py-3">Approval Rate</th><th class="px-4 py-3">Bottleneck Score</th>
+                    </tr></thead>
+                    <tbody id="approverBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Requests by Type &mdash; Approval Required?</h3>
+                <div style="height:280px"><canvas id="typeChart"></canvas></div>
+            </div>
+            <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+                <h3 class="text-sm font-semibold text-green-800 mb-3">Recommendations</h3>
+                <div class="space-y-2">
+                    <div class="bg-white rounded-lg p-3 border border-green-200"><strong>Auto-approve software under $100</strong> &mdash; 35% of pending approvals. Save 12 hrs avg wait.</div>
+                    <div class="bg-white rounded-lg p-3 border border-green-200"><strong>Add delegation for VP Finance</strong> &mdash; 8 requests stuck in queue during PTO.</div>
+                    <div class="bg-white rounded-lg p-3 border border-green-200"><strong>Remove VP approval for standard access</strong> &mdash; Manager approval sufficient. Save 1 step, 18 hrs.</div>
+                    <div class="bg-white rounded-lg p-3 border border-green-200"><strong>Set 24-hour auto-escalation</strong> &mdash; If approver doesn't respond, escalate to delegate.</div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">Approval Workflows &mdash; Course 20 &mdash; Lecture 5 &mdash; Confidential</footer>
+    </main>
+<script>
+const APPROVERS = [
+    { name: 'Sarah Miller (VP Finance)', pending: 8, avgHrs: 42, delegation: false, rate: 85, bottleneck: 9.2 },
+    { name: 'James Chen (IT Director)', pending: 3, avgHrs: 6, delegation: true, rate: 92, bottleneck: 2.1 },
+    { name: 'Lisa Park (HR Director)', pending: 5, avgHrs: 24, delegation: false, rate: 88, bottleneck: 6.5 },
+    { name: 'Mark Thompson (VP Ops)', pending: 4, avgHrs: 18, delegation: true, rate: 95, bottleneck: 4.2 },
+    { name: 'Rachel Kim (Security Lead)', pending: 2, avgHrs: 4, delegation: true, rate: 78, bottleneck: 1.5 },
+    { name: 'David Brown (CFO)', pending: 6, avgHrs: 72, delegation: false, rate: 90, bottleneck: 9.8 },
+];
+
+const totalPending = APPROVERS.reduce((s,a)=>s+a.pending,0);
+const avgTime = Math.round(APPROVERS.reduce((s,a)=>s+a.avgHrs,0)/APPROVERS.length);
+const topBottleneck = APPROVERS.reduce((a,b)=>a.bottleneck>b.bottleneck?a:b);
+
+const KPI = [
+    { label: 'Pending Approvals', value: totalPending, color: '#ef4444' },
+    { label: 'Avg Approval Time', value: avgTime+' hrs', color: '#f59e0b' },
+    { label: 'Top Bottleneck', value: topBottleneck.name.split(' (')[0], color: '#ef4444' },
+    { label: 'Auto-Approval Rate', value: '15%', color: '#10b981' },
+    { label: 'Expired Waiting', value: '3', color: '#8b5cf6' },
+];
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+new Chart(document.getElementById('stageChart'), {
+    type: 'bar',
+    data: { labels: ['Submitted','Manager Review','VP/Director','Finance','Security','Final Approval'], datasets: [{ data: [0.5,4,18,42,6,2], backgroundColor: [0.5,4,18,42,6,2].map(v=>v>20?'#ef4444':v>10?'#f59e0b':'#10b981'), borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: 'Hours' } } } }
+});
+
+document.getElementById('approverBody').innerHTML = APPROVERS.map(a => {
+    const bn = a.bottleneck>=7?'bg-red-100 text-red-700':a.bottleneck>=4?'bg-amber-100 text-amber-700':'bg-green-100 text-green-700';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${a.bottleneck>=7?'bg-red-50':''}">
+        <td class="px-4 py-3 font-medium">${a.name}</td><td class="px-4 py-3 ${a.pending>5?'text-red-600 font-semibold':''}">${a.pending}</td>
+        <td class="px-4 py-3 ${a.avgHrs>24?'text-red-600 font-semibold':''}">${a.avgHrs}</td>
+        <td class="px-4 py-3">${a.delegation?'<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">Y</span>':'<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-semibold">N</span>'}</td>
+        <td class="px-4 py-3">${a.rate}%</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${bn} font-semibold">${a.bottleneck}</span></td></tr>`;
+}).join('');
+
+new Chart(document.getElementById('typeChart'), {
+    type: 'bar',
+    data: { labels: ['Software','Hardware','Access','Network','Security','Other'], datasets: [
+        { label: 'Approval Required', data: [28,18,12,8,15,5], backgroundColor: '#f59e0b', borderRadius: 4 },
+        { label: 'Auto-Approved', data: [5,0,8,2,0,3], backgroundColor: '#10b981', borderRadius: 4 },
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .ticket-tab { cursor: pointer; transition: all 0.2s ease; }
+        .ticket-tab:hover { background: #eff6ff; }
+        .ticket-tab.active { background: #eff6ff; border-left: 3px solid #3b82f6; }
+        @keyframes typewriter { from { max-height: 0; } to { max-height: 2000px; } }
+        .article-appear { animation: typewriter 0.8s ease forwards; overflow: hidden; }
+        .step-item { border-left: 2px solid #e5e7eb; padding-left: 16px; margin-left: 8px; }
+        .step-item::before { content: ''; width: 10px; height: 10px; background: #3b82f6; border-radius: 50%; display: inline-block; margin-left: -22px; margin-right: 12px; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Knowledge Base Generator</h1>
+                <p class="text-slate-300 text-sm mt-1">Resolved Tickets &rarr; KB Articles &mdash; The Self-Building Knowledge Base</p>
+            </div>
+            <div class="text-right text-sm">
+                <div class="text-slate-300">Articles Generated</div>
+                <div class="font-semibold text-lg" id="articleCount">0 / 5</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+
+        <!-- Stats -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #3b82f6">
+                <div class="text-xs font-semibold text-gray-500 uppercase">KB Articles Today</div>
+                <div class="text-3xl font-extrabold text-blue-600 mt-1" id="kpiArticles">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #22c55e">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Est. Tickets Deflected</div>
+                <div class="text-3xl font-extrabold text-green-600 mt-1" id="kpiDeflected">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #8b5cf6">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Avg Generation Time</div>
+                <div class="text-3xl font-extrabold text-purple-600 mt-1">1.8s</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #f59e0b">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Manual Authoring Time</div>
+                <div class="text-3xl font-extrabold text-amber-600 mt-1">45 min</div>
+                <div class="text-xs text-gray-400 mt-1">industry average per article</div>
+            </div>
+        </section>
+
+        <!-- Two-Panel Layout -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6" style="min-height:600px">
+            <!-- Left Panel: Resolved Tickets -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-700">Resolved Tickets</h3>
+                    <p class="text-xs text-gray-400 mt-1">Click a ticket to generate a KB article</p>
+                </div>
+                <div id="ticketList" class="divide-y divide-gray-100"></div>
+            </div>
+
+            <!-- Right Panel: Generated Article -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-gray-700">Generated KB Article</h3>
+                    <span id="approveBtn" class="hidden px-3 py-1.5 bg-green-600 text-white text-xs font-semibold rounded-lg cursor-pointer hover:bg-green-700 transition-colors" onclick="approveArticle()">Approve &amp; Publish</span>
+                </div>
+                <div id="articlePanel" class="p-6">
+                    <div class="text-center text-gray-300 py-16">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <p class="text-sm">Select a resolved ticket to generate an article</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Knowledge Base Generator &mdash; Course 3: AI-Powered IT Service Management &mdash; Lecture 4 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+const TICKETS = [
+    {
+        id: 'TK-4821',
+        title: 'VPN "Certificate Expired" Error on macOS',
+        summary: 'User reported GlobalProtect VPN showing certificate expired error after macOS update to 15.3. Unable to connect to corporate network remotely.',
+        resolution: 'Renewed SCEP certificate via MDM push. Cleared VPN credential cache. Reinstalled GlobalProtect profile. Verified connectivity.',
+        article: {
+            title: 'Fix: VPN "Certificate Expired" Error After macOS Update',
+            category: 'Network / VPN',
+            summary: 'After updating macOS, GlobalProtect VPN may display a "Certificate Expired" error and refuse to connect. This occurs because the OS update invalidates the SCEP-enrolled device certificate used for VPN authentication.',
+            steps: [
+                'Open System Settings > General > Device Management and verify the MDM profile is still active',
+                'If the MDM profile shows "Not Verified," contact IT to trigger a certificate renewal push',
+                'Once the new certificate arrives (usually within 5 minutes), open Keychain Access and search for the old VPN certificate',
+                'Delete the expired certificate from the login keychain (it will say "This certificate has expired")',
+                'Quit GlobalProtect completely (right-click the menu bar icon > Quit)',
+                'Relaunch GlobalProtect and attempt to connect — the new certificate should be picked up automatically',
+                'If connection still fails, run: sudo /Applications/GlobalProtect.app/Contents/Resources/gpcleanup.sh in Terminal to reset the client state'
+            ],
+            tags: ['VPN', 'macOS', 'certificate', 'GlobalProtect', 'SCEP', 'MDM'],
+            deflection: 12
+        }
+    },
+    {
+        id: 'TK-4835',
+        title: 'Outlook Search Returns No Results',
+        summary: 'User\'s Outlook desktop app (M365) search returns zero results for any query. Email is syncing fine, only search is broken. Windows 11.',
+        resolution: 'Rebuilt Windows Search Index for Outlook. Cleared Outlook cache folder. Repaired Office installation via Settings > Apps. Search working after reindex completed.',
+        article: {
+            title: 'Fix: Outlook Desktop Search Returns No Results (Windows)',
+            category: 'Email / M365',
+            summary: 'Outlook search may stop returning results even though email syncs correctly. This typically happens when the Windows Search Index becomes corrupted or when an Office update resets indexing settings.',
+            steps: [
+                'Close Outlook completely',
+                'Open Windows Settings > Privacy & Security > Searching Windows > Advanced Indexing Options',
+                'Click "Advanced" > "Rebuild" to rebuild the search index (this may take 15-30 minutes)',
+                'While the index rebuilds, navigate to %localappdata%\\Microsoft\\Outlook and delete the .ost file (Outlook will re-download from Exchange)',
+                'Open a Command Prompt as Administrator and run: sfc /scannow to check for corrupted system files',
+                'Reopen Outlook and wait for the mailbox to fully sync (watch the status bar)',
+                'Test search after sync completes — results should return normally'
+            ],
+            tags: ['Outlook', 'search', 'M365', 'Windows', 'index', 'cache'],
+            deflection: 18
+        }
+    },
+    {
+        id: 'TK-4847',
+        title: 'New Hire Onboarding — AD, Email, Laptop Setup',
+        summary: 'New hire starting Monday in Marketing. Need AD account, M365 license, laptop provisioned with standard marketing software bundle, badge access.',
+        resolution: 'Created AD account in Marketing OU. Assigned M365 E3 license. Deployed laptop image via SCCM with Adobe CC, Figma, and Canva. Configured badge in Lenel. Sent welcome email.',
+        article: {
+            title: 'Standard New Hire Onboarding Checklist — IT Setup',
+            category: 'Onboarding',
+            summary: 'Complete IT onboarding checklist for new employees. Covers Active Directory, email, software, hardware, and physical access. Typically takes 2-4 hours if all approvals are pre-completed.',
+            steps: [
+                'Verify that the new hire form has been submitted by HR with manager approval (required before any provisioning)',
+                'Create AD account in the appropriate departmental OU with standard naming convention (first.last)',
+                'Assign M365 license (E3 for standard, E5 for executives) and verify mailbox creation in Exchange Online',
+                'Select laptop from inventory and apply the department-specific SCCM task sequence (includes OS, security agents, and department software)',
+                'Configure badge access in Lenel — standard access plus any department-specific zones (confirm with manager)',
+                'Add user to department-specific AD groups for SharePoint, Teams channels, and shared drives',
+                'Send welcome email to new hire\'s personal email with first-day instructions, WiFi credentials, and IT contact info',
+                'Schedule a 15-minute "IT orientation" slot on the new hire\'s first morning'
+            ],
+            tags: ['onboarding', 'new hire', 'AD', 'M365', 'SCCM', 'badge access'],
+            deflection: 8
+        }
+    },
+    {
+        id: 'TK-4852',
+        title: 'Shared Printer Showing Offline on Floor 3',
+        summary: 'Canon ImageRunner C5560 on floor 3 showing as offline for all users. Print jobs queuing but not printing. Physical printer appears powered on and ready.',
+        resolution: 'Restarted print spooler service on print server. Cleared stuck print jobs in queue. Re-shared printer and pushed updated driver via Group Policy. All users can now print.',
+        article: {
+            title: 'Fix: Shared Network Printer Shows Offline Despite Being Powered On',
+            category: 'Printing',
+            summary: 'A shared network printer may appear offline to all users even though the physical device is powered on and shows ready. This is usually a print server issue, not a printer hardware problem.',
+            steps: [
+                'First, verify the printer\'s IP address is pingable from the print server (rules out network issues)',
+                'RDP into the print server and open Services (services.msc)',
+                'Locate "Print Spooler" service — if it shows "Running," stop it, wait 10 seconds, then start it again',
+                'Open the print queue for the affected printer and cancel all pending jobs (they\'ll need to be re-sent)',
+                'Right-click the printer > Properties > Ports tab — verify the IP address matches the printer\'s current IP',
+                'If the IP has changed (DHCP lease), update the port to the correct IP address',
+                'On a client machine, remove and re-add the printer. Test with a test page.',
+                'If the issue recurs, assign the printer a static IP or DHCP reservation to prevent future IP changes'
+            ],
+            tags: ['printer', 'offline', 'print spooler', 'network printing', 'Canon', 'print server'],
+            deflection: 15
+        }
+    },
+    {
+        id: 'TK-4861',
+        title: 'MFA Push Notifications Not Arriving on Phone',
+        summary: 'User switched to new iPhone and Microsoft Authenticator push notifications stopped working. Can still use time-based codes but push prompts never appear.',
+        resolution: 'Had user remove and re-register Authenticator on new device. Cleared MFA cache in Azure AD. Verified notification settings on iOS. Push working after re-registration.',
+        article: {
+            title: 'Fix: Microsoft Authenticator Push Notifications Not Working on New Phone',
+            category: 'Password / Access',
+            summary: 'After switching to a new phone, Microsoft Authenticator push notifications may stop working even though the app is installed and time-based codes function correctly. The app needs to be re-registered with Azure AD on the new device.',
+            steps: [
+                'On the new phone, open Microsoft Authenticator and note whether your work account is listed',
+                'Go to mysignins.microsoft.com on a computer and sign in with your work credentials (use a time-based code if needed)',
+                'Navigate to Security Info > Add sign-in method > Authenticator App',
+                'On the phone, tap + to add an account > Work or school account > Scan QR code',
+                'Scan the QR code displayed on the computer screen',
+                'Complete the test notification — you should receive a push immediately',
+                'On the mysignins page, remove the old phone entry to avoid confusion',
+                'Verify iOS Settings > Notifications > Authenticator has "Allow Notifications" enabled with Banners and Sounds on'
+            ],
+            tags: ['MFA', 'Authenticator', 'push notification', 'iPhone', 'Azure AD', 'authentication'],
+            deflection: 22
+        }
+    }
+];
+
+let generatedArticles = new Set();
+let currentTicket = -1;
+
+function renderTicketList() {
+    document.getElementById('ticketList').innerHTML = TICKETS.map((t, i) => {
+        const isActive = i === currentTicket;
+        const isGenerated = generatedArticles.has(i);
+        return `<div class="ticket-tab px-6 py-4 ${isActive ? 'active' : ''}" onclick="selectTicket(${i})">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-gray-400">${t.id}</span>
+                ${isGenerated ? '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">Article Created</span>' : ''}
+            </div>
+            <div class="font-semibold text-sm mt-1">${t.title}</div>
+            <div class="text-xs text-gray-500 mt-1 line-clamp-2">${t.summary}</div>
+        </div>`;
+    }).join('');
+}
+
+function selectTicket(i) {
+    currentTicket = i;
+    renderTicketList();
+    generateArticle(i);
+}
+
+async function generateArticle(i) {
+    const t = TICKETS[i];
+    const panel = document.getElementById('articlePanel');
+    const approveBtn = document.getElementById('approveBtn');
+    approveBtn.classList.add('hidden');
+
+    // Show loading
+    panel.innerHTML = `<div class="flex items-center gap-3 py-8">
+        <div class="animate-spin w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+        <span class="text-sm text-gray-500">Analyzing resolved ticket and generating KB article...</span>
+    </div>`;
+
+    await new Promise(r => setTimeout(r, 800 + Math.random() * 600));
+
+    const a = t.article;
+    panel.innerHTML = `<div class="article-appear space-y-5">
+        <div>
+            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-semibold">${a.category}</span>
+            <h2 class="text-lg font-bold text-gray-900 mt-2">${a.title}</h2>
+        </div>
+        <div>
+            <h4 class="text-xs font-semibold text-gray-500 uppercase mb-1">Summary</h4>
+            <p class="text-sm text-gray-700 leading-relaxed">${a.summary}</p>
+        </div>
+        <div>
+            <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2">Step-by-Step Resolution</h4>
+            <ol class="space-y-2.5">
+                ${a.steps.map((s, j) => `<li class="flex gap-3 text-sm"><span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">${j + 1}</span><span class="text-gray-700 leading-relaxed">${s}</span></li>`).join('')}
+            </ol>
+        </div>
+        <div>
+            <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2">Tags</h4>
+            <div class="flex flex-wrap gap-1.5">
+                ${a.tags.map(tag => `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">${tag}</span>`).join('')}
+            </div>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div class="text-xs font-semibold text-green-700">Estimated Ticket Deflection</div>
+            <div class="text-sm text-green-800 mt-1">This article could deflect ~${a.deflection} tickets/month based on historical ticket patterns for this issue type.</div>
+        </div>
+        <div class="bg-slate-50 border border-gray-200 rounded-lg p-3">
+            <div class="text-xs font-semibold text-gray-500">Source Ticket</div>
+            <div class="text-xs text-gray-500 mt-1"><strong>${t.id}</strong> &mdash; ${t.title}</div>
+            <div class="text-xs text-gray-400 mt-1">Resolution: ${t.resolution}</div>
+        </div>
+    </div>`;
+
+    approveBtn.classList.remove('hidden');
+}
+
+function approveArticle() {
+    if (currentTicket >= 0) {
+        generatedArticles.add(currentTicket);
+        renderTicketList();
+        updateStats();
+        document.getElementById('approveBtn').textContent = 'Published';
+        document.getElementById('approveBtn').classList.replace('bg-green-600', 'bg-gray-400');
+        document.getElementById('approveBtn').classList.replace('hover:bg-green-700', 'hover:bg-gray-400');
+    }
+}
+
+function updateStats() {
+    const count = generatedArticles.size;
+    document.getElementById('kpiArticles').textContent = count;
+    document.getElementById('articleCount').textContent = count + ' / 5';
+    const deflected = [...generatedArticles].reduce((s, i) => s + TICKETS[i].article.deflection, 0);
+    document.getElementById('kpiDeflected').textContent = deflected + '/mo';
+}
+
+renderTicketList();
+</script>
+</body>
+</html>

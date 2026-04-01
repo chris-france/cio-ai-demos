@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Lifecycle Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto"><h1 class="text-2xl font-extrabold">Hardware Lifecycle Intelligence</h1>
+        <p class="text-slate-300 text-sm mt-1">Age &amp; Warranty Tracker with Refresh Planner</p></div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Device Age Distribution</h3>
+                <div style="height:300px"><canvas id="ageChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Warranty Expirations &mdash; Next 24 Months</h3>
+                <div style="height:300px"><canvas id="warrantyChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Hardware Inventory &mdash; Top Priority Devices</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Asset Tag</th><th class="px-4 py-3">Type</th><th class="px-4 py-3">Model</th>
+                        <th class="px-4 py-3">Purchase Date</th><th class="px-4 py-3">Age (yr)</th><th class="px-4 py-3">Warranty End</th>
+                        <th class="px-4 py-3">Replace Cost</th><th class="px-4 py-3">Priority</th>
+                    </tr></thead>
+                    <tbody id="hwBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-green-50 border border-green-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-green-800 mb-3">Refresh Plan &mdash; Next 4 Quarters</h3>
+            <div class="grid grid-cols-4 gap-4 mt-3">
+                <div class="bg-white rounded-lg p-4 border border-green-200 text-center"><div class="text-xs font-semibold text-gray-500">Q2 2026</div><div class="text-2xl font-bold text-green-700 mt-1">18 devices</div><div class="text-sm text-gray-600">$27,000</div></div>
+                <div class="bg-white rounded-lg p-4 border border-green-200 text-center"><div class="text-xs font-semibold text-gray-500">Q3 2026</div><div class="text-2xl font-bold text-green-700 mt-1">12 devices</div><div class="text-sm text-gray-600">$18,000</div></div>
+                <div class="bg-white rounded-lg p-4 border border-green-200 text-center"><div class="text-xs font-semibold text-gray-500">Q4 2026</div><div class="text-2xl font-bold text-amber-600 mt-1">24 devices</div><div class="text-sm text-gray-600">$36,000</div></div>
+                <div class="bg-white rounded-lg p-4 border border-green-200 text-center"><div class="text-xs font-semibold text-gray-500">Q1 2027</div><div class="text-2xl font-bold text-amber-600 mt-1">15 devices</div><div class="text-sm text-gray-600">$22,500</div></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Hardware Lifecycle &mdash; Course 19 &mdash; Lecture 4 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const KPI = [
+    { label: 'Total Assets', value: '192', color: '#3b82f6' },
+    { label: 'Avg Device Age', value: '2.8 yr', color: '#8b5cf6' },
+    { label: 'Out of Warranty', value: '34', color: '#ef4444' },
+    { label: 'Over 4 Years', value: '28', color: '#f59e0b' },
+    { label: 'Annual Refresh Budget', value: '$103K', color: '#10b981' },
+];
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: { labels: ['<1 year', '1-2 years', '2-3 years', '3-4 years', '4+ years'], datasets: [{ label: 'Devices', data: [32,48,52,32,28], backgroundColor: ['#10b981','#3b82f6','#8b5cf6','#f59e0b','#ef4444'], borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+const months = Array.from({length:24},(_,i)=>{const d=new Date(2026,3+i,1);return d.toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
+const expirations = [4,6,3,5,8,4,2,7,5,3,6,4,3,2,5,4,3,2,4,3,2,1,3,2];
+new Chart(document.getElementById('warrantyChart'), {
+    type: 'bar',
+    data: { labels: months, datasets: [{ label: 'Warranties Expiring', data: expirations, backgroundColor: expirations.map((_,i)=>i<3?'#ef4444':'#3b82f6'), borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 2 } } } }
+});
+
+const HW = [
+    { tag: 'HW-001', type: 'Laptop', model: 'Dell Latitude 5420', purchase: '2021-06-15', age: 4.8, warranty: '2024-06-15', cost: 1500, priority: 'Critical' },
+    { tag: 'HW-002', type: 'Laptop', model: 'Dell Latitude 5420', purchase: '2021-08-22', age: 4.6, warranty: '2024-08-22', cost: 1500, priority: 'Critical' },
+    { tag: 'HW-003', type: 'Desktop', model: 'HP ProDesk 400 G7', purchase: '2021-03-10', age: 5.0, warranty: '2024-03-10', cost: 1200, priority: 'Critical' },
+    { tag: 'HW-004', type: 'Server', model: 'Dell R740', purchase: '2021-01-15', age: 5.2, warranty: '2025-01-15', cost: 8500, priority: 'High' },
+    { tag: 'HW-005', type: 'Laptop', model: 'MacBook Pro 14"', purchase: '2022-11-01', age: 3.4, warranty: '2025-11-01', cost: 2400, priority: 'Medium' },
+    { tag: 'HW-006', type: 'Laptop', model: 'Lenovo T14s', purchase: '2023-04-15', age: 3.0, warranty: '2026-04-15', cost: 1800, priority: 'Low' },
+    { tag: 'HW-007', type: 'Desktop', model: 'Dell OptiPlex 7090', purchase: '2022-06-20', age: 3.8, warranty: '2025-06-20', cost: 1100, priority: 'Medium' },
+    { tag: 'HW-008', type: 'Server', model: 'HPE DL380 Gen10', purchase: '2020-09-01', age: 5.5, warranty: '2023-09-01', cost: 12000, priority: 'Critical' },
+];
+document.getElementById('hwBody').innerHTML = HW.map(h => {
+    const prColor = h.priority==='Critical'?'bg-red-100 text-red-700':h.priority==='High'?'bg-amber-100 text-amber-700':h.priority==='Medium'?'bg-blue-100 text-blue-700':'bg-green-100 text-green-700';
+    const warrantyExpired = new Date(h.warranty) < new Date('2026-03-28');
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${h.priority==='Critical'?'bg-red-50':''}">
+        <td class="px-4 py-3 font-mono text-xs">${h.tag}</td><td class="px-4 py-3">${h.type}</td><td class="px-4 py-3">${h.model}</td>
+        <td class="px-4 py-3">${h.purchase}</td><td class="px-4 py-3 ${h.age>=4?'text-red-600 font-semibold':''}">${h.age}</td>
+        <td class="px-4 py-3 ${warrantyExpired?'text-red-600 font-semibold':''}">${h.warranty}</td>
+        <td class="px-4 py-3">$${h.cost.toLocaleString()}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${prColor} font-semibold">${h.priority}</span></td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

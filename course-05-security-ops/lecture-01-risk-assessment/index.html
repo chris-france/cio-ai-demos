@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Risk Assessment Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+    .grade-a { background: #dcfce7; color: #166534; }
+    .grade-b { background: #fef9c3; color: #854d0e; }
+    .grade-c { background: #fed7aa; color: #9a3412; }
+    .grade-d { background: #fecaca; color: #991b1b; }
+    .grade-f { background: #fecaca; color: #7f1d1d; }
+    .risk-cell { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: transform 0.15s; }
+    .risk-cell:hover { transform: scale(1.15); z-index: 10; }
+    .severity-critical { background: #dc2626; color: #fff; }
+    .severity-high { background: #f97316; color: #fff; }
+    .severity-medium { background: #eab308; color: #1c1917; }
+    .severity-low { background: #22c55e; color: #fff; }
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+
+<!-- Header -->
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-indigo-600 text-sm font-medium tracking-wide uppercase">Course 5, Lecture 1 — The SMB Security Gap</p>
+                <h1 class="text-3xl font-bold text-gray-900 mt-1">Security Risk Assessment Dashboard</h1>
+                <p class="text-gray-500 mt-1">AI-powered security posture analysis for Meridian Engineering (200 employees)</p>
+            </div>
+            <div class="text-right">
+                <div class="text-sm text-gray-400">Assessment Date: March 28, 2026</div>
+                <div id="overallGrade" class="mt-2 inline-block px-4 py-2 rounded-lg text-2xl font-extrabold"></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Overall Score -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-5 text-center">
+            <div id="overallScore" class="text-4xl font-extrabold text-gray-900"></div>
+            <div class="text-xs text-gray-500 mt-1">Overall Risk Score (0-100)</div>
+        </div>
+        <div class="card p-5 text-center">
+            <div id="critCount" class="text-4xl font-extrabold text-red-600"></div>
+            <div class="text-xs text-gray-500 mt-1">Critical Findings</div>
+        </div>
+        <div class="card p-5 text-center">
+            <div id="highCount" class="text-4xl font-extrabold text-orange-500"></div>
+            <div class="text-xs text-gray-500 mt-1">High Findings</div>
+        </div>
+        <div class="card p-5 text-center">
+            <div id="medCount" class="text-4xl font-extrabold text-yellow-600"></div>
+            <div class="text-xs text-gray-500 mt-1">Medium Findings</div>
+        </div>
+    </div>
+</div>
+
+<!-- Radar Chart + Risk Matrix -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Radar Chart -->
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Security Posture by Category</h2>
+            <div style="max-height: 380px; display: flex; justify-content: center;">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Risk Matrix -->
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-2">Risk Matrix — Likelihood vs Impact</h2>
+            <p class="text-xs text-gray-400 mb-4">Each cell shows the number of findings at that intersection. Click to filter the findings table.</p>
+            <div class="flex items-end gap-2">
+                <div class="text-xs text-gray-400 flex flex-col items-center mr-1" style="writing-mode: vertical-rl; transform: rotate(180deg); height: 260px;">
+                    Likelihood &rarr;
+                </div>
+                <div>
+                    <div class="flex items-center gap-1 mb-1">
+                        <div class="text-xs text-gray-400 w-16 text-right pr-2">Critical</div>
+                        <div id="matrix-row-4" class="flex gap-1"></div>
+                    </div>
+                    <div class="flex items-center gap-1 mb-1">
+                        <div class="text-xs text-gray-400 w-16 text-right pr-2">High</div>
+                        <div id="matrix-row-3" class="flex gap-1"></div>
+                    </div>
+                    <div class="flex items-center gap-1 mb-1">
+                        <div class="text-xs text-gray-400 w-16 text-right pr-2">Medium</div>
+                        <div id="matrix-row-2" class="flex gap-1"></div>
+                    </div>
+                    <div class="flex items-center gap-1 mb-1">
+                        <div class="text-xs text-gray-400 w-16 text-right pr-2">Low</div>
+                        <div id="matrix-row-1" class="flex gap-1"></div>
+                    </div>
+                    <div class="flex items-center gap-1 mt-2">
+                        <div class="w-16"></div>
+                        <div class="text-xs text-gray-400 w-12 text-center">Low</div>
+                        <div class="text-xs text-gray-400 w-12 text-center">Medium</div>
+                        <div class="text-xs text-gray-400 w-12 text-center">High</div>
+                        <div class="text-xs text-gray-400 w-12 text-center">Critical</div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <div class="w-16"></div>
+                        <div class="text-xs text-gray-400 text-center w-full">Impact &rarr;</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Scores -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Category Breakdown</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="categoryCards"></div>
+    </div>
+</div>
+
+<!-- Top 10 Findings Table -->
+<div class="max-w-7xl mx-auto px-6 mt-6 mb-12">
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900">Top 10 Risk Findings</h2>
+            <div class="flex gap-2">
+                <button onclick="filterFindings('all')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 font-medium" id="filter-all">All</button>
+                <button onclick="filterFindings('critical')" class="px-3 py-1 text-xs rounded-full bg-red-50 hover:bg-red-100 text-red-700 font-medium" id="filter-critical">Critical</button>
+                <button onclick="filterFindings('high')" class="px-3 py-1 text-xs rounded-full bg-orange-50 hover:bg-orange-100 text-orange-700 font-medium" id="filter-high">High</button>
+                <button onclick="filterFindings('medium')" class="px-3 py-1 text-xs rounded-full bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium" id="filter-medium">Medium</button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-xs text-gray-400 uppercase border-b border-gray-200">
+                        <th class="text-left py-3 px-3">#</th>
+                        <th class="text-left py-3 px-3">Finding</th>
+                        <th class="text-left py-3 px-3">Category</th>
+                        <th class="text-center py-3 px-3">Severity</th>
+                        <th class="text-center py-3 px-3">Likelihood</th>
+                        <th class="text-center py-3 px-3">Impact</th>
+                        <th class="text-left py-3 px-3">Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody id="findingsTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-white text-gray-400 text-center py-6 text-xs border-t border-gray-200">
+    CIO AI Security Operations Course — Lecture 1 Demo Output &bull; Security Risk Assessment Dashboard &bull; Generated March 2026
+</footer>
+
+<script>
+// === DATA ===
+const categories = [
+    { name: 'Network Security', score: 62, icon: '🔒' },
+    { name: 'Endpoint Protection', score: 71, icon: '💻' },
+    { name: 'Identity & Access', score: 45, icon: '🔑' },
+    { name: 'Data Protection', score: 38, icon: '🗄️' },
+    { name: 'Cloud Security', score: 52, icon: '☁️' },
+    { name: 'Compliance', score: 58, icon: '📋' },
+    { name: 'Incident Response', score: 29, icon: '🚨' },
+    { name: 'Security Training', score: 34, icon: '🎓' }
+];
+
+const findings = [
+    { id: 1, finding: 'No MFA on VPN or admin accounts', category: 'Identity & Access', severity: 'critical', likelihood: 4, impact: 4, recommendation: 'Deploy MFA (Microsoft Entra or Duo) for all privileged and remote access within 30 days' },
+    { id: 2, finding: 'No incident response plan documented or tested', category: 'Incident Response', severity: 'critical', likelihood: 3, impact: 4, recommendation: 'Draft IR playbook covering ransomware, data breach, and BEC scenarios; tabletop exercise within 60 days' },
+    { id: 3, finding: 'Backups not tested; no immutable/offsite copy', category: 'Data Protection', severity: 'critical', likelihood: 3, impact: 4, recommendation: 'Implement 3-2-1 backup with immutable cloud tier; test restore monthly' },
+    { id: 4, finding: '47 endpoints running unpatched Windows 10 (EOL)', category: 'Endpoint Protection', severity: 'high', likelihood: 4, impact: 3, recommendation: 'Upgrade to Windows 11 or deploy extended security updates; prioritize internet-facing machines' },
+    { id: 5, finding: 'Flat network — no segmentation between IT and OT', category: 'Network Security', severity: 'high', likelihood: 3, impact: 4, recommendation: 'Implement VLANs separating corporate, guest, OT/SCADA, and server networks' },
+    { id: 6, finding: 'No DLP controls — sensitive data leaves via email and USB', category: 'Data Protection', severity: 'high', likelihood: 4, impact: 3, recommendation: 'Deploy Microsoft Purview DLP; disable USB mass storage via GPO' },
+    { id: 7, finding: 'Cloud storage (OneDrive/SharePoint) permissions over-provisioned', category: 'Cloud Security', severity: 'high', likelihood: 3, impact: 3, recommendation: 'Audit sharing links; enforce least-privilege; block anonymous sharing' },
+    { id: 8, finding: 'No security awareness training program in place', category: 'Security Training', severity: 'medium', likelihood: 4, impact: 2, recommendation: 'Launch monthly phishing simulations + quarterly training; track completion rates' },
+    { id: 9, finding: 'Firewall rules not reviewed in 18+ months; 12 "ANY" rules found', category: 'Network Security', severity: 'medium', likelihood: 2, impact: 3, recommendation: 'Conduct firewall rule audit; remove unused rules; replace ANY with specific services' },
+    { id: 10, finding: 'No SIEM or centralized log management', category: 'Compliance', severity: 'medium', likelihood: 2, impact: 3, recommendation: 'Deploy lightweight SIEM (Wazuh or Microsoft Sentinel); aggregate firewall, AD, and endpoint logs' }
+];
+
+// === SCORING ===
+const overallScore = Math.round(categories.reduce((s, c) => s + c.score, 0) / categories.length);
+const grade = overallScore >= 90 ? 'A' : overallScore >= 80 ? 'B' : overallScore >= 65 ? 'C' : overallScore >= 50 ? 'D' : 'F';
+const gradeClass = `grade-${grade.toLowerCase()}`;
+
+document.getElementById('overallScore').textContent = overallScore;
+document.getElementById('overallGrade').textContent = grade;
+document.getElementById('overallGrade').className = `mt-2 inline-block px-4 py-2 rounded-lg text-2xl font-extrabold ${gradeClass}`;
+document.getElementById('critCount').textContent = findings.filter(f => f.severity === 'critical').length;
+document.getElementById('highCount').textContent = findings.filter(f => f.severity === 'high').length;
+document.getElementById('medCount').textContent = findings.filter(f => f.severity === 'medium').length;
+
+// === RADAR CHART ===
+new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+        labels: categories.map(c => c.name),
+        datasets: [{
+            label: 'Current Score',
+            data: categories.map(c => c.score),
+            borderColor: '#4f46e5',
+            backgroundColor: 'rgba(79, 70, 229, 0.15)',
+            pointBackgroundColor: '#4f46e5',
+            borderWidth: 2
+        }, {
+            label: 'Target (80)',
+            data: categories.map(() => 80),
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.05)',
+            borderDash: [5, 5],
+            pointRadius: 0,
+            borderWidth: 1.5
+        }]
+    },
+    options: {
+        scales: {
+            r: {
+                min: 0, max: 100,
+                ticks: { stepSize: 20, font: { size: 10 } },
+                pointLabels: { font: { size: 11, family: 'Inter' } }
+            }
+        },
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } } }
+    }
+});
+
+// === CATEGORY CARDS ===
+const catContainer = document.getElementById('categoryCards');
+categories.forEach(c => {
+    const color = c.score >= 70 ? 'text-green-600 bg-green-50' : c.score >= 50 ? 'text-yellow-600 bg-yellow-50' : 'text-red-600 bg-red-50';
+    const barColor = c.score >= 70 ? 'bg-green-500' : c.score >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+    catContainer.innerHTML += `
+        <div class="rounded-lg border border-gray-200 p-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700">${c.name}</span>
+                <span class="text-lg font-bold ${color} px-2 py-0.5 rounded">${c.score}</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+                <div class="${barColor} rounded-full h-2" style="width: ${c.score}%"></div>
+            </div>
+        </div>`;
+});
+
+// === RISK MATRIX ===
+const matrixData = {};
+findings.forEach(f => {
+    const key = `${f.likelihood}-${f.impact}`;
+    matrixData[key] = (matrixData[key] || 0) + 1;
+});
+
+for (let row = 4; row >= 1; row--) {
+    const rowEl = document.getElementById(`matrix-row-${row}`);
+    for (let col = 1; col <= 4; col++) {
+        const count = matrixData[`${row}-${col}`] || 0;
+        const risk = row + col;
+        const bg = risk >= 7 ? 'bg-red-500 text-white' : risk >= 5 ? 'bg-orange-400 text-white' : risk >= 3 ? 'bg-yellow-300 text-gray-900' : 'bg-green-300 text-gray-900';
+        rowEl.innerHTML += `<div class="risk-cell ${bg}" onclick="filterByMatrix(${row},${col})">${count || ''}</div>`;
+    }
+}
+
+// === FINDINGS TABLE ===
+let activeFilter = 'all';
+
+function renderFindings(filter) {
+    const tbody = document.getElementById('findingsTable');
+    tbody.innerHTML = '';
+    const filtered = filter === 'all' ? findings : findings.filter(f => f.severity === filter);
+    filtered.forEach(f => {
+        const sevClass = `severity-${f.severity}`;
+        const likLabel = ['', 'Unlikely', 'Possible', 'Likely', 'Almost Certain'][f.likelihood];
+        const impLabel = ['', 'Minimal', 'Moderate', 'Significant', 'Severe'][f.impact];
+        tbody.innerHTML += `<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-3 px-3 text-gray-400">${f.id}</td>
+            <td class="py-3 px-3 font-medium text-gray-900">${f.finding}</td>
+            <td class="py-3 px-3 text-gray-500">${f.category}</td>
+            <td class="py-3 px-3 text-center"><span class="px-2 py-1 rounded text-xs font-bold ${sevClass}">${f.severity.toUpperCase()}</span></td>
+            <td class="py-3 px-3 text-center text-gray-600 text-xs">${likLabel}</td>
+            <td class="py-3 px-3 text-center text-gray-600 text-xs">${impLabel}</td>
+            <td class="py-3 px-3 text-gray-600 text-xs">${f.recommendation}</td>
+        </tr>`;
+    });
+}
+
+function filterFindings(sev) {
+    activeFilter = sev;
+    renderFindings(sev);
+}
+
+function filterByMatrix(lik, imp) {
+    const tbody = document.getElementById('findingsTable');
+    tbody.innerHTML = '';
+    const filtered = findings.filter(f => f.likelihood === lik && f.impact === imp);
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-gray-400">No findings at this risk intersection</td></tr>';
+        return;
+    }
+    filtered.forEach(f => {
+        const sevClass = `severity-${f.severity}`;
+        const likLabel = ['', 'Unlikely', 'Possible', 'Likely', 'Almost Certain'][f.likelihood];
+        const impLabel = ['', 'Minimal', 'Moderate', 'Significant', 'Severe'][f.impact];
+        tbody.innerHTML += `<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-3 px-3 text-gray-400">${f.id}</td>
+            <td class="py-3 px-3 font-medium text-gray-900">${f.finding}</td>
+            <td class="py-3 px-3 text-gray-500">${f.category}</td>
+            <td class="py-3 px-3 text-center"><span class="px-2 py-1 rounded text-xs font-bold ${sevClass}">${f.severity.toUpperCase()}</span></td>
+            <td class="py-3 px-3 text-center text-gray-600 text-xs">${likLabel}</td>
+            <td class="py-3 px-3 text-center text-gray-600 text-xs">${impLabel}</td>
+            <td class="py-3 px-3 text-gray-600 text-xs">${f.recommendation}</td>
+        </tr>`;
+    });
+}
+
+renderFindings('all');
+</script>
+</body>
+</html>

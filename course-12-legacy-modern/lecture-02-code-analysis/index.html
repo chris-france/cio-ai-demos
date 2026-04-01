@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legacy Code Analysis Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <h1 class="text-2xl font-bold text-gray-900">Legacy Code Analysis Report</h1>
+        <p class="text-gray-500 text-sm mt-1">Course 12, Lecture 2 — AI Reads Your Legacy Code</p>
+    </div>
+</header>
+<main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+        <p class="text-amber-800 text-sm"><strong>Sample Data:</strong> This report contains sample code analysis data. Run the Claude Code prompt to rebuild it with your workbook data.</p>
+    </div>
+    <div class="grid grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-gray-900">156.5K</div>
+            <div class="text-xs text-gray-500 mt-1">Lines of Code</div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-gray-900">6</div>
+            <div class="text-xs text-gray-500 mt-1">Modules</div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-orange-600">60.5</div>
+            <div class="text-xs text-gray-500 mt-1">Avg Complexity</div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-red-600">16%</div>
+            <div class="text-xs text-gray-500 mt-1">Avg Doc Coverage</div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-red-700">D</div>
+            <div class="text-xs text-gray-500 mt-1">Migration Readiness</div>
+        </div>
+    </div>
+    <p class="text-gray-600 text-center py-12">Run the Claude Code prompt to generate the full interactive report with charts, dependency graphs, and migration complexity matrix.</p>
+</main>
+</body>
+</html>

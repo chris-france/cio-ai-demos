@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSO & MFA Coverage Matrix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-violet-900 via-violet-800 to-violet-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">SSO & MFA Coverage Matrix</h1>
+            <p class="text-violet-300 text-sm mt-1">SSO and MFA Strategy &mdash; Gap Analysis</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">SSO Integration Status</h3>
+                <div style="height:300px"><canvas id="ssoChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">MFA Method Distribution</h3>
+                <div style="height:300px"><canvas id="mfaChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-700">Application Coverage Matrix</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Application</th><th class="px-4 py-3">Category</th>
+                        <th class="px-4 py-3">Users</th><th class="px-4 py-3">SSO</th>
+                        <th class="px-4 py-3">MFA</th><th class="px-4 py-3">MFA Method</th>
+                        <th class="px-4 py-3">SAML/OIDC</th><th class="px-4 py-3">Gap Risk</th>
+                    </tr></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-amber-800 mb-3">Priority Gaps to Close</h3>
+            <div id="gaps" class="space-y-2"></div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            SSO & MFA Coverage Matrix &mdash; Course 6: Zero Trust for SMBs &mdash; Lecture 6 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const APPS = [
+    { app: 'Microsoft 365', cat: 'Productivity', users: 300, sso: true, mfa: true, method: 'Authenticator App', protocol: 'SAML 2.0', risk: 'Low' },
+    { app: 'Salesforce', cat: 'CRM', users: 120, sso: true, mfa: true, method: 'Authenticator App', protocol: 'SAML 2.0', risk: 'Low' },
+    { app: 'AWS Console', cat: 'Cloud', users: 45, sso: true, mfa: true, method: 'Hardware Key', protocol: 'SAML 2.0', risk: 'Low' },
+    { app: 'GitHub Enterprise', cat: 'Development', users: 60, sso: true, mfa: true, method: 'Authenticator App', protocol: 'SAML 2.0', risk: 'Low' },
+    { app: 'Workday', cat: 'HR', users: 300, sso: true, mfa: false, method: 'None', protocol: 'SAML 2.0', risk: 'High' },
+    { app: 'SAP ERP', cat: 'Finance', users: 85, sso: false, mfa: false, method: 'None', protocol: 'N/A', risk: 'Critical' },
+    { app: 'Jira/Confluence', cat: 'Project Mgmt', users: 150, sso: true, mfa: true, method: 'Authenticator App', protocol: 'SAML 2.0', risk: 'Low' },
+    { app: 'Snowflake', cat: 'Data', users: 20, sso: true, mfa: true, method: 'Authenticator App', protocol: 'OIDC', risk: 'Low' },
+    { app: 'Legacy CRM', cat: 'Sales', users: 30, sso: false, mfa: false, method: 'None', protocol: 'N/A', risk: 'Critical' },
+    { app: 'NetSuite', cat: 'Finance', users: 40, sso: false, mfa: true, method: 'SMS', protocol: 'N/A', risk: 'High' },
+    { app: 'Zendesk', cat: 'Support', users: 60, sso: true, mfa: false, method: 'None', protocol: 'SAML 2.0', risk: 'Medium' },
+    { app: 'DocuSign', cat: 'Legal', users: 100, sso: true, mfa: false, method: 'None', protocol: 'SAML 2.0', risk: 'Medium' },
+    { app: 'Custom Intranet', cat: 'Internal', users: 300, sso: false, mfa: false, method: 'None', protocol: 'N/A', risk: 'High' },
+    { app: 'VPN Gateway', cat: 'Network', users: 200, sso: false, mfa: true, method: 'RADIUS + OTP', protocol: 'N/A', risk: 'Medium' },
+    { app: 'ServiceNow', cat: 'ITSM', users: 50, sso: true, mfa: true, method: 'Authenticator App', protocol: 'SAML 2.0', risk: 'Low' },
+];
+
+document.getElementById('kpiCards').innerHTML = [
+    { label: 'Total Applications', value: '15', color: '#8b5cf6', trend: 'In scope for audit' },
+    { label: 'SSO Integrated', value: '67%', color: '#10b981', trend: '10 of 15 apps' },
+    { label: 'MFA Enabled', value: '53%', color: '#f59e0b', trend: '8 of 15 apps' },
+    { label: 'Full Coverage', value: '40%', color: '#3b82f6', trend: 'SSO + MFA both enabled' },
+    { label: 'Critical Gaps', value: '3', color: '#ef4444', trend: 'No SSO and no MFA' }
+].map(k => `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+new Chart(document.getElementById('ssoChart'), {
+    type: 'doughnut', data: { labels: ['SSO + MFA','SSO Only','MFA Only','Neither'],
+        datasets: [{ data: [6,4,2,3], backgroundColor: ['#10b981','#3b82f6','#f59e0b','#ef4444'] }]
+    }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+});
+
+new Chart(document.getElementById('mfaChart'), {
+    type: 'bar', data: { labels: ['Authenticator App','Hardware Key','SMS','RADIUS OTP','None'],
+        datasets: [{ label: 'Applications', data: [5,1,1,1,7], backgroundColor: ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ef4444'] }]
+    }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+document.getElementById('tableBody').innerHTML = APPS.map(a => {
+    const sso = a.sso ? '<span class="text-green-600 font-semibold">Yes</span>' : '<span class="text-red-600 font-semibold">No</span>';
+    const mfa = a.mfa ? '<span class="text-green-600 font-semibold">Yes</span>' : '<span class="text-red-600 font-semibold">No</span>';
+    const rc = a.risk==='Critical'?'bg-red-100 text-red-700':a.risk==='High'?'bg-amber-100 text-amber-700':a.risk==='Medium'?'bg-blue-100 text-blue-700':'bg-green-100 text-green-700';
+    const bg = a.risk==='Critical'?'bg-red-50':'';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${bg}">
+        <td class="px-4 py-3 font-medium">${a.app}</td><td class="px-4 py-3">${a.cat}</td>
+        <td class="px-4 py-3">${a.users}</td><td class="px-4 py-3">${sso}</td>
+        <td class="px-4 py-3">${mfa}</td><td class="px-4 py-3">${a.method}</td>
+        <td class="px-4 py-3 font-mono text-xs">${a.protocol}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${rc}">${a.risk}</span></td></tr>`;
+}).join('');
+
+document.getElementById('gaps').innerHTML = APPS.filter(a => a.risk==='Critical'||a.risk==='High').map(a => `
+    <div class="bg-white rounded-lg p-3 border ${a.risk==='Critical'?'border-red-300':'border-amber-300'}">
+        <div class="font-semibold">${a.app} <span class="text-xs px-2 py-0.5 rounded-full ${a.risk==='Critical'?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700'}">${a.risk}</span></div>
+        <div class="text-xs text-gray-600 mt-1">${a.users} users | SSO: ${a.sso?'Yes':'No'} | MFA: ${a.mfa?'Yes':'No'} | Recommendation: ${!a.sso?'Integrate SSO via SAML 2.0':''}${!a.sso&&!a.mfa?' + ':''}${!a.mfa?'Enable MFA (authenticator app)':''}</div>
+    </div>`).join('');
+</script>
+</body>
+</html>

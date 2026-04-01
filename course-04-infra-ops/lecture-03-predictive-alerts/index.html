@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Alerting — 72-Hour Incident Forecast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .prediction-card { transition: all 0.3s ease; cursor: pointer; }
+        .prediction-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .prediction-card.selected { ring: 2px; box-shadow: 0 0 0 3px rgba(99,102,241,0.3); }
+        .urgency-critical { border-left: 4px solid #ef4444; }
+        .urgency-high { border-left: 4px solid #f59e0b; }
+        .urgency-medium { border-left: 4px solid #3b82f6; }
+        .urgency-low { border-left: 4px solid #22c55e; }
+        .timeline-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .confidence-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
+        .confidence-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-gray-900 via-slate-800 to-cyan-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-400 text-sm font-medium tracking-wider uppercase">Course 4: AI Infrastructure Ops &mdash; Lecture 3 Demo</p>
+                    <h1 class="text-3xl font-bold mt-1">Predictive Alerting Dashboard</h1>
+                    <p class="text-slate-300 text-sm mt-1">Forecasting incidents 72 hours before they happen</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-red-400">3</p>
+                        <p class="text-xs text-slate-400">Critical (24h)</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-amber-400">5</p>
+                        <p class="text-xs text-slate-400">High (48h)</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-cyan-400">4</p>
+                        <p class="text-xs text-slate-400">Medium (72h)</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-green-400">$127K</p>
+                        <p class="text-xs text-slate-400">Downtime Avoided</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+        <!-- Timeline Visualization -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">72-Hour Prediction Timeline</h2>
+            <p class="text-sm text-gray-500 mb-4">Click any prediction to see details below</p>
+            <div class="h-72"><canvas id="timelineChart"></canvas></div>
+        </div>
+
+        <!-- Prediction Cards Grid -->
+        <div class="grid grid-cols-3 gap-4" id="predictionCards"></div>
+
+        <!-- Selected Prediction Detail -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6" id="detailPanel">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Prediction Detail</h2>
+            <div id="detailContent" class="text-sm text-gray-500">Click a prediction card above to see full details, trend data, and recommended actions.</div>
+        </div>
+
+        <!-- Prediction Accuracy History -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Prediction Accuracy &mdash; Last 30 Days</h2>
+            <p class="text-sm text-gray-500 mb-4">How well the AI has been predicting incidents</p>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-bold text-green-600">94%</p>
+                    <p class="text-xs text-green-500 mt-1">Prediction Accuracy</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-bold text-blue-600">47</p>
+                    <p class="text-xs text-blue-500 mt-1">Incidents Predicted</p>
+                </div>
+                <div class="bg-amber-50 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-bold text-amber-600">3</p>
+                    <p class="text-xs text-amber-500 mt-1">False Predictions</p>
+                </div>
+                <div class="bg-red-50 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-bold text-red-600">2</p>
+                    <p class="text-xs text-red-500 mt-1">Missed Incidents</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Insight -->
+        <div class="bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl p-6">
+            <h3 class="font-bold text-cyan-900 text-lg">The Shift: Reactive to Predictive</h3>
+            <p class="text-cyan-800 mt-2">Instead of waking up at 2am to a crashed server, your team reviews predicted incidents over morning coffee. The 3 critical predictions in the next 24 hours can all be resolved during business hours with zero downtime, saving an estimated <strong>$127,000 in avoided outage costs</strong>.</p>
+        </div>
+    </div>
+
+<script>
+const PREDICTIONS = [
+    {
+        id: 1, system: "prod-db-01", metric: "Disk Space", category: "Storage",
+        current: "87% full (2.1 TB / 2.4 TB)", rate: "+3.2 GB/day",
+        breach: "~18 hours", confidence: 96, urgency: "critical",
+        detail: "Data volume growing at 3.2 GB/day due to transaction log accumulation. At current rate, volume will hit 95% in 18 hours and 100% in 28 hours. Auto-archive of logs older than 30 days would free 180 GB immediately.",
+        action: "Schedule log archival tonight. Approve 500 GB volume expansion as backup.",
+        cost: "$45,000 (estimated outage cost if DB fills up)"
+    },
+    {
+        id: 2, system: "prod-web-cluster", metric: "Memory", category: "Memory",
+        current: "6.8 GB / 8 GB (85%)", rate: "+120 MB/hour (leak detected)",
+        breach: "~10 hours", confidence: 93, urgency: "critical",
+        detail: "Gradual memory increase in Node.js worker processes since last deployment (v3.14.2, deployed 36 hours ago). Heap snapshots show event listener accumulation in WebSocket handler. Classic memory leak pattern.",
+        action: "Roll back to v3.14.1 or deploy hotfix for WebSocket handler. Schedule rolling restart as interim measure.",
+        cost: "$28,000 (estimated outage cost if OOM kills worker processes)"
+    },
+    {
+        id: 3, system: "prod-app-03", metric: "CPU", category: "Compute",
+        current: "72% avg (sustained)", rate: "+2% per hour during business hours",
+        breach: "~22 hours (next business day peak)", confidence: 89, urgency: "critical",
+        detail: "CPU trending upward since new recommendation engine deployment. The ML inference calls are 3x heavier than estimated. Will saturate during tomorrow's 10am-2pm peak traffic window.",
+        action: "Scale horizontally: add 2 app instances before 9am tomorrow. File ticket to optimize inference batch size.",
+        cost: "$54,000 (estimated revenue loss from degraded response times)"
+    },
+    {
+        id: 4, system: "prod-lb-02", metric: "SSL Certificate", category: "Certificate",
+        current: "Expires in 6 days", rate: "n/a",
+        breach: "6 days", confidence: 99, urgency: "high",
+        detail: "Wildcard certificate for *.company.com expires March 15. Let's Encrypt auto-renewal failed 3 times (DNS challenge timeout). Manual intervention required. If cert expires, all HTTPS traffic returns browser warnings.",
+        action: "Fix DNS challenge configuration. Manually renew certificate. Set up monitoring for renewal failures.",
+        cost: "$0 if renewed. $200K+ reputation damage if expired in production."
+    },
+    {
+        id: 5, system: "prod-nas-01", metric: "Disk Space", category: "Storage",
+        current: "78% full (15.6 TB / 20 TB)", rate: "+45 GB/day",
+        breach: "~48 hours (at weekend backup peak)", confidence: 91, urgency: "high",
+        detail: "NAS filling faster than normal due to video surveillance migration project. Weekend backup jobs will add another 200 GB. Volume will breach 90% threshold Saturday night.",
+        action: "Move completed surveillance archives to cold storage (S3 Glacier). Expand volume if migration continues.",
+        cost: "$12,000 (overtime + emergency storage procurement)"
+    },
+    {
+        id: 6, system: "prod-k8s-cluster", metric: "Pod Evictions", category: "Compute",
+        current: "3 evictions today", rate: "+1.5 evictions/day (trending up)",
+        breach: "~36 hours (service degradation)", confidence: 87, urgency: "high",
+        detail: "Memory pressure on worker nodes causing pod evictions. Resource requests underspecified for 4 microservices after last Sprint's feature additions. Eviction rate accelerating as traffic grows.",
+        action: "Update resource requests for payment-svc, auth-svc, catalog-svc, search-svc. Add 1 worker node to cluster.",
+        cost: "$8,500 (degraded checkout experience, potential cart abandonment)"
+    },
+    {
+        id: 7, system: "prod-db-replica-03", metric: "Replication Lag", category: "Database",
+        current: "4.2 seconds (threshold: 10s)", rate: "+0.3s per hour",
+        breach: "~42 hours", confidence: 85, urgency: "high",
+        detail: "Replication lag increasing steadily on replica-03. I/O wait on replica is 2x higher than other replicas, suggesting disk degradation. SMART data shows 12 reallocated sectors (was 4 last week).",
+        action: "Schedule disk replacement for replica-03 during next maintenance window. Redirect read traffic to replica-01 and replica-02.",
+        cost: "$15,000 (potential data loss if disk fails before replacement)"
+    },
+    {
+        id: 8, system: "prod-cache-cluster", metric: "Hit Rate", category: "Network",
+        current: "82% (normally 95%+)", rate: "Declining 1.5%/day",
+        breach: "~60 hours (performance cliff)", confidence: 82, urgency: "high",
+        detail: "Redis cache hit rate declining since schema migration 3 days ago. New cache keys don't match old key patterns. 13% of cache entries are orphaned (old schema). Cache is filling with stale data.",
+        action: "Flush orphaned keys matching old schema pattern. Verify new cache key generation matches application queries.",
+        cost: "$6,000 (DB load increase, response time degradation)"
+    },
+    {
+        id: 9, system: "prod-vpn-01", metric: "Connection Pool", category: "Network",
+        current: "412 / 500 connections", rate: "+15 connections/day",
+        breach: "~60 hours", confidence: 78, urgency: "medium",
+        detail: "VPN connection count climbing as remote work increases post-holiday. Pool will hit capacity Thursday morning when West Coast team logs in. Historical pattern shows 20% spike on Thursdays (all-hands day).",
+        action: "Increase connection pool to 750. Evaluate split-tunnel VPN to reduce full-tunnel connections.",
+        cost: "$3,000 (lost productivity if engineers can't connect)"
+    },
+    {
+        id: 10, system: "prod-monitor-01", metric: "Disk I/O", category: "Storage",
+        current: "78% I/O wait", rate: "Stable but high",
+        breach: "~68 hours (metric retention overflow)", confidence: 74, urgency: "medium",
+        detail: "Prometheus TSDB is hitting I/O bottleneck as metric cardinality has grown 3x in 6 months. Currently at 2.4M active time series. Storage backend will overflow retention window by end of week.",
+        action: "Reduce cardinality: drop unused metrics, increase scrape intervals for non-critical targets. Move to SSD-backed storage.",
+        cost: "$2,000 (monitoring blind spot if Prometheus falls behind)"
+    },
+    {
+        id: 11, system: "prod-jenkins-01", metric: "Build Queue", category: "Compute",
+        current: "22 queued jobs (normally <5)", rate: "+4 jobs/hour backing up",
+        breach: "~70 hours (CI/CD pipeline blocked)", confidence: 71, urgency: "medium",
+        detail: "Jenkins build queue growing since 2 of 6 executors became stuck on flaky integration tests. Remaining executors can't keep up with commit rate. Developer velocity will drop if builds take >30 min.",
+        action: "Restart stuck executors. Quarantine flaky tests. Add 2 ephemeral cloud executors.",
+        cost: "$5,000 (developer time wasted waiting for builds)"
+    },
+    {
+        id: 12, system: "prod-mail-01", metric: "Queue Depth", category: "Network",
+        current: "1,847 messages (normally <200)", rate: "+300/hour",
+        breach: "~72 hours (delivery SLA breach)", confidence: 68, urgency: "medium",
+        detail: "Email queue backing up due to rate limiting from recipient domains (Gmail, Microsoft). Bounce rate has increased from 2% to 8%. Likely triggered by marketing campaign sent without warmup.",
+        action: "Throttle outbound rate. Implement domain-based sending limits. Review marketing email practices.",
+        cost: "$1,500 (SLA penalties, delayed transactional emails)"
+    }
+];
+
+// ===== RENDER PREDICTION CARDS =====
+document.getElementById('predictionCards').innerHTML = PREDICTIONS.map(p => {
+    const urgColor = { critical: 'border-red-300 bg-red-50', high: 'border-amber-300 bg-amber-50', medium: 'border-blue-300 bg-blue-50', low: 'border-green-300 bg-green-50' }[p.urgency];
+    const urgBadge = { critical: 'bg-red-100 text-red-700', high: 'bg-amber-100 text-amber-700', medium: 'bg-blue-100 text-blue-700', low: 'bg-green-100 text-green-700' }[p.urgency];
+    const confColor = p.confidence >= 90 ? '#22c55e' : p.confidence >= 80 ? '#f59e0b' : '#3b82f6';
+    return `<div class="prediction-card rounded-xl border ${urgColor} p-4 urgency-${p.urgency}" onclick="showDetail(${p.id})">
+        <div class="flex justify-between items-start mb-2">
+            <span class="font-mono text-xs text-gray-500">${p.system}</span>
+            <span class="${urgBadge} text-xs font-bold px-2 py-0.5 rounded-full">${p.urgency.toUpperCase()}</span>
+        </div>
+        <h3 class="font-bold text-gray-900 text-sm">${p.metric} &mdash; ${p.category}</h3>
+        <p class="text-xs text-gray-600 mt-1">${p.current}</p>
+        <p class="text-xs text-gray-500 mt-0.5">Predicted breach: <strong>${p.breach}</strong></p>
+        <div class="mt-3">
+            <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-500">Confidence</span>
+                <span class="font-bold">${p.confidence}%</span>
+            </div>
+            <div class="confidence-bar"><div class="confidence-fill" style="width:${p.confidence}%; background:${confColor}"></div></div>
+        </div>
+    </div>`;
+}).join('');
+
+function showDetail(id) {
+    const p = PREDICTIONS.find(x => x.id === id);
+    document.querySelectorAll('.prediction-card').forEach(c => c.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    const urgBadge = { critical: 'bg-red-100 text-red-700', high: 'bg-amber-100 text-amber-700', medium: 'bg-blue-100 text-blue-700' }[p.urgency];
+    document.getElementById('detailContent').innerHTML = `
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <h3 class="text-lg font-bold text-gray-900">${p.system} &mdash; ${p.metric}</h3>
+                    <span class="${urgBadge} text-xs font-bold px-2 py-0.5 rounded-full">${p.urgency.toUpperCase()}</span>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div><span class="font-semibold text-gray-700">Current:</span> <span class="text-gray-600">${p.current}</span></div>
+                    <div><span class="font-semibold text-gray-700">Rate of Change:</span> <span class="text-gray-600">${p.rate}</span></div>
+                    <div><span class="font-semibold text-gray-700">Predicted Breach:</span> <span class="text-red-600 font-bold">${p.breach}</span></div>
+                    <div><span class="font-semibold text-gray-700">Confidence:</span> <span class="font-bold">${p.confidence}%</span></div>
+                    <div><span class="font-semibold text-gray-700">Estimated Impact:</span> <span class="text-gray-600">${p.cost}</span></div>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-bold text-gray-900 mb-2">Analysis</h4>
+                <p class="text-sm text-gray-600 mb-4">${p.detail}</p>
+                <h4 class="font-bold text-gray-900 mb-2">Recommended Action</h4>
+                <p class="text-sm text-green-700 bg-green-50 p-3 rounded-lg">${p.action}</p>
+            </div>
+        </div>`;
+}
+
+// ===== TIMELINE CHART =====
+const timelineHours = Array.from({length: 72}, (_, i) => {
+    const h = (new Date().getHours() + i) % 24;
+    const d = Math.floor(i / 24);
+    const dayLabel = d === 0 ? 'Today' : d === 1 ? 'Tomorrow' : 'Day 3';
+    return `${dayLabel} ${h.toString().padStart(2,'0')}:00`;
+});
+
+// Place predictions on timeline
+const timelineData = PREDICTIONS.map(p => {
+    const hoursUntil = parseInt(p.breach) || (parseFloat(p.breach.match(/\d+/)?.[0]) || 48);
+    return { x: hoursUntil, y: p.confidence, label: p.system, urgency: p.urgency, metric: p.metric };
+});
+
+const urgColors = { critical: '#ef4444', high: '#f59e0b', medium: '#3b82f6', low: '#22c55e' };
+
+new Chart(document.getElementById('timelineChart'), {
+    type: 'scatter',
+    data: {
+        datasets: ['critical', 'high', 'medium'].map(u => ({
+            label: u.charAt(0).toUpperCase() + u.slice(1),
+            data: timelineData.filter(d => d.urgency === u).map(d => ({ x: d.x, y: d.y })),
+            backgroundColor: urgColors[u],
+            borderColor: urgColors[u],
+            pointRadius: 8,
+            pointHoverRadius: 12
+        }))
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: { title: { display: true, text: 'Hours Until Predicted Breach' }, min: 0, max: 75, reverse: false },
+            y: { title: { display: true, text: 'Confidence %' }, min: 60, max: 100 }
+        },
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } },
+            tooltip: {
+                callbacks: {
+                    label: (ctx) => {
+                        const d = timelineData.filter(t => t.urgency === ['critical','high','medium'][ctx.datasetIndex])[ctx.dataIndex];
+                        return `${d.label}: ${d.metric} in ~${d.x}h (${d.y}% confidence)`;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+</body>
+</html>

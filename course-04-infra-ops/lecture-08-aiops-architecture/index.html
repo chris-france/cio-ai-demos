@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Your AI Ops Stack — Architecture & 90-Day Roadmap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .layer { transition: all 0.3s ease; cursor: pointer; }
+        .layer:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .layer.selected { box-shadow: 0 0 0 3px rgba(99,102,241,0.4); }
+        .tool-badge { transition: all 0.2s; }
+        .tool-badge:hover { transform: scale(1.05); }
+        .phase { transition: all 0.3s; }
+        .phase:hover { transform: translateY(-2px); }
+        .size-btn { transition: all 0.2s; cursor: pointer; }
+        .size-btn.active { background: #1e40af; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-gradient-to-r from-gray-900 via-slate-800 to-indigo-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-400 text-sm font-medium tracking-wider uppercase">Course 4: AI Infrastructure Ops &mdash; Lecture 8 Demo</p>
+                    <h1 class="text-3xl font-bold mt-1">Building Your AI Ops Stack</h1>
+                    <p class="text-slate-300 text-sm mt-1">From 6 monitoring tools to 1 AI platform &mdash; the 90-day transition</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-indigo-400">4</p>
+                        <p class="text-xs text-slate-400">Architecture Layers</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-green-400">90</p>
+                        <p class="text-xs text-slate-400">Day Transition</p>
+                    </div>
+                    <div class="bg-slate-700/50 px-4 py-2 rounded-lg text-center">
+                        <p class="text-2xl font-bold text-amber-400">$340K</p>
+                        <p class="text-xs text-slate-400">Year 1 Savings</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+        <!-- Architecture Diagram -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">AI Ops Architecture — Four Layers</h2>
+            <p class="text-sm text-gray-500 mb-4">Click a layer to see recommended tools and implementation details</p>
+
+            <div class="space-y-3" id="archLayers"></div>
+        </div>
+
+        <!-- Layer Detail Panel -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6" id="layerDetail">
+            <h2 class="text-lg font-bold text-gray-900 mb-2" id="layerTitle">Select a Layer Above</h2>
+            <p class="text-sm text-gray-500 mb-4" id="layerDesc">Click an architecture layer to see recommended tools and implementation details.</p>
+            <div id="layerContent"></div>
+        </div>
+
+        <!-- Recommended Tool Stack -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Recommended Tool Stack</h2>
+            <p class="text-sm text-gray-500 mb-4">Open-source first, commercial where justified. Replaces 6+ point solutions.</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="text-left py-3 px-3 font-semibold text-gray-600">Function</th>
+                            <th class="text-left py-3 px-3 font-semibold text-gray-600">Open Source</th>
+                            <th class="text-left py-3 px-3 font-semibold text-gray-600">Commercial</th>
+                            <th class="text-left py-3 px-3 font-semibold text-gray-600">Replaces</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-600">Annual Savings</th>
+                        </tr>
+                    </thead>
+                    <tbody id="toolTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 90-Day Roadmap -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">90-Day Implementation Roadmap</h2>
+            <p class="text-sm text-gray-500 mb-4">Three phases to go from alert chaos to AI-driven operations</p>
+            <div class="grid grid-cols-3 gap-4" id="roadmapPhases"></div>
+        </div>
+
+        <!-- Budget Calculator -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Budget Calculator</h2>
+            <p class="text-sm text-gray-500 mb-4">Estimate your AI Ops investment by organization size</p>
+
+            <div class="flex gap-3 mb-6">
+                <button class="size-btn active px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300" onclick="calcBudget('small')">Small (50-200 servers)</button>
+                <button class="size-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300" onclick="calcBudget('medium')">Medium (200-1000 servers)</button>
+                <button class="size-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300" onclick="calcBudget('large')">Large (1000+ servers)</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-3">Investment</h3>
+                    <div class="space-y-2" id="budgetInvestment"></div>
+                    <div class="border-t-2 border-gray-300 mt-3 pt-3 flex justify-between font-bold text-gray-900">
+                        <span>Total Year 1</span>
+                        <span id="budgetTotal"></span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-3">Expected Returns</h3>
+                    <div class="space-y-2" id="budgetReturns"></div>
+                    <div class="border-t-2 border-gray-300 mt-3 pt-3 flex justify-between font-bold text-green-700">
+                        <span>Net Savings Year 1</span>
+                        <span id="budgetNet"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 h-64"><canvas id="roiChart"></canvas></div>
+        </div>
+
+        <div class="bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200 rounded-xl p-6">
+            <h3 class="font-bold text-indigo-900 text-lg">From Tool Sprawl to Unified Intelligence</h3>
+            <p class="text-indigo-800 mt-2">You currently pay 6 vendors for pieces of a puzzle: Nagios for servers, Datadog for APM, PagerDuty for alerting, Splunk for logs, Grafana for dashboards, CloudWatch for AWS. <strong>Zero correlation between them.</strong> The AI Ops stack replaces all six with a unified platform where every signal is correlated, every alert is contextual, and every remediation is automated. Total cost reduction: <strong>$340K/year</strong>. Total MTTR reduction: <strong>87%</strong>.</p>
+        </div>
+    </div>
+
+<script>
+const LAYERS = [
+    {
+        name: "Data Collection Layer", icon: "📡", color: "bg-blue-500", border: "border-blue-200",
+        desc: "Unified telemetry pipeline — metrics, logs, traces from every source",
+        detail: "This layer replaces your 6 separate data collection tools with a single, unified pipeline. OpenTelemetry provides vendor-neutral instrumentation for metrics, logs, and traces. Prometheus scrapes infrastructure metrics. Fluent Bit collects and routes logs. All data flows into a single data lake for AI processing.",
+        tools: [
+            { name: "OpenTelemetry", type: "Instrumentation", desc: "Vendor-neutral telemetry collection SDK" },
+            { name: "Prometheus", type: "Metrics", desc: "Time-series metrics collection and storage" },
+            { name: "Fluent Bit", type: "Logs", desc: "Lightweight log collector and router" },
+            { name: "Jaeger", type: "Traces", desc: "Distributed tracing for microservices" }
+        ]
+    },
+    {
+        name: "AI Processing Layer", icon: "🧠", color: "bg-purple-500", border: "border-purple-200",
+        desc: "Anomaly detection, prediction, correlation, root cause analysis",
+        detail: "The AI layer sits on top of your collected data and turns signals into intelligence. It learns baselines for every metric, detects anomalies that static thresholds miss, predicts failures 72 hours out, correlates events across infrastructure/application/network, and identifies root causes in seconds. This is where the real value lives.",
+        tools: [
+            { name: "Scikit-learn / Prophet", type: "Forecasting", desc: "Time series prediction and anomaly detection" },
+            { name: "Isolation Forest", type: "Anomaly Detection", desc: "Unsupervised anomaly detection on metrics" },
+            { name: "LLM (local Llama)", type: "Root Cause", desc: "Natural language root cause analysis from logs" },
+            { name: "Custom Correlation Engine", type: "Correlation", desc: "Cross-signal event correlation and clustering" }
+        ]
+    },
+    {
+        name: "Action Layer", icon: "⚡", color: "bg-emerald-500", border: "border-emerald-200",
+        desc: "Auto-remediation, playbook execution, change management integration",
+        detail: "The action layer executes fixes autonomously with guardrails. It runs pre-approved playbooks for known issues (disk full, service restart, cert renewal), integrates with change management for approval workflows on risky actions, and maintains a full audit trail. Human override is always available — the AI never takes destructive actions without approval.",
+        tools: [
+            { name: "Ansible / AWX", type: "Automation", desc: "Playbook execution across infrastructure" },
+            { name: "Rundeck", type: "Runbook", desc: "Self-service runbook platform with approval workflows" },
+            { name: "PagerDuty / Opsgenie", type: "Alerting", desc: "Intelligent alert routing (keep for escalation)" },
+            { name: "Custom Guardrails", type: "Safety", desc: "Action limits, blast radius controls, rollback" }
+        ]
+    },
+    {
+        name: "Visibility Layer", icon: "📊", color: "bg-amber-500", border: "border-amber-200",
+        desc: "Unified dashboards, natural language queries, executive reporting",
+        detail: "The visibility layer replaces your 6 separate dashboard tools with a single pane of glass. Grafana provides infrastructure dashboards. A custom AI chatbot lets anyone query system health in natural language ('Is the payment service healthy?'). Executive dashboards auto-generate monthly reports on availability, MTTR, cost trends, and capacity forecasts.",
+        tools: [
+            { name: "Grafana", type: "Dashboards", desc: "Unified dashboards for all layers" },
+            { name: "AI Chatbot (LLM)", type: "NL Queries", desc: "'Is production healthy?' in plain English" },
+            { name: "Custom Reports", type: "Exec Reporting", desc: "Auto-generated monthly ops reports" },
+            { name: "Status Page", type: "Public", desc: "Auto-updated customer-facing status" }
+        ]
+    }
+];
+
+const TOOLS = [
+    { func: "Metrics Collection", oss: "Prometheus + Grafana", commercial: "Datadog", replaces: "Nagios, Zabbix, PRTG", savings: 48000 },
+    { func: "Log Management", oss: "Loki + Fluent Bit", commercial: "Splunk Cloud", replaces: "Splunk Enterprise ($180K/yr)", savings: 145000 },
+    { func: "APM / Tracing", oss: "Jaeger + OpenTelemetry", commercial: "New Relic, Dynatrace", replaces: "Datadog APM ($72K/yr)", savings: 52000 },
+    { func: "Alerting", oss: "Alertmanager", commercial: "PagerDuty (keep)", replaces: "OpsGenie + custom scripts", savings: 12000 },
+    { func: "Anomaly Detection", oss: "Scikit-learn + Prophet", commercial: "Moogsoft, BigPanda", replaces: "Static thresholds (manual tuning)", savings: 35000 },
+    { func: "Auto-Remediation", oss: "Ansible + Rundeck", commercial: "Resolve.io, Shoreline", replaces: "Manual SSH + runbooks", savings: 28000 },
+    { func: "Dashboards", oss: "Grafana", commercial: "Datadog Dashboards", replaces: "6 separate dashboards", savings: 20000 }
+];
+
+const PHASES = [
+    {
+        name: "Phase 1: Foundation", weeks: "Week 1-4", color: "border-blue-400 bg-blue-50",
+        items: [
+            "Deploy OpenTelemetry across top 20 critical services",
+            "Set up Prometheus + Grafana (replace Nagios dashboards)",
+            "Deploy Fluent Bit log collection (unified pipeline)",
+            "Create single 'ops overview' dashboard in Grafana",
+            "Establish baselines: 2-week learning period begins"
+        ],
+        milestone: "All telemetry flowing through single pipeline. Old tools still running in parallel."
+    },
+    {
+        name: "Phase 2: Intelligence", weeks: "Week 5-8", color: "border-purple-400 bg-purple-50",
+        items: [
+            "Deploy anomaly detection models (trained on Phase 1 baselines)",
+            "Enable predictive alerting for disk, memory, certificates",
+            "Build correlation engine: connect metrics + logs + traces",
+            "Create 5 auto-remediation playbooks (disk, restart, cert, logs, scaling)",
+            "Run AI alerts in shadow mode alongside old alerts"
+        ],
+        milestone: "AI alerts running in parallel. Compare AI vs static threshold accuracy for 2 weeks."
+    },
+    {
+        name: "Phase 3: Transition", weeks: "Week 9-12", color: "border-emerald-400 bg-emerald-50",
+        items: [
+            "Switch primary alerting to AI-driven (static as backup)",
+            "Enable auto-remediation for approved scenarios",
+            "Decommission redundant tools (Nagios, Zabbix, custom scripts)",
+            "Deploy executive reporting dashboard",
+            "Train ops team on new platform. Retrospective and tuning."
+        ],
+        milestone: "AI Ops platform is primary. Old tools decommissioned. Team trained. 90-day review scheduled."
+    }
+];
+
+const BUDGETS = {
+    small: {
+        investment: [
+            { item: "Infrastructure (VMs, storage)", cost: 24000 },
+            { item: "Open-source tool deployment", cost: 15000 },
+            { item: "SRE time (setup, config)", cost: 45000 },
+            { item: "Training & documentation", cost: 8000 },
+            { item: "Commercial licenses (PagerDuty)", cost: 12000 }
+        ],
+        returns: [
+            { item: "Tool consolidation savings", savings: 85000 },
+            { item: "Reduced MTTR (fewer incidents)", savings: 42000 },
+            { item: "On-call reduction (alerts down 90%)", savings: 35000 },
+            { item: "Cloud cost optimization", savings: 28000 },
+            { item: "Avoided downtime", savings: 65000 }
+        ],
+        roi: [104, 151, 255, 340]
+    },
+    medium: {
+        investment: [
+            { item: "Infrastructure (VMs, storage)", cost: 65000 },
+            { item: "Open-source tool deployment", cost: 35000 },
+            { item: "SRE team time (2 FTEs, 3 months)", cost: 120000 },
+            { item: "Training & documentation", cost: 18000 },
+            { item: "Commercial licenses", cost: 45000 }
+        ],
+        returns: [
+            { item: "Tool consolidation savings", savings: 245000 },
+            { item: "Reduced MTTR (fewer incidents)", savings: 120000 },
+            { item: "On-call reduction", savings: 85000 },
+            { item: "Cloud cost optimization", savings: 180000 },
+            { item: "Avoided downtime", savings: 250000 }
+        ],
+        roi: [283, 597, 880, 1140]
+    },
+    large: {
+        investment: [
+            { item: "Infrastructure (dedicated cluster)", cost: 180000 },
+            { item: "Platform engineering team (4 FTEs)", cost: 320000 },
+            { item: "Enterprise licenses", cost: 120000 },
+            { item: "Training & change management", cost: 45000 },
+            { item: "Integration & customization", cost: 85000 }
+        ],
+        returns: [
+            { item: "Tool consolidation savings", savings: 680000 },
+            { item: "Reduced MTTR", savings: 340000 },
+            { item: "On-call reduction", savings: 210000 },
+            { item: "Cloud cost optimization", savings: 520000 },
+            { item: "Avoided downtime (P1s)", savings: 850000 }
+        ],
+        roi: [750, 1850, 2600, 3400]
+    }
+};
+
+// ===== ARCHITECTURE LAYERS =====
+document.getElementById('archLayers').innerHTML = LAYERS.map((l, i) =>
+    `<div class="layer border-2 ${l.border} rounded-xl p-4 flex items-center gap-4" onclick="showLayer(${i})">
+        <div class="flex-shrink-0 w-12 h-12 ${l.color} rounded-xl flex items-center justify-center text-2xl text-white">${l.icon}</div>
+        <div class="flex-1">
+            <h3 class="font-bold text-gray-900">${l.name}</h3>
+            <p class="text-sm text-gray-500">${l.desc}</p>
+        </div>
+        <div class="flex gap-2">
+            ${l.tools.map(t => `<span class="tool-badge bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${t.name}</span>`).join('')}
+        </div>
+    </div>`
+).join('');
+
+function showLayer(idx) {
+    const l = LAYERS[idx];
+    document.querySelectorAll('.layer').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.layer')[idx].classList.add('selected');
+    document.getElementById('layerTitle').textContent = l.name;
+    document.getElementById('layerDesc').textContent = l.detail;
+    document.getElementById('layerContent').innerHTML = `
+        <div class="grid grid-cols-4 gap-3">
+            ${l.tools.map(t => `
+                <div class="border rounded-lg p-3">
+                    <span class="text-xs font-bold text-indigo-600 uppercase">${t.type}</span>
+                    <h4 class="font-bold text-gray-900 text-sm mt-1">${t.name}</h4>
+                    <p class="text-xs text-gray-500 mt-1">${t.desc}</p>
+                </div>
+            `).join('')}
+        </div>`;
+}
+
+// ===== TOOL TABLE =====
+document.getElementById('toolTable').innerHTML = TOOLS.map(t =>
+    `<tr class="border-b border-gray-100 hover:bg-gray-50">
+        <td class="py-3 px-3 font-medium text-gray-900">${t.func}</td>
+        <td class="py-3 px-3 text-green-700 font-semibold text-xs">${t.oss}</td>
+        <td class="py-3 px-3 text-gray-500 text-xs">${t.commercial}</td>
+        <td class="py-3 px-3 text-red-600 text-xs">${t.replaces}</td>
+        <td class="py-3 px-3 text-center font-bold text-green-600">$${(t.savings/1000).toFixed(0)}K/yr</td>
+    </tr>`
+).join('') + `<tr class="border-t-2 border-gray-300 bg-gray-50 font-bold">
+    <td class="py-3 px-3" colspan="4">TOTAL ANNUAL SAVINGS</td>
+    <td class="py-3 px-3 text-center text-green-600">$${(TOOLS.reduce((a,t)=>a+t.savings,0)/1000).toFixed(0)}K/yr</td>
+</tr>`;
+
+// ===== ROADMAP =====
+document.getElementById('roadmapPhases').innerHTML = PHASES.map(p =>
+    `<div class="phase border-2 ${p.color} rounded-xl p-5">
+        <h3 class="font-bold text-gray-900 mb-1">${p.name}</h3>
+        <p class="text-xs text-gray-500 mb-3">${p.weeks}</p>
+        <ul class="space-y-2">
+            ${p.items.map(item => `<li class="text-xs text-gray-700 flex items-start gap-2"><span class="text-green-500 mt-0.5">&#9679;</span>${item}</li>`).join('')}
+        </ul>
+        <div class="mt-3 pt-3 border-t border-gray-200">
+            <p class="text-xs text-indigo-700 font-semibold">Milestone: ${p.milestone}</p>
+        </div>
+    </div>`
+).join('');
+
+// ===== BUDGET CALCULATOR =====
+let roiChart;
+function calcBudget(size) {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    const b = BUDGETS[size];
+    const totalInvest = b.investment.reduce((a,i) => a+i.cost, 0);
+    const totalReturn = b.returns.reduce((a,i) => a+i.savings, 0);
+
+    document.getElementById('budgetInvestment').innerHTML = b.investment.map(i =>
+        `<div class="flex justify-between text-sm"><span class="text-gray-600">${i.item}</span><span class="font-semibold text-gray-900">$${(i.cost/1000).toFixed(0)}K</span></div>`
+    ).join('');
+    document.getElementById('budgetTotal').textContent = `$${(totalInvest/1000).toFixed(0)}K`;
+
+    document.getElementById('budgetReturns').innerHTML = b.returns.map(i =>
+        `<div class="flex justify-between text-sm"><span class="text-gray-600">${i.item}</span><span class="font-semibold text-green-600">$${(i.savings/1000).toFixed(0)}K</span></div>`
+    ).join('');
+    document.getElementById('budgetNet').textContent = `$${((totalReturn - totalInvest)/1000).toFixed(0)}K`;
+
+    if (roiChart) roiChart.destroy();
+    roiChart = new Chart(document.getElementById('roiChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4'],
+            datasets: [
+                { label: 'Cumulative Net Savings ($K)', data: b.roi, backgroundColor: '#22c55e' },
+                { type: 'line', label: 'Investment ($K)', data: [totalInvest/1000, totalInvest/1000 * 0.3 + totalInvest/1000, totalInvest/1000 * 0.3 * 2 + totalInvest/1000, totalInvest/1000 * 0.3 * 3 + totalInvest/1000], borderColor: '#ef4444', borderDash: [5,5], pointRadius: 4, fill: false }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { y: { title: { display: true, text: '$K' } } },
+            plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } } }
+        }
+    });
+}
+
+calcBudget('small');
+document.querySelector('.size-btn').classList.add('active');
+</script>
+</body>
+</html>

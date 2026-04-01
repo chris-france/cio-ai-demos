@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Service Adoption Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto"><h1 class="text-2xl font-extrabold">Self-Service Adoption Dashboard</h1>
+        <p class="text-sky-300 text-sm mt-1">Portal Usage &amp; Cost Savings Tracker</p></div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Self-Service vs Help Desk by Category</h3>
+                <div style="height:300px"><canvas id="stackChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Adoption Trend &mdash; 12 Months</h3>
+                <div style="height:300px"><canvas id="trendChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Service Adoption Detail</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Service</th><th class="px-4 py-3">Total Requests</th><th class="px-4 py-3">Self-Service</th>
+                        <th class="px-4 py-3">Adoption Rate</th><th class="px-4 py-3">Cost/Req (SS)</th><th class="px-4 py-3">Cost/Req (HD)</th><th class="px-4 py-3">Monthly Savings</th>
+                    </tr></thead>
+                    <tbody id="adoptBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-green-50 border border-green-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-green-800 mb-3">Next 5 Services to Add to Self-Service</h3>
+            <div class="space-y-2">
+                <div class="bg-white rounded-lg p-3 border border-green-200 flex justify-between"><span><strong>Software License Request</strong> &mdash; 22 requests/mo, easily automatable</span><span class="font-semibold text-green-700">Save $660/mo</span></div>
+                <div class="bg-white rounded-lg p-3 border border-green-200 flex justify-between"><span><strong>VPN Access</strong> &mdash; 15 requests/mo, standard approval flow</span><span class="font-semibold text-green-700">Save $450/mo</span></div>
+                <div class="bg-white rounded-lg p-3 border border-green-200 flex justify-between"><span><strong>Guest WiFi Setup</strong> &mdash; 30 requests/mo, simple form</span><span class="font-semibold text-green-700">Save $810/mo</span></div>
+                <div class="bg-white rounded-lg p-3 border border-green-200 flex justify-between"><span><strong>Shared Mailbox Request</strong> &mdash; 8 requests/mo, scriptable</span><span class="font-semibold text-green-700">Save $200/mo</span></div>
+                <div class="bg-white rounded-lg p-3 border border-green-200 flex justify-between"><span><strong>Distribution List Management</strong> &mdash; 10 requests/mo, self-serve ready</span><span class="font-semibold text-green-700">Save $270/mo</span></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">Self-Service Adoption &mdash; Course 20 &mdash; Lecture 4 &mdash; Confidential</footer>
+    </main>
+<script>
+const ADOPT = [
+    { service: 'Password Reset', total: 120, ss: 108, costSS: 0.50, costHD: 22, savings: 2580 },
+    { service: 'MFA Enrollment', total: 30, ss: 25, costSS: 0.25, costHD: 15, savings: 369 },
+    { service: 'Email DL Changes', total: 10, ss: 7, costSS: 0.50, costHD: 18, savings: 123 },
+    { service: 'Printer Install', total: 12, ss: 4, costSS: 1.00, costHD: 25, savings: 92 },
+    { service: 'Network Access', total: 15, ss: 3, costSS: 2.00, costHD: 30, savings: 84 },
+    { service: 'Software Install', total: 45, ss: 12, costSS: 1.50, costHD: 28, savings: 318 },
+];
+
+const totalReq = ADOPT.reduce((s,a)=>s+a.total,0);
+const ssPct = Math.round(ADOPT.reduce((s,a)=>s+a.ss,0)/totalReq*100);
+const totalSavings = ADOPT.reduce((s,a)=>s+a.savings,0);
+
+const KPI = [
+    { label: 'Requests (Month)', value: totalReq, color: '#0284c7' },
+    { label: 'Self-Service %', value: ssPct+'%', color: '#10b981' },
+    { label: 'Monthly Savings', value: '$'+totalSavings.toLocaleString(), color: '#8b5cf6' },
+    { label: 'Avg SS Resolution', value: '3 min', color: '#3b82f6' },
+    { label: 'User Satisfaction', value: '4.2/5', color: '#f59e0b' },
+];
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+new Chart(document.getElementById('stackChart'), {
+    type: 'bar',
+    data: { labels: ADOPT.map(a=>a.service), datasets: [
+        { label: 'Self-Service', data: ADOPT.map(a=>a.ss), backgroundColor: '#10b981', borderRadius: 4 },
+        { label: 'Help Desk', data: ADOPT.map(a=>a.total-a.ss), backgroundColor: '#f59e0b', borderRadius: 4 },
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, ticks: { font: { size: 10 } } }, y: { stacked: true } } }
+});
+
+const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: { labels: months, datasets: [{ label: 'Self-Service Adoption %', data: [22,28,32,35,38,42,45,50,54,58,62,68], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { max: 100, ticks: { callback: v=>v+'%' } } } }
+});
+
+document.getElementById('adoptBody').innerHTML = ADOPT.map(a => {
+    const rate = Math.round(a.ss/a.total*100);
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50">
+        <td class="px-4 py-3 font-medium">${a.service}</td><td class="px-4 py-3">${a.total}</td><td class="px-4 py-3">${a.ss}</td>
+        <td class="px-4 py-3 font-bold ${rate>=80?'text-green-600':rate>=50?'text-amber-600':'text-red-600'}">${rate}%</td>
+        <td class="px-4 py-3 text-green-600">$${a.costSS.toFixed(2)}</td><td class="px-4 py-3 text-red-600">$${a.costHD}</td>
+        <td class="px-4 py-3 font-semibold text-green-600">$${a.savings.toLocaleString()}</td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

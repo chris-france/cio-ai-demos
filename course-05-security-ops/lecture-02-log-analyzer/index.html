@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Log Analyzer — Threat Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+    .log-line { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; padding: 4px 8px; border-bottom: 1px solid #f3f4f6; }
+    .log-normal { }
+    .log-suspicious { background: #fefce8; }
+    .log-malicious { background: #fef2f2; }
+    .tag-normal { background: #dcfce7; color: #166534; }
+    .tag-suspicious { background: #fef9c3; color: #854d0e; }
+    .tag-malicious { background: #fecaca; color: #991b1b; }
+    .threat-card { border-left: 4px solid #dc2626; }
+    #logStream { max-height: 420px; overflow-y: auto; }
+    .pulse { animation: pulse-dot 2s infinite; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-indigo-600 text-sm font-medium tracking-wide uppercase">Course 5, Lecture 2 — AI Threat Detection</p>
+                <h1 class="text-3xl font-bold text-gray-900 mt-1">AI Log Analyzer</h1>
+                <p class="text-gray-500 mt-1">1,000 log entries analyzed from firewall, auth, and application sources</p>
+            </div>
+            <div class="text-right">
+                <div class="flex items-center gap-2 justify-end">
+                    <span class="w-2 h-2 rounded-full bg-red-500 pulse"></span>
+                    <span class="text-red-600 text-sm font-semibold" id="threatCount">3 Active Threats Detected</span>
+                </div>
+                <div class="text-sm text-gray-400 mt-1">Analysis completed in 2.3 seconds</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Summary Stats -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-gray-900">1,000</div>
+            <div class="text-xs text-gray-500">Total Entries</div>
+        </div>
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-green-600">952</div>
+            <div class="text-xs text-gray-500">Normal</div>
+        </div>
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-yellow-600">31</div>
+            <div class="text-xs text-gray-500">Suspicious</div>
+        </div>
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-red-600">17</div>
+            <div class="text-xs text-gray-500">Malicious</div>
+        </div>
+        <div class="card p-4 text-center">
+            <div class="text-2xl font-bold text-indigo-600">3</div>
+            <div class="text-xs text-gray-500">Distinct Threats</div>
+        </div>
+    </div>
+</div>
+
+<!-- Threats Identified -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 pulse"></span>
+            Active Threats Identified
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="threat-card bg-red-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-red-800">Brute Force Attack</span>
+                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-red-600 text-white">CRITICAL</span>
+                </div>
+                <div class="text-xs text-gray-600 space-y-1">
+                    <div><span class="text-gray-400">Source:</span> 185.220.101.47 (Tor exit node, Romania)</div>
+                    <div><span class="text-gray-400">Target:</span> VPN gateway (10.0.1.1:443)</div>
+                    <div><span class="text-gray-400">Pattern:</span> 847 failed login attempts in 22 minutes</div>
+                    <div><span class="text-gray-400">Accounts targeted:</span> admin, sysadmin, jsmith, mwilson</div>
+                    <div><span class="text-gray-400">First seen:</span> 03:17:42 UTC</div>
+                    <div><span class="text-gray-400">Log entries:</span> 12 flagged (of 847 total events)</div>
+                </div>
+                <div class="mt-3 text-xs font-medium text-indigo-600">AI Recommendation: Block IP at firewall; enforce account lockout after 5 failures; enable MFA immediately</div>
+            </div>
+            <div class="threat-card bg-red-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-red-800">SQL Injection Probe</span>
+                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-orange-500 text-white">HIGH</span>
+                </div>
+                <div class="text-xs text-gray-600 space-y-1">
+                    <div><span class="text-gray-400">Source:</span> 91.243.44.12 (hosting provider, Netherlands)</div>
+                    <div><span class="text-gray-400">Target:</span> Web application (portal.meridian-eng.com)</div>
+                    <div><span class="text-gray-400">Pattern:</span> UNION SELECT, OR 1=1, and xp_cmdshell in query strings</div>
+                    <div><span class="text-gray-400">Endpoints hit:</span> /api/search, /login, /api/projects</div>
+                    <div><span class="text-gray-400">First seen:</span> 04:02:18 UTC</div>
+                    <div><span class="text-gray-400">Log entries:</span> 3 flagged</div>
+                </div>
+                <div class="mt-3 text-xs font-medium text-indigo-600">AI Recommendation: WAF rule to block SQLi patterns; parameterize all database queries; pen test the application</div>
+            </div>
+            <div class="threat-card bg-red-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-red-800">Lateral Movement (Compromised Account)</span>
+                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-red-600 text-white">CRITICAL</span>
+                </div>
+                <div class="text-xs text-gray-600 space-y-1">
+                    <div><span class="text-gray-400">Source:</span> Internal — jsmith@meridian-eng.com (10.0.4.87)</div>
+                    <div><span class="text-gray-400">Pattern:</span> RDP to 6 servers in 4 minutes at 03:41 UTC (user normally accesses 1 server during business hours)</div>
+                    <div><span class="text-gray-400">Anomalies:</span> Off-hours access, new-device fingerprint, admin share enumeration</div>
+                    <div><span class="text-gray-400">Confidence:</span> 94% — behavioral baseline violation</div>
+                    <div><span class="text-gray-400">Log entries:</span> 2 flagged</div>
+                </div>
+                <div class="mt-3 text-xs font-medium text-indigo-600">AI Recommendation: Disable jsmith account immediately; isolate workstation 10.0.4.87; forensic image before reboot</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Timeline + Log Stream -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Threat Timeline -->
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Threat Activity Timeline (24h)</h2>
+            <canvas id="timelineChart" height="220"></canvas>
+        </div>
+
+        <!-- Source Distribution -->
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Log Source Distribution</h2>
+            <canvas id="sourceChart" height="220"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Streaming Log Display -->
+<div class="max-w-7xl mx-auto px-6 mt-6 mb-12">
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900">Log Stream — AI-Classified Entries</h2>
+            <div class="flex gap-2">
+                <button onclick="filterLogs('all')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 font-medium">All</button>
+                <button onclick="filterLogs('suspicious')" class="px-3 py-1 text-xs rounded-full bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium">Suspicious</button>
+                <button onclick="filterLogs('malicious')" class="px-3 py-1 text-xs rounded-full bg-red-50 hover:bg-red-100 text-red-700 font-medium">Malicious</button>
+            </div>
+        </div>
+        <div id="logStream" class="bg-gray-900 rounded-lg p-2 text-xs font-mono"></div>
+        <div class="mt-3 flex items-center gap-4 text-xs text-gray-400">
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-100 inline-block border border-green-300"></span> Normal</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-yellow-100 inline-block border border-yellow-300"></span> Suspicious</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-100 inline-block border border-red-300"></span> Malicious</span>
+            <span class="ml-auto">Showing 50 of 1,000 entries (filtered view)</span>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-white text-gray-400 text-center py-6 text-xs border-t border-gray-200">
+    CIO AI Security Operations Course — Lecture 2 Demo Output &bull; AI Log Analyzer &bull; Generated March 2026
+</footer>
+
+<script>
+// === LOG DATA ===
+const logEntries = [
+    { time: '03:17:42', src: 'firewall', ip: '185.220.101.47', msg: 'DENY TCP 185.220.101.47:54821 -> 10.0.1.1:443 (VPN) — auth failure user=admin', classification: 'malicious', threat: 'brute-force' },
+    { time: '03:17:43', src: 'firewall', ip: '185.220.101.47', msg: 'DENY TCP 185.220.101.47:54822 -> 10.0.1.1:443 (VPN) — auth failure user=admin', classification: 'malicious', threat: 'brute-force' },
+    { time: '03:17:44', src: 'firewall', ip: '185.220.101.47', msg: 'DENY TCP 185.220.101.47:54823 -> 10.0.1.1:443 (VPN) — auth failure user=sysadmin', classification: 'malicious', threat: 'brute-force' },
+    { time: '03:18:01', src: 'auth', ip: '10.0.2.15', msg: 'EventID 4624 — Successful logon user=mwilson workstation=WS-ACCT-03 type=interactive', classification: 'normal' },
+    { time: '03:18:15', src: 'firewall', ip: '185.220.101.47', msg: 'DENY TCP 185.220.101.47:54830 -> 10.0.1.1:443 (VPN) — auth failure user=jsmith', classification: 'malicious', threat: 'brute-force' },
+    { time: '03:19:02', src: 'app', ip: '10.0.3.22', msg: 'INFO portal.meridian-eng.com GET /dashboard 200 142ms user=klee session=a8f2c', classification: 'normal' },
+    { time: '03:19:33', src: 'auth', ip: '10.0.2.44', msg: 'EventID 4625 — Failed logon user=temp_contractor workstation=WS-ENG-12 reason=bad_password', classification: 'suspicious' },
+    { time: '03:20:01', src: 'firewall', ip: '10.0.4.12', msg: 'ALLOW TCP 10.0.4.12:49221 -> 8.8.8.8:443 (DNS-over-HTTPS)', classification: 'normal' },
+    { time: '03:20:45', src: 'app', ip: '10.0.3.22', msg: 'INFO portal.meridian-eng.com POST /api/timesheet 201 89ms user=klee', classification: 'normal' },
+    { time: '03:21:17', src: 'firewall', ip: '185.220.101.47', msg: 'DENY TCP 185.220.101.47:54901 -> 10.0.1.1:443 (VPN) — auth failure user=mwilson', classification: 'malicious', threat: 'brute-force' },
+    { time: '03:22:00', src: 'auth', ip: '10.0.5.10', msg: 'EventID 4672 — Special privileges assigned to new logon user=svc_backup', classification: 'normal' },
+    { time: '03:25:12', src: 'app', ip: '10.0.3.8', msg: 'INFO portal.meridian-eng.com GET /api/projects 200 234ms user=bthompson', classification: 'normal' },
+    { time: '03:28:44', src: 'firewall', ip: '45.33.49.12', msg: 'DENY UDP 45.33.49.12:5060 -> 10.0.1.1:5060 (SIP scan)', classification: 'suspicious' },
+    { time: '03:30:01', src: 'auth', ip: '10.0.2.15', msg: 'EventID 4624 — Successful logon user=svc_sql workstation=DB-PROD-01 type=service', classification: 'normal' },
+    { time: '03:32:18', src: 'firewall', ip: '103.14.26.88', msg: 'DENY TCP 103.14.26.88:38271 -> 10.0.1.1:22 (SSH scan)', classification: 'suspicious' },
+    { time: '03:35:00', src: 'app', ip: '10.0.3.40', msg: 'WARN portal.meridian-eng.com POST /api/upload 413 — file too large user=dpark filename=CAD_Bridge_v4.dwg', classification: 'normal' },
+    { time: '03:38:22', src: 'firewall', ip: '185.220.101.47', msg: 'DENY TCP 185.220.101.47:55102 -> 10.0.1.1:443 (VPN) — auth failure user=admin attempt=847', classification: 'malicious', threat: 'brute-force' },
+    { time: '03:40:01', src: 'auth', ip: '10.0.4.87', msg: 'EventID 4624 — Successful logon user=jsmith workstation=UNKNOWN type=network NEW_DEVICE_FINGERPRINT', classification: 'suspicious' },
+    { time: '03:41:01', src: 'auth', ip: '10.0.4.87', msg: 'EventID 4624 — Successful logon user=jsmith target=SRV-FILE-01 type=RemoteInteractive OFF_HOURS', classification: 'malicious', threat: 'lateral-movement' },
+    { time: '03:41:18', src: 'auth', ip: '10.0.4.87', msg: 'EventID 4624 — Successful logon user=jsmith target=SRV-DB-01 type=RemoteInteractive OFF_HOURS', classification: 'suspicious' },
+    { time: '03:41:33', src: 'auth', ip: '10.0.4.87', msg: 'EventID 4624 — Successful logon user=jsmith target=SRV-APP-01 type=RemoteInteractive — ADMIN$ share enumeration detected', classification: 'malicious', threat: 'lateral-movement' },
+    { time: '03:42:01', src: 'firewall', ip: '10.0.4.87', msg: 'ALLOW TCP 10.0.4.87:49888 -> 10.0.5.20:445 (SMB) — unusual internal lateral traffic', classification: 'suspicious' },
+    { time: '03:45:00', src: 'app', ip: '10.0.3.22', msg: 'INFO portal.meridian-eng.com GET /api/notifications 200 45ms user=klee', classification: 'normal' },
+    { time: '03:48:12', src: 'firewall', ip: '23.129.64.10', msg: 'DENY TCP 23.129.64.10:41222 -> 10.0.1.1:3389 (RDP scan from Tor)', classification: 'suspicious' },
+    { time: '03:50:00', src: 'auth', ip: '10.0.2.30', msg: 'EventID 4740 — Account lockout user=reception workstation=WS-FRONT-01 (3 failed attempts)', classification: 'suspicious' },
+    { time: '03:55:01', src: 'app', ip: '10.0.3.15', msg: 'INFO portal.meridian-eng.com GET /health 200 12ms (monitoring check)', classification: 'normal' },
+    { time: '04:00:00', src: 'firewall', ip: '10.0.1.1', msg: 'INFO Firewall rule audit: 2,847 ALLOW, 1,203 DENY in last hour', classification: 'normal' },
+    { time: '04:02:18', src: 'app', ip: '91.243.44.12', msg: "WARN portal.meridian-eng.com GET /api/search?q=' OR 1=1 -- 400 — SQL injection attempt blocked", classification: 'malicious', threat: 'sqli' },
+    { time: '04:02:22', src: 'app', ip: '91.243.44.12', msg: "WARN portal.meridian-eng.com GET /login?user=admin' UNION SELECT * FROM users-- 400 — SQLi blocked", classification: 'malicious', threat: 'sqli' },
+    { time: '04:02:25', src: 'app', ip: '91.243.44.12', msg: "WARN portal.meridian-eng.com POST /api/projects?id=1;EXEC xp_cmdshell('whoami') 400 — SQLi blocked", classification: 'malicious', threat: 'sqli' },
+    { time: '04:05:00', src: 'auth', ip: '10.0.2.55', msg: 'EventID 4624 — Successful logon user=admin workstation=SRV-DC-01 type=interactive', classification: 'normal' },
+    { time: '04:08:33', src: 'firewall', ip: '10.0.3.100', msg: 'ALLOW TCP 10.0.3.100:443 -> 52.182.143.212:443 (Azure AD auth)', classification: 'normal' },
+    { time: '04:10:00', src: 'app', ip: '10.0.3.22', msg: 'INFO portal.meridian-eng.com GET /api/reports/quarterly 200 1243ms user=cjones', classification: 'normal' },
+    { time: '04:12:44', src: 'firewall', ip: '194.61.24.102', msg: 'DENY TCP 194.61.24.102:39001 -> 10.0.1.1:8080 (web scan)', classification: 'suspicious' },
+    { time: '04:15:00', src: 'auth', ip: '10.0.2.15', msg: 'EventID 4634 — Logoff user=mwilson workstation=WS-ACCT-03', classification: 'normal' },
+    { time: '04:18:22', src: 'firewall', ip: '10.0.4.87', msg: 'ALLOW TCP 10.0.4.87:50112 -> 185.199.108.133:443 (GitHub) — unusual for this workstation', classification: 'suspicious' },
+    { time: '04:20:00', src: 'app', ip: '10.0.3.8', msg: 'INFO portal.meridian-eng.com PUT /api/projects/142/status 200 178ms user=bthompson', classification: 'normal' },
+    { time: '04:22:15', src: 'auth', ip: '10.0.2.70', msg: 'EventID 4624 — Successful logon user=dpark workstation=WS-ENG-07 type=interactive', classification: 'normal' },
+    { time: '04:25:00', src: 'firewall', ip: '10.0.1.1', msg: 'INFO VPN tunnel established user=remote_jones from 72.38.14.201 (known home IP)', classification: 'normal' },
+    { time: '04:28:33', src: 'app', ip: '10.0.3.22', msg: 'INFO portal.meridian-eng.com DELETE /api/notifications/old 200 56ms (scheduled cleanup)', classification: 'normal' },
+    { time: '04:30:00', src: 'auth', ip: '10.0.5.10', msg: 'EventID 4688 — New process created: powershell.exe by svc_backup on SRV-BACKUP-01', classification: 'normal' },
+    { time: '04:32:18', src: 'firewall', ip: '45.155.205.33', msg: 'DENY TCP 45.155.205.33:42111 -> 10.0.1.1:1433 (MSSQL scan)', classification: 'suspicious' },
+    { time: '04:35:00', src: 'app', ip: '10.0.3.15', msg: 'INFO portal.meridian-eng.com GET /health 200 11ms (monitoring check)', classification: 'normal' },
+    { time: '04:38:01', src: 'auth', ip: '10.0.2.44', msg: 'EventID 4625 — Failed logon user=temp_contractor workstation=WS-ENG-12 reason=expired_account', classification: 'suspicious' },
+    { time: '04:40:00', src: 'firewall', ip: '10.0.3.100', msg: 'ALLOW TCP 10.0.3.100:8443 -> 20.190.151.70:443 (Microsoft 365)', classification: 'normal' },
+    { time: '04:42:12', src: 'app', ip: '10.0.3.40', msg: 'INFO portal.meridian-eng.com POST /api/projects/new 201 312ms user=bthompson', classification: 'normal' },
+    { time: '04:45:00', src: 'auth', ip: '10.0.2.15', msg: 'EventID 4624 — Successful logon user=mwilson workstation=WS-ACCT-03 type=interactive', classification: 'normal' },
+    { time: '04:48:33', src: 'firewall', ip: '10.0.1.1', msg: 'INFO GeoIP block: 14 connection attempts from sanctioned countries in last hour', classification: 'suspicious' },
+    { time: '04:50:00', src: 'app', ip: '10.0.3.22', msg: 'INFO portal.meridian-eng.com GET /api/dashboard/metrics 200 89ms user=cjones', classification: 'normal' },
+    { time: '04:55:00', src: 'auth', ip: '10.0.5.10', msg: 'EventID 4634 — Logoff user=svc_backup workstation=SRV-BACKUP-01 (backup job completed)', classification: 'normal' },
+];
+
+// === TIMELINE CHART ===
+const hours = Array.from({length: 24}, (_, i) => `${String(i).padStart(2, '0')}:00`);
+const normalByHour = [42,38,35,41,44,48,52,55,58,61,58,55,52,48,45,42,40,38,36,35,42,44,40,38];
+const suspiciousByHour = [1,1,0,4,3,2,1,1,2,1,2,1,1,1,0,1,1,0,1,2,1,1,2,1];
+const maliciousByHour = [0,0,0,8,5,2,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0];
+
+new Chart(document.getElementById('timelineChart'), {
+    type: 'bar',
+    data: {
+        labels: hours,
+        datasets: [
+            { label: 'Normal', data: normalByHour, backgroundColor: '#86efac', borderRadius: 2 },
+            { label: 'Suspicious', data: suspiciousByHour, backgroundColor: '#fde047', borderRadius: 2 },
+            { label: 'Malicious', data: maliciousByHour, backgroundColor: '#fca5a5', borderRadius: 2 }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } } },
+        scales: {
+            x: { stacked: true, ticks: { font: { size: 9 }, maxRotation: 45 } },
+            y: { stacked: true, ticks: { font: { size: 10 } } }
+        }
+    }
+});
+
+// === SOURCE CHART ===
+new Chart(document.getElementById('sourceChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Firewall (482)', 'Authentication (312)', 'Application (206)'],
+        datasets: [{
+            data: [482, 312, 206],
+            backgroundColor: ['#6366f1', '#f59e0b', '#10b981'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } } }
+    }
+});
+
+// === LOG STREAM ===
+const stream = document.getElementById('logStream');
+let allLogElements = [];
+let streamFilter = 'all';
+
+function renderLogs() {
+    stream.innerHTML = '';
+    allLogElements = [];
+    const filtered = streamFilter === 'all' ? logEntries : logEntries.filter(e => e.classification === streamFilter);
+    filtered.forEach(entry => {
+        const colorClass = entry.classification === 'malicious' ? 'text-red-400' : entry.classification === 'suspicious' ? 'text-yellow-400' : 'text-green-400';
+        const bgClass = entry.classification === 'malicious' ? 'bg-red-950/40' : entry.classification === 'suspicious' ? 'bg-yellow-950/30' : '';
+        const tag = entry.classification === 'malicious' ? '<span class="text-red-400 font-bold">[MALICIOUS]</span>' :
+                     entry.classification === 'suspicious' ? '<span class="text-yellow-400 font-bold">[SUSPICIOUS]</span>' :
+                     '<span class="text-green-600">[NORMAL]</span>';
+        const srcTag = `<span class="text-blue-400">[${entry.src.toUpperCase()}]</span>`;
+        const el = document.createElement('div');
+        el.className = `py-1 px-2 border-b border-gray-800 ${bgClass}`;
+        el.innerHTML = `<span class="text-gray-500">${entry.time}</span> ${srcTag} ${tag} <span class="text-gray-300">${entry.msg}</span>`;
+        stream.appendChild(el);
+    });
+}
+
+function filterLogs(type) {
+    streamFilter = type;
+    renderLogs();
+}
+
+// Streaming effect
+let logIndex = 0;
+function streamNextLog() {
+    if (logIndex >= logEntries.length) return;
+    const entry = logEntries[logIndex];
+    const colorClass = entry.classification === 'malicious' ? 'text-red-400' : entry.classification === 'suspicious' ? 'text-yellow-400' : 'text-green-400';
+    const bgClass = entry.classification === 'malicious' ? 'bg-red-950/40' : entry.classification === 'suspicious' ? 'bg-yellow-950/30' : '';
+    const tag = entry.classification === 'malicious' ? '<span class="text-red-400 font-bold">[MALICIOUS]</span>' :
+                 entry.classification === 'suspicious' ? '<span class="text-yellow-400 font-bold">[SUSPICIOUS]</span>' :
+                 '<span class="text-green-600">[NORMAL]</span>';
+    const srcTag = `<span class="text-blue-400">[${entry.src.toUpperCase()}]</span>`;
+    const el = document.createElement('div');
+    el.className = `py-1 px-2 border-b border-gray-800 ${bgClass}`;
+    el.style.opacity = '0';
+    el.innerHTML = `<span class="text-gray-500">${entry.time}</span> ${srcTag} ${tag} <span class="text-gray-300">${entry.msg}</span>`;
+    stream.appendChild(el);
+    requestAnimationFrame(() => { el.style.transition = 'opacity 0.3s'; el.style.opacity = '1'; });
+    stream.scrollTop = stream.scrollHeight;
+    logIndex++;
+    if (logIndex < logEntries.length) {
+        setTimeout(streamNextLog, entry.classification === 'malicious' ? 800 : entry.classification === 'suspicious' ? 400 : 80);
+    }
+}
+
+streamNextLog();
+</script>
+</body>
+</html>

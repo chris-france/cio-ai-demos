@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSSP vs AI SOC Cost Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+    .mssp-col { background: #f9fafb; }
+    .ai-col { background: #eef2ff; }
+    .check { color: #22c55e; }
+    .cross { color: #ef4444; }
+    .partial { color: #f59e0b; }
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-indigo-600 text-sm font-medium tracking-wide uppercase">Course 5, Lecture 7 — MSSP Replacement</p>
+                <h1 class="text-3xl font-bold text-gray-900 mt-1">MSSP vs AI SOC Calculator</h1>
+                <p class="text-gray-500 mt-1">Side-by-side cost, coverage, and response time analysis</p>
+            </div>
+            <div class="text-right text-sm text-gray-400">
+                <div>Organization size: <span id="orgSizeDisplay" class="font-medium text-gray-700">200 employees</span></div>
+                <div>Current MSSP: <span class="font-medium text-gray-700">Generic Mid-Tier Provider</span></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Org Size Slider -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <div class="flex items-center gap-6">
+            <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Organization Size:</label>
+            <input type="range" id="orgSize" min="50" max="500" value="200" step="25" class="flex-1" oninput="recalculate()">
+            <span id="orgSizeLabel" class="text-sm font-bold text-indigo-600 w-24 text-right">200 employees</span>
+        </div>
+    </div>
+</div>
+
+<!-- Cost Comparison -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card mssp-col p-6 text-center">
+            <div class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Current MSSP</div>
+            <div class="text-4xl font-extrabold text-gray-900 mt-3" id="msspMonthly">$38,000</div>
+            <div class="text-xs text-gray-400">per month</div>
+            <div class="text-lg font-bold text-gray-700 mt-2" id="msspAnnual">$456,000/yr</div>
+            <div class="text-lg font-bold text-gray-500 mt-1" id="mssp3yr">$1,368,000 over 3 years</div>
+        </div>
+        <div class="card ai-col p-6 text-center border-indigo-200">
+            <div class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">AI SOC Alternative</div>
+            <div class="text-4xl font-extrabold text-indigo-600 mt-3" id="aiMonthly">$8,200</div>
+            <div class="text-xs text-gray-400">per month</div>
+            <div class="text-lg font-bold text-indigo-700 mt-2" id="aiAnnual">$98,400/yr</div>
+            <div class="text-lg font-bold text-indigo-500 mt-1" id="ai3yr">$295,200 over 3 years</div>
+        </div>
+        <div class="card bg-green-50 p-6 text-center border-green-200">
+            <div class="text-sm font-semibold text-green-700 uppercase tracking-wide">Annual Savings</div>
+            <div class="text-4xl font-extrabold text-green-600 mt-3" id="savings">$357,600</div>
+            <div class="text-xs text-gray-400">per year</div>
+            <div class="text-lg font-bold text-green-700 mt-2" id="savingsPct">78% reduction</div>
+            <div class="text-lg font-bold text-green-500 mt-1" id="savings3yr">$1,072,800 over 3 years</div>
+        </div>
+    </div>
+</div>
+
+<!-- Break-Even Chart -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Cumulative Cost — Break-Even Analysis (36 Months)</h2>
+        <canvas id="breakEvenChart" height="100"></canvas>
+    </div>
+</div>
+
+<!-- Coverage Comparison -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Coverage Comparison</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-200 text-xs text-gray-400 uppercase">
+                        <th class="text-left py-3 px-4">Capability</th>
+                        <th class="text-center py-3 px-4 mssp-col rounded-tl">Current MSSP</th>
+                        <th class="text-center py-3 px-4 ai-col rounded-tr">AI SOC</th>
+                    </tr>
+                </thead>
+                <tbody id="coverageTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Response Time Comparison -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Response Time Comparison</h2>
+        <canvas id="responseChart" height="100"></canvas>
+    </div>
+</div>
+
+<!-- Cost Breakdown -->
+<div class="max-w-7xl mx-auto px-6 mt-6 mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">MSSP Cost Breakdown</h2>
+            <canvas id="msspPie" height="200"></canvas>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">AI SOC Cost Breakdown</h2>
+            <canvas id="aiPie" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Savings Summary -->
+<div class="max-w-7xl mx-auto px-6 mb-12">
+    <div class="card p-6 bg-gradient-to-r from-indigo-50 to-green-50">
+        <h2 class="text-lg font-bold text-gray-900 mb-3">Bottom Line</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+            <div>
+                <div class="text-2xl font-extrabold text-indigo-600" id="blSavings">$357,600</div>
+                <div class="text-xs text-gray-500">Annual Savings</div>
+            </div>
+            <div>
+                <div class="text-2xl font-extrabold text-indigo-600">24/7</div>
+                <div class="text-xs text-gray-500">True Continuous Coverage</div>
+            </div>
+            <div>
+                <div class="text-2xl font-extrabold text-indigo-600">15 sec</div>
+                <div class="text-xs text-gray-500">Avg Detection Time</div>
+            </div>
+            <div>
+                <div class="text-2xl font-extrabold text-indigo-600" id="blROI">364%</div>
+                <div class="text-xs text-gray-500">First-Year ROI</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-white text-gray-400 text-center py-6 text-xs border-t border-gray-200">
+    CIO AI Security Operations Course — Lecture 7 Demo Output &bull; MSSP vs AI SOC Calculator &bull; Generated March 2026
+</footer>
+
+<script>
+const coverageItems = [
+    { cap: '24/7 SOC Monitoring', mssp: 'check', msspNote: 'Shared SOC (200+ clients)', ai: 'check', aiNote: 'Dedicated, always-on AI' },
+    { cap: 'Log Collection & SIEM', mssp: 'check', msspNote: 'Managed Splunk/QRadar', ai: 'check', aiNote: 'Wazuh + AI correlation' },
+    { cap: 'Real-time Threat Detection', mssp: 'partial', msspNote: 'Rule-based, 15-min delay', ai: 'check', aiNote: 'ML behavioral analysis, <15 sec' },
+    { cap: 'Incident Response', mssp: 'partial', msspNote: '4-hour SLA', ai: 'check', aiNote: 'Automated playbooks, <5 min' },
+    { cap: 'Vulnerability Scanning', mssp: 'partial', msspNote: 'Monthly scans only', ai: 'check', aiNote: 'Continuous + AI prioritization' },
+    { cap: 'Phishing Analysis', mssp: 'cross', msspNote: 'Not included', ai: 'check', aiNote: 'AI email classifier' },
+    { cap: 'Compliance Monitoring', mssp: 'partial', msspNote: 'Quarterly reports', ai: 'check', aiNote: 'Continuous dashboard' },
+    { cap: 'Threat Intelligence', mssp: 'check', msspNote: 'Generic feeds', ai: 'check', aiNote: 'Contextualized to your environment' },
+    { cap: 'Forensic Investigation', mssp: 'partial', msspNote: 'Extra cost ($300/hr)', ai: 'check', aiNote: 'Automated forensics included' },
+    { cap: 'Security Awareness Training', mssp: 'cross', msspNote: 'Not included', ai: 'check', aiNote: 'AI phishing simulations included' },
+    { cap: 'Custom Detection Rules', mssp: 'cross', msspNote: 'Vendor-managed only', ai: 'check', aiNote: 'Full customization' },
+    { cap: 'Dedicated Analyst', mssp: 'cross', msspNote: 'Shared pool', ai: 'partial', aiNote: 'AI + part-time senior analyst' },
+];
+
+// Coverage table
+const ct = document.getElementById('coverageTable');
+coverageItems.forEach(item => {
+    const msspIcon = item.mssp === 'check' ? '<span class="check text-lg">&#10003;</span>' : item.mssp === 'partial' ? '<span class="partial text-lg">&#9673;</span>' : '<span class="cross text-lg">&#10007;</span>';
+    const aiIcon = item.ai === 'check' ? '<span class="check text-lg">&#10003;</span>' : item.ai === 'partial' ? '<span class="partial text-lg">&#9673;</span>' : '<span class="cross text-lg">&#10007;</span>';
+    ct.innerHTML += `<tr class="border-b border-gray-100 hover:bg-gray-50">
+        <td class="py-3 px-4 font-medium">${item.cap}</td>
+        <td class="py-3 px-4 text-center mssp-col">${msspIcon}<div class="text-xs text-gray-400 mt-1">${item.msspNote}</div></td>
+        <td class="py-3 px-4 text-center ai-col">${aiIcon}<div class="text-xs text-gray-400 mt-1">${item.aiNote}</div></td>
+    </tr>`;
+});
+
+// Response time chart
+new Chart(document.getElementById('responseChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Initial Detection', 'Alert Triage', 'Incident Escalation', 'Containment Action', 'Root Cause Analysis', 'Post-Incident Report'],
+        datasets: [
+            { label: 'MSSP (minutes)', data: [15, 45, 240, 480, 2880, 10080], backgroundColor: '#d1d5db', borderRadius: 4 },
+            { label: 'AI SOC (minutes)', data: [0.25, 1, 2, 5, 15, 60], backgroundColor: '#6366f1', borderRadius: 4 }
+        ]
+    },
+    options: {
+        responsive: true, indexAxis: 'y',
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } },
+            tooltip: { callbacks: { label: ctx => {
+                const v = ctx.raw;
+                if (v >= 1440) return ctx.dataset.label.replace('(minutes)', '') + ': ' + (v/1440).toFixed(1) + ' days';
+                if (v >= 60) return ctx.dataset.label.replace('(minutes)', '') + ': ' + (v/60).toFixed(1) + ' hours';
+                return ctx.dataset.label.replace('(minutes)', '') + ': ' + v + ' min';
+            }}}
+        },
+        scales: { x: { type: 'logarithmic', ticks: { callback: v => v >= 1440 ? (v/1440)+'d' : v >= 60 ? (v/60)+'h' : v+'m' } } }
+    }
+});
+
+// Calculation
+let breakEvenChart, msspPieChart, aiPieChart;
+
+function recalculate() {
+    const size = parseInt(document.getElementById('orgSize').value);
+    document.getElementById('orgSizeLabel').textContent = size + ' employees';
+    document.getElementById('orgSizeDisplay').textContent = size + ' employees';
+
+    // MSSP pricing: base $25K + $65/employee/month
+    const msspBase = 25000;
+    const msspPerEmp = 65;
+    const msspMonthly = msspBase + (msspPerEmp * size);
+    const msspAnnual = msspMonthly * 12;
+    const mssp3yr = msspAnnual * 3;
+
+    // AI SOC: Wazuh (free) + AI tools $3K/mo + part-time analyst $4K/mo + infra $800/mo + $5/emp/mo
+    const aiBase = 7800;
+    const aiPerEmp = 5;
+    const aiSetup = 15000; // one-time
+    const aiMonthly = aiBase + (aiPerEmp * size);
+    const aiAnnual = (aiMonthly * 12) + (aiSetup / 3); // amortize setup over 3 years
+    const ai3yr = (aiMonthly * 36) + aiSetup;
+
+    const annualSavings = msspAnnual - aiAnnual;
+    const savingsPct = Math.round((annualSavings / msspAnnual) * 100);
+    const roi = Math.round((annualSavings / aiAnnual) * 100);
+
+    document.getElementById('msspMonthly').textContent = '$' + msspMonthly.toLocaleString();
+    document.getElementById('msspAnnual').textContent = '$' + msspAnnual.toLocaleString() + '/yr';
+    document.getElementById('mssp3yr').textContent = '$' + mssp3yr.toLocaleString() + ' over 3 years';
+    document.getElementById('aiMonthly').textContent = '$' + aiMonthly.toLocaleString();
+    document.getElementById('aiAnnual').textContent = '$' + Math.round(aiAnnual).toLocaleString() + '/yr';
+    document.getElementById('ai3yr').textContent = '$' + ai3yr.toLocaleString() + ' over 3 years';
+    document.getElementById('savings').textContent = '$' + Math.round(annualSavings).toLocaleString();
+    document.getElementById('savingsPct').textContent = savingsPct + '% reduction';
+    document.getElementById('savings3yr').textContent = '$' + Math.round(mssp3yr - ai3yr).toLocaleString() + ' over 3 years';
+    document.getElementById('blSavings').textContent = '$' + Math.round(annualSavings).toLocaleString();
+    document.getElementById('blROI').textContent = roi + '%';
+
+    // Break-even chart
+    const months = Array.from({length: 37}, (_, i) => i);
+    const msspCum = months.map(m => msspMonthly * m);
+    const aiCum = months.map(m => aiSetup + (aiMonthly * m));
+
+    if (breakEvenChart) breakEvenChart.destroy();
+    breakEvenChart = new Chart(document.getElementById('breakEvenChart'), {
+        type: 'line',
+        data: {
+            labels: months.map(m => m === 0 ? 'Start' : 'Mo ' + m),
+            datasets: [
+                { label: 'MSSP Cumulative', data: msspCum, borderColor: '#9ca3af', backgroundColor: 'rgba(156,163,175,0.1)', fill: true, tension: 0.1, pointRadius: 0 },
+                { label: 'AI SOC Cumulative', data: aiCum, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.1, pointRadius: 0 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' } } } },
+            scales: { y: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'K' } } }
+        }
+    });
+
+    // Pie charts
+    if (msspPieChart) msspPieChart.destroy();
+    msspPieChart = new Chart(document.getElementById('msspPie'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Base SOC ($25K)', 'Per-Employee ($' + (msspPerEmp * size).toLocaleString() + ')', 'Hidden: IR Retainer ($5K est)', 'Hidden: Overage Fees ($3K est)'],
+            datasets: [{ data: [25000, msspPerEmp * size, 5000, 3000], backgroundColor: ['#9ca3af', '#6b7280', '#ef4444', '#f87171'], borderWidth: 0 }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10, family: 'Inter' } } } } }
+    });
+
+    if (aiPieChart) aiPieChart.destroy();
+    aiPieChart = new Chart(document.getElementById('aiPie'), {
+        type: 'doughnut',
+        data: {
+            labels: ['AI Tools & SIEM ($3K)', 'Part-Time Sr Analyst ($4K)', 'Infrastructure ($800)', 'Per-Employee ($' + (aiPerEmp * size).toLocaleString() + ')', 'Setup (amortized $' + Math.round(aiSetup/36).toLocaleString() + '/mo)'],
+            datasets: [{ data: [3000, 4000, 800, aiPerEmp * size, Math.round(aiSetup/36)], backgroundColor: ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#e0e7ff'], borderWidth: 0 }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10, family: 'Inter' } } } } }
+    });
+}
+
+recalculate();
+</script>
+</body>
+</html>

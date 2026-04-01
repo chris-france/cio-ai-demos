@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schema Change Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-orange-900 via-orange-800 to-orange-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">Schema Change Tracker</h1>
+            <p class="text-orange-300 text-sm mt-1">Schema Evolution Management &mdash; Track Every Change, Prevent Every Break</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Schema Changes &mdash; 6 Months</h3>
+                <div style="height:300px"><canvas id="changeChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Changes by Type</h3>
+                <div style="height:300px"><canvas id="typeChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Recent Schema Changes</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase">
+                    <th class="px-4 py-3">Date</th><th class="px-4 py-3">Source</th><th class="px-4 py-3">Table</th>
+                    <th class="px-4 py-3">Change Type</th><th class="px-4 py-3">Detail</th>
+                    <th class="px-4 py-3">Impact</th><th class="px-4 py-3">Status</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Schema Change Tracker &mdash; Course 8 &mdash; Lecture 6 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const CHANGES=[
+    {date:'2026-03-27',source:'Salesforce',table:'Opportunity',type:'Column Added',detail:'Added SUSTAINABILITY_SCORE (decimal)',impact:'Low',status:'Auto-adapted'},
+    {date:'2026-03-25',source:'SAP',table:'BKPF (Accounting)',type:'Column Type Changed',detail:'BELNR changed from CHAR(10) to CHAR(12)',impact:'High',status:'Manual fix needed'},
+    {date:'2026-03-22',source:'Workday',table:'Worker',type:'Column Added',detail:'Added REMOTE_WORK_PCT (integer)',impact:'Low',status:'Auto-adapted'},
+    {date:'2026-03-20',source:'Stripe',table:'Payments',type:'Enum Value Added',detail:'payment_method: added "crypto"',impact:'Medium',status:'Auto-adapted'},
+    {date:'2026-03-18',source:'Legacy Oracle',table:'INVENTORY',type:'Column Removed',detail:'Dropped LEGACY_CODE column',impact:'Critical',status:'Pipeline broken'},
+    {date:'2026-03-15',source:'Salesforce',table:'Contact',type:'Column Renamed',detail:'Email__c → Primary_Email__c',impact:'High',status:'Manual fix needed'},
+    {date:'2026-03-12',source:'HubSpot',table:'Deals',type:'Column Added',detail:'Added AI_SCORE (float)',impact:'Low',status:'Auto-adapted'},
+    {date:'2026-03-10',source:'GA4',table:'Events',type:'Schema Version',detail:'v3 → v4: new event parameters structure',impact:'Critical',status:'Migration planned'},
+    {date:'2026-03-08',source:'Zendesk',table:'Tickets',type:'Column Type Changed',detail:'priority changed from text to enum',impact:'Medium',status:'Auto-adapted'},
+    {date:'2026-03-05',source:'SAP',table:'VBAK (Sales)',type:'Column Added',detail:'Added CARBON_OFFSET_AMT (decimal)',impact:'Low',status:'Auto-adapted'},
+];
+
+document.getElementById('kpiCards').innerHTML=[
+    {label:'Changes (30d)',value:CHANGES.length,color:'#f97316',trend:'Across 7 sources'},
+    {label:'Auto-Adapted',value:CHANGES.filter(c=>c.status==='Auto-adapted').length,color:'#10b981',trend:'No intervention needed'},
+    {label:'Manual Fix',value:CHANGES.filter(c=>c.status==='Manual fix needed').length,color:'#f59e0b',trend:'Engineer attention needed'},
+    {label:'Critical',value:CHANGES.filter(c=>c.impact==='Critical').length,color:'#ef4444',trend:'Pipeline breaking changes'},
+    {label:'Sources Tracked',value:7,color:'#0ea5e9',trend:'Schema versioning enabled'}
+].map(k=>`<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+new Chart(document.getElementById('changeChart'),{type:'bar',data:{
+    labels:['Oct','Nov','Dec','Jan','Feb','Mar'],
+    datasets:[
+        {label:'Auto-adapted',data:[4,6,3,5,7,6],backgroundColor:'#10b981'},
+        {label:'Manual fix',data:[1,2,1,3,1,2],backgroundColor:'#f59e0b'},
+        {label:'Breaking',data:[0,1,0,1,0,2],backgroundColor:'#ef4444'}
+    ]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+
+new Chart(document.getElementById('typeChart'),{type:'doughnut',data:{
+    labels:['Column Added','Column Type Changed','Column Removed','Column Renamed','Enum Changed','Schema Version'],
+    datasets:[{data:[5,2,1,1,1,1],backgroundColor:['#10b981','#f59e0b','#ef4444','#8b5cf6','#0ea5e9','#f97316']}]
+},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});
+
+document.getElementById('tableBody').innerHTML=CHANGES.map(c=>{
+    const ic=c.impact==='Critical'?'bg-red-100 text-red-700':c.impact==='High'?'bg-amber-100 text-amber-700':c.impact==='Medium'?'bg-blue-100 text-blue-700':'bg-green-100 text-green-700';
+    const sc=c.status==='Auto-adapted'?'bg-green-100 text-green-700':c.status==='Manual fix needed'?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700';
+    const bg=c.impact==='Critical'?'bg-red-50':'';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${bg}">
+        <td class="px-4 py-3">${c.date}</td><td class="px-4 py-3 font-medium">${c.source}</td>
+        <td class="px-4 py-3 font-mono text-xs">${c.table}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700">${c.type}</span></td>
+        <td class="px-4 py-3 text-xs">${c.detail}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${ic}">${c.impact}</span></td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${sc}">${c.status}</span></td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

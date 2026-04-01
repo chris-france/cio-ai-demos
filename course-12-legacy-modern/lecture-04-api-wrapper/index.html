@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Wrapper Catalog Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <h1 class="text-2xl font-bold text-gray-900">API Wrapper Catalog Dashboard</h1>
+        <p class="text-gray-500 text-sm mt-1">Course 12, Lecture 4 — API Wrapping Legacy Systems</p>
+    </div>
+</header>
+<main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+        <p class="text-amber-800 text-sm"><strong>Sample Data:</strong> This catalog contains sample API data. Run the Claude Code prompt to rebuild it with your workbook data.</p>
+    </div>
+    <div class="grid grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-gray-900">8</div>
+            <div class="text-xs text-gray-500 mt-1">Endpoints</div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-green-600">4</div>
+            <div class="text-xs text-gray-500 mt-1">Healthy</div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-orange-600">4</div>
+            <div class="text-xs text-gray-500 mt-1">Degraded</div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-blue-600">459ms</div>
+            <div class="text-xs text-gray-500 mt-1">Avg Latency</div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div class="text-3xl font-bold text-gray-700">62.5K</div>
+            <div class="text-xs text-gray-500 mt-1">Daily Requests</div>
+        </div>
+    </div>
+    <p class="text-gray-600 text-center py-12">Run the Claude Code prompt to generate the full interactive catalog with health grid, latency charts, and dependency maps.</p>
+</main>
+</body>
+</html>

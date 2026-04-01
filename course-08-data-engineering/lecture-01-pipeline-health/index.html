@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Pipeline Health Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}.sortable{cursor:pointer;user-select:none;}.sortable:hover{background:#f1f5f9;}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-orange-900 via-orange-800 to-orange-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">Data Pipeline Health Dashboard</h1>
+            <p class="text-orange-300 text-sm mt-1">The Pipeline Problem &mdash; See What Is Actually Running</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Pipeline Success Rate &mdash; 30 Days</h3>
+                <div style="height:300px"><canvas id="successChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Pipeline Status Distribution</h3>
+                <div style="height:300px"><canvas id="statusChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-700">All Pipelines &mdash; Current Status</h3>
+                <select id="statusFilter" onchange="renderTable()" class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
+                    <option value="all">All</option><option value="Failed">Failed</option>
+                    <option value="Degraded">Degraded</option><option value="Healthy">Healthy</option>
+                </select>
+            </div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase">
+                    <th class="px-4 py-3 sortable" onclick="sortT(0)">Pipeline</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(1)">Source</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(2)">Destination</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(3)">Schedule</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(4)">Last Run</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(5)">Duration</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(6)">Records</th>
+                    <th class="px-4 py-3">Status</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Data Pipeline Health &mdash; Course 8: AI Data Engineering &mdash; Lecture 1 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const PIPELINES=[
+    {name:'CRM Daily Sync',src:'Salesforce',dst:'Snowflake',schedule:'Daily 2:00 AM',lastRun:'2026-03-28 02:12',duration:'8m 32s',records:'142,380',status:'Healthy'},
+    {name:'ERP Financial Extract',src:'SAP',dst:'Snowflake',schedule:'Daily 3:00 AM',lastRun:'2026-03-28 03:45',duration:'22m 15s',records:'89,210',status:'Healthy'},
+    {name:'Web Analytics Import',src:'GA4',dst:'BigQuery',schedule:'Hourly',lastRun:'2026-03-28 10:05',duration:'1m 42s',records:'28,450',status:'Healthy'},
+    {name:'HR Data Sync',src:'Workday',dst:'Snowflake',schedule:'Daily 4:00 AM',lastRun:'2026-03-28 04:02',duration:'3m 18s',records:'12,840',status:'Healthy'},
+    {name:'Support Ticket ETL',src:'Zendesk',dst:'Postgres',schedule:'Every 15 min',lastRun:'2026-03-28 10:15',duration:'45s',records:'1,280',status:'Healthy'},
+    {name:'Inventory Sync',src:'Legacy Oracle',dst:'Snowflake',schedule:'Daily 5:00 AM',lastRun:'2026-03-28 05:00',duration:'TIMEOUT',records:'0',status:'Failed'},
+    {name:'Marketing Attribution',src:'HubSpot+GA4',dst:'Snowflake',schedule:'Daily 6:00 AM',lastRun:'2026-03-28 06:30',duration:'45m 22s',records:'340,120',status:'Degraded'},
+    {name:'Payment Reconciliation',src:'Stripe',dst:'Postgres',schedule:'Hourly',lastRun:'2026-03-28 10:00',duration:'2m 10s',records:'3,450',status:'Healthy'},
+    {name:'Product Usage Events',src:'Segment',dst:'BigQuery',schedule:'Real-time',lastRun:'2026-03-28 10:18',duration:'streaming',records:'1.2M/day',status:'Healthy'},
+    {name:'Partner Data Exchange',src:'SFTP',dst:'S3+Snowflake',schedule:'Daily 7:00 AM',lastRun:'2026-03-27 07:15',duration:'12m 08s',records:'45,600',status:'Degraded'},
+    {name:'Compliance Audit Log',src:'Okta+AWS',dst:'Splunk',schedule:'Every 5 min',lastRun:'2026-03-28 10:15',duration:'28s',records:'8,900',status:'Healthy'},
+    {name:'Legacy Report Extract',src:'MS Access',dst:'CSV→S3',schedule:'Weekly Mon',lastRun:'2026-03-25 01:00',duration:'Failed',records:'0',status:'Failed'},
+];
+
+let sortCol=-1,sortAsc=true;
+const failed=PIPELINES.filter(p=>p.status==='Failed').length;
+const degraded=PIPELINES.filter(p=>p.status==='Degraded').length;
+
+document.getElementById('kpiCards').innerHTML=[
+    {label:'Total Pipelines',value:PIPELINES.length,color:'#f97316',trend:`${PIPELINES.length-failed-degraded} healthy`},
+    {label:'Failed',value:failed,color:'#ef4444',trend:'Require immediate fix'},
+    {label:'Degraded',value:degraded,color:'#f59e0b',trend:'Running slow or partial'},
+    {label:'Success Rate (30d)',value:'91.4%',color:'#10b981',trend:'Target: 99%'},
+    {label:'Avg Latency',value:'12m',color:'#0ea5e9',trend:'SLA: 30 min'}
+].map(k=>`<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+const days=Array.from({length:30},(_,i)=>`Mar ${i+1}`);
+new Chart(document.getElementById('successChart'),{type:'line',data:{labels:days,datasets:[
+    {label:'Success Rate %',data:[95,94,96,92,88,91,93,95,94,90,92,94,95,93,88,85,90,92,94,95,93,91,92,94,95,93,91,92,91,91],borderColor:'#f97316',tension:0.3,fill:true,backgroundColor:'rgba(249,115,22,0.1)'},
+    {label:'Target (99%)',data:Array(30).fill(99),borderColor:'#ef4444',borderDash:[5,5],pointRadius:0}
+]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:80,max:100}}}});
+
+new Chart(document.getElementById('statusChart'),{type:'doughnut',data:{
+    labels:['Healthy','Degraded','Failed'],
+    datasets:[{data:[PIPELINES.length-failed-degraded,degraded,failed],backgroundColor:['#10b981','#f59e0b','#ef4444']}]
+},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});
+
+function renderTable(){
+    const f=document.getElementById('statusFilter').value;
+    let data=f==='all'?[...PIPELINES]:PIPELINES.filter(p=>p.status===f);
+    if(sortCol>=0){const keys=['name','src','dst','schedule','lastRun','duration','records'];
+        data.sort((a,b)=>{let va=a[keys[sortCol]],vb=b[keys[sortCol]];return typeof va==='string'?(sortAsc?va.localeCompare(vb):vb.localeCompare(va)):(sortAsc?va-vb:vb-va);});}
+    document.getElementById('tableBody').innerHTML=data.map(p=>{
+        const sc=p.status==='Failed'?'bg-red-100 text-red-700':p.status==='Degraded'?'bg-amber-100 text-amber-700':'bg-green-100 text-green-700';
+        const bg=p.status==='Failed'?'bg-red-50':'';
+        return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${bg}">
+            <td class="px-4 py-3 font-medium">${p.name}</td><td class="px-4 py-3">${p.src}</td>
+            <td class="px-4 py-3">${p.dst}</td><td class="px-4 py-3 text-xs">${p.schedule}</td>
+            <td class="px-4 py-3 text-xs">${p.lastRun}</td><td class="px-4 py-3">${p.duration}</td>
+            <td class="px-4 py-3">${p.records}</td>
+            <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${sc}">${p.status}</span></td></tr>`;
+    }).join('');
+}
+function sortT(c){if(sortCol===c)sortAsc=!sortAsc;else{sortCol=c;sortAsc=true;}renderTable();}
+renderTable();
+</script>
+</body>
+</html>

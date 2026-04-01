@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Negotiation Intelligence Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto"><h1 class="text-2xl font-extrabold">Vendor Negotiation Intelligence</h1>
+        <p class="text-blue-300 text-sm mt-1">Telecom Vendor Comparison &amp; Negotiation Strategy</p></div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Vendor Scorecard</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Vendor</th><th class="px-4 py-3">Annual Spend</th><th class="px-4 py-3">Circuits</th>
+                        <th class="px-4 py-3">SLA Target</th><th class="px-4 py-3">Actual Uptime</th><th class="px-4 py-3">Support (hrs)</th><th class="px-4 py-3">Grade</th>
+                    </tr></thead>
+                    <tbody id="vendorBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Vendor Comparison Radar</h3>
+                <div style="height:300px"><canvas id="radarChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Your Rate vs Market Rate ($/Mbps)</h3>
+                <div style="height:300px"><canvas id="rateChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-blue-800 mb-3">Negotiation Strategy &mdash; Next Renewal</h3>
+            <div class="space-y-3">
+                <div class="bg-white rounded-lg p-4 border border-blue-200">
+                    <div class="font-semibold text-blue-900">Target: Verizon DIA Renewal (June 2026)</div>
+                    <ul class="mt-2 text-sm text-blue-800 space-y-1 list-disc list-inside">
+                        <li>Current rate: $3.80/Mbps &mdash; Market rate: $2.10/Mbps (45% premium)</li>
+                        <li>Leverage: 2 competitive bids from Lumen and Zayo at $2.20/Mbps and $2.35/Mbps</li>
+                        <li>Strategy: Request 3-year term at $2.25/Mbps with uptime SLA increase to 99.99%</li>
+                        <li>Target savings: $1,800/month ($21,600/year)</li>
+                        <li>Fallback: Accept $2.50/Mbps with free bandwidth burst to 2 Gbps</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Vendor Negotiation Intelligence &mdash; Course 18 &mdash; Lecture 5 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const VENDORS = [
+    { name: 'AT&T', annual: 177600, circuits: 6, sla: '99.95%', actual: '99.92%', support: 4.2, grade: 'B' },
+    { name: 'Verizon', annual: 82800, circuits: 3, sla: '99.99%', actual: '99.97%', support: 2.1, grade: 'A' },
+    { name: 'Lumen', annual: 181800, circuits: 4, sla: '99.95%', actual: '99.88%', support: 6.5, grade: 'C+' },
+    { name: 'Zayo', annual: 100800, circuits: 2, sla: '99.99%', actual: '99.96%', support: 3.8, grade: 'B+' },
+    { name: 'Comcast', annual: 24600, circuits: 4, sla: '99.9%', actual: '99.85%', support: 8.2, grade: 'C' },
+    { name: 'T-Mobile', annual: 9900, circuits: 3, sla: '99.5%', actual: '99.3%', support: 12.0, grade: 'C-' },
+];
+
+const KPI = [
+    { label: 'Telecom Vendors', value: VENDORS.length, color: '#3b82f6' },
+    { label: 'Annual Spend', value: '$'+VENDORS.reduce((s,v)=>s+v.annual,0).toLocaleString(), color: '#8b5cf6' },
+    { label: 'Renewals < 90 Days', value: '2', color: '#ef4444' },
+    { label: 'Est. Negotiation Savings', value: '$48,000/yr', color: '#10b981' },
+    { label: 'Avg Discount Achieved', value: '18%', color: '#f59e0b' },
+];
+
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+const gradeColor = g => g.startsWith('A')?'text-green-600':g.startsWith('B')?'text-blue-600':'text-amber-600';
+document.getElementById('vendorBody').innerHTML = VENDORS.map(v =>
+    `<tr class="border-t border-gray-100 hover:bg-gray-50"><td class="px-4 py-3 font-semibold">${v.name}</td>
+    <td class="px-4 py-3">$${v.annual.toLocaleString()}</td><td class="px-4 py-3">${v.circuits}</td>
+    <td class="px-4 py-3">${v.sla}</td><td class="px-4 py-3">${v.actual}</td>
+    <td class="px-4 py-3">${v.support}</td>
+    <td class="px-4 py-3 font-bold text-lg ${gradeColor(v.grade)}">${v.grade}</td></tr>`
+).join('');
+
+new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+        labels: ['Price', 'Reliability', 'Support', 'Flexibility', 'Coverage'],
+        datasets: [
+            { label: 'AT&T', data: [6,8,7,5,9], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)' },
+            { label: 'Verizon', data: [5,9,9,6,8], borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)' },
+            { label: 'Lumen', data: [7,7,5,7,7], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)' },
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true, max: 10 } } }
+});
+
+new Chart(document.getElementById('rateChart'), {
+    type: 'bar',
+    data: {
+        labels: ['MPLS 200M', 'MPLS 500M', 'DIA 500M', 'DIA 1G', 'Broadband 500M'],
+        datasets: [
+            { label: 'Your Rate', data: [12.0, 8.8, 5.6, 3.8, 0.9], backgroundColor: '#ef4444', borderRadius: 4 },
+            { label: 'Market Rate', data: [8.5, 6.2, 3.4, 2.1, 0.7], backgroundColor: '#3b82f6', borderRadius: 4 },
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: '$/Mbps/month' } } } }
+});
+</script>
+</body>
+</html>

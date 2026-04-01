@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Ticket Classifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .ticket-row { transition: all 0.4s ease; }
+        .ticket-row.classified { background: #f0fdf4; }
+        .confidence-bar { height: 6px; border-radius: 3px; transition: width 0.6s ease; }
+        @keyframes pulse-border { 0%,100% { border-color: #3b82f6; } 50% { border-color: #93c5fd; } }
+        .classifying { animation: pulse-border 0.8s ease infinite; border-left: 4px solid #3b82f6; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">AI Ticket Classifier</h1>
+                <p class="text-slate-300 text-sm mt-1">NLP-Powered Triage &mdash; From Keyword Matching to Intent Understanding</p>
+            </div>
+            <div class="text-right">
+                <button id="classifyBtn" onclick="runClassification()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors">
+                    Classify All Tickets
+                </button>
+                <button onclick="resetDemo()" class="ml-3 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors">
+                    Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+
+        <!-- Summary Cards -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4" id="summaryCards">
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Total Tickets</div>
+                <div class="text-3xl font-extrabold text-slate-800 mt-1">10</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Classified</div>
+                <div class="text-3xl font-extrabold text-blue-600 mt-1" id="classifiedCount">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Avg Confidence</div>
+                <div class="text-3xl font-extrabold text-green-600 mt-1" id="avgConfidence">&mdash;</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Avg Time</div>
+                <div class="text-3xl font-extrabold text-amber-600 mt-1" id="avgTime">&mdash;</div>
+            </div>
+        </section>
+
+        <!-- Ticket Classification Table -->
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-700">Incoming Tickets &mdash; AI Classification Results</h3>
+                <p class="text-xs text-gray-400 mt-1">Click "Classify All Tickets" to watch the AI triage each ticket in real time</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 w-8">#</th>
+                            <th class="px-4 py-3" style="min-width:320px">Ticket Text</th>
+                            <th class="px-4 py-3">AI Category</th>
+                            <th class="px-4 py-3">Confidence</th>
+                            <th class="px-4 py-3">Priority</th>
+                            <th class="px-4 py-3">Reasoning</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Category Distribution Chart -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Classification Distribution</h3>
+                <div style="height:280px"><canvas id="distChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Confidence Scores</h3>
+                <div style="height:280px"><canvas id="confChart"></canvas></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            AI Ticket Classifier &mdash; Course 3: AI-Powered IT Service Management &mdash; Lecture 2 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+const TICKETS = [
+    { text: "I can't log into Salesforce — it says my password is expired but I just changed it yesterday", category: 'Password / Access', confidence: 0.96, priority: 'High', reasoning: 'Authentication failure with recent password change indicates credential sync issue' },
+    { text: "Need Figma installed on my new laptop for the design team project starting Monday", category: 'Software Install', confidence: 0.94, priority: 'Medium', reasoning: 'Software provisioning request with clear timeline and business justification' },
+    { text: "The VPN keeps disconnecting every 10 minutes when I work from home — been happening all week", category: 'Network / VPN', confidence: 0.92, priority: 'High', reasoning: 'Recurring connectivity issue impacting remote work productivity' },
+    { text: "My monitor went black this morning and won't turn back on. The power light blinks orange.", category: 'Hardware', confidence: 0.97, priority: 'Medium', reasoning: 'Physical hardware failure indicated by diagnostic LED pattern' },
+    { text: "Can someone add me to the marketing shared drive? I transferred from sales last week.", category: 'Password / Access', confidence: 0.89, priority: 'Low', reasoning: 'Access request for department transfer — requires manager approval workflow' },
+    { text: "Outlook keeps crashing whenever I try to open attachments larger than 5MB", category: 'Email / M365', confidence: 0.91, priority: 'Medium', reasoning: 'Application crash pattern tied to specific action — likely corrupt cache or add-in conflict' },
+    { text: "The printer on the 3rd floor is jamming constantly and making a grinding noise", category: 'Hardware', confidence: 0.88, priority: 'Low', reasoning: 'Mechanical hardware issue — paper path obstruction or worn roller assembly' },
+    { text: "I accidentally deleted the Q1 budget spreadsheet from SharePoint — can it be recovered?", category: 'Email / M365', confidence: 0.85, priority: 'High', reasoning: 'Data recovery request for business-critical financial document — time-sensitive' },
+    { text: "Teams calls keep dropping after exactly 30 minutes — nobody else in my office has this problem", category: 'Network / VPN', confidence: 0.87, priority: 'Medium', reasoning: 'Pattern suggests session timeout or QoS policy issue — user-specific network config' },
+    { text: "Need to set up a new hire with laptop, email, AD account, and badge access by Friday", category: 'Onboarding', confidence: 0.93, priority: 'High', reasoning: 'Multi-system onboarding request with hard deadline — triggers provisioning workflow' }
+];
+
+let classified = [];
+let distChart = null, confChart = null;
+
+function renderTickets() {
+    document.getElementById('ticketBody').innerHTML = TICKETS.map((t, i) => {
+        const c = classified[i];
+        const rowClass = c ? 'ticket-row classified' : 'ticket-row';
+        const catBadge = c ? `<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-semibold fade-in">${t.category}</span>` : '<span class="text-gray-300">Waiting...</span>';
+        const confBar = c ? `<div class="fade-in"><div class="flex items-center gap-2"><span class="text-xs font-semibold ${t.confidence >= 0.9 ? 'text-green-600' : 'text-amber-600'}">${(t.confidence * 100).toFixed(0)}%</span><div class="w-20 bg-gray-200 rounded-full"><div class="confidence-bar ${t.confidence >= 0.9 ? 'bg-green-500' : 'bg-amber-500'}" style="width:${t.confidence * 100}%"></div></div></div></div>` : '';
+        const priBadge = c ? priorityBadge(t.priority) : '';
+        const reason = c ? `<span class="text-xs text-gray-500 fade-in">${t.reasoning}</span>` : '';
+        return `<tr class="${rowClass}" id="row-${i}">
+            <td class="px-4 py-3 text-gray-400 font-mono text-xs">${i + 1}</td>
+            <td class="px-4 py-3 text-gray-700">${t.text}</td>
+            <td class="px-4 py-3">${catBadge}</td>
+            <td class="px-4 py-3">${confBar}</td>
+            <td class="px-4 py-3">${priBadge}</td>
+            <td class="px-4 py-3">${reason}</td>
+        </tr>`;
+    }).join('');
+}
+
+function priorityBadge(p) {
+    const colors = { High: 'bg-red-100 text-red-700', Medium: 'bg-amber-100 text-amber-700', Low: 'bg-green-100 text-green-700' };
+    return `<span class="px-2 py-1 text-xs rounded-full ${colors[p]} font-semibold fade-in">${p}</span>`;
+}
+
+async function runClassification() {
+    const btn = document.getElementById('classifyBtn');
+    btn.disabled = true;
+    btn.textContent = 'Classifying...';
+    btn.classList.add('opacity-60');
+
+    for (let i = 0; i < TICKETS.length; i++) {
+        const row = document.getElementById('row-' + i);
+        row.classList.add('classifying');
+        await new Promise(r => setTimeout(r, 400 + Math.random() * 300));
+        classified[i] = true;
+        row.classList.remove('classifying');
+        renderTickets();
+        updateSummary();
+    }
+
+    btn.textContent = 'All Classified';
+    renderCharts();
+}
+
+function updateSummary() {
+    const count = classified.filter(Boolean).length;
+    document.getElementById('classifiedCount').textContent = count;
+    if (count > 0) {
+        const avg = TICKETS.slice(0, count).reduce((s, t) => s + t.confidence, 0) / count;
+        document.getElementById('avgConfidence').textContent = (avg * 100).toFixed(1) + '%';
+        document.getElementById('avgTime').textContent = '0.4s';
+    }
+}
+
+function renderCharts() {
+    const catCounts = {};
+    TICKETS.forEach(t => { catCounts[t.category] = (catCounts[t.category] || 0) + 1; });
+    const labels = Object.keys(catCounts);
+    const data = Object.values(catCounts);
+    const colors = ['#3b82f6', '#8b5cf6', '#ef4444', '#f59e0b', '#10b981', '#6366f1'];
+
+    if (distChart) distChart.destroy();
+    distChart = new Chart(document.getElementById('distChart'), {
+        type: 'bar',
+        data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderRadius: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Inter' } } }, x: { ticks: { font: { family: 'Inter', size: 10 } } } } }
+    });
+
+    if (confChart) confChart.destroy();
+    confChart = new Chart(document.getElementById('confChart'), {
+        type: 'bar',
+        data: {
+            labels: TICKETS.map((_, i) => 'T' + (i + 1)),
+            datasets: [{ data: TICKETS.map(t => t.confidence * 100), backgroundColor: TICKETS.map(t => t.confidence >= 0.9 ? '#22c55e' : '#f59e0b'), borderRadius: 4 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 70, max: 100, ticks: { callback: v => v + '%', font: { family: 'Inter' } } }, x: { ticks: { font: { family: 'Inter' } } } } }
+    });
+}
+
+function resetDemo() {
+    classified = [];
+    const btn = document.getElementById('classifyBtn');
+    btn.disabled = false;
+    btn.textContent = 'Classify All Tickets';
+    btn.classList.remove('opacity-60');
+    document.getElementById('classifiedCount').textContent = '0';
+    document.getElementById('avgConfidence').innerHTML = '&mdash;';
+    document.getElementById('avgTime').innerHTML = '&mdash;';
+    if (distChart) { distChart.destroy(); distChart = null; }
+    if (confChart) { confChart.destroy(); confChart = null; }
+    renderTickets();
+}
+
+renderTickets();
+</script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Resolution Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        @keyframes processing { 0%,100% { border-left-color: #3b82f6; } 50% { border-left-color: #93c5fd; } }
+        .processing { animation: processing 0.6s ease infinite; border-left: 4px solid #3b82f6; }
+        .resolved { border-left: 4px solid #22c55e; background: #f0fdf4; }
+        .escalated { border-left: 4px solid #f59e0b; background: #fffbeb; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Auto-Resolution Engine</h1>
+                <p class="text-slate-300 text-sm mt-1">The 70% Rule &mdash; Most Tickets Don't Need a Human</p>
+            </div>
+            <div class="text-right flex items-center gap-3">
+                <button id="runBtn" onclick="runAutoResolve()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors">
+                    Run Auto-Resolution
+                </button>
+                <button onclick="resetDemo()" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors">Reset</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+
+        <!-- KPIs -->
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #22c55e">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Auto-Resolved</div>
+                <div class="text-3xl font-extrabold text-green-600 mt-1" id="kpiResolved">0</div>
+                <div class="text-xs text-gray-400 mt-1">of 10 tickets</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #f59e0b">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Escalated</div>
+                <div class="text-3xl font-extrabold text-amber-600 mt-1" id="kpiEscalated">0</div>
+                <div class="text-xs text-gray-400 mt-1">requires human</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #3b82f6">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Time Saved</div>
+                <div class="text-3xl font-extrabold text-blue-600 mt-1" id="kpiTime">0 hrs</div>
+                <div class="text-xs text-gray-400 mt-1">vs manual handling</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #8b5cf6">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Cost Saved</div>
+                <div class="text-3xl font-extrabold text-purple-600 mt-1" id="kpiCost">$0</div>
+                <div class="text-xs text-gray-400 mt-1">at $22/ticket avg</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #06b6d4">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Resolution Rate</div>
+                <div class="text-3xl font-extrabold text-cyan-600 mt-1" id="kpiRate">&mdash;</div>
+                <div class="text-xs text-gray-400 mt-1">target: 70%</div>
+            </div>
+        </section>
+
+        <!-- Ticket Processing Table -->
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-700">Ticket Processing &mdash; Auto-Resolution Results</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 w-8">#</th>
+                            <th class="px-4 py-3" style="min-width:260px">Ticket</th>
+                            <th class="px-4 py-3">Outcome</th>
+                            <th class="px-4 py-3">Resolution Method</th>
+                            <th class="px-4 py-3">Time Saved</th>
+                            <th class="px-4 py-3">Cost Saved</th>
+                            <th class="px-4 py-3">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Charts -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Time Saved per Ticket (minutes)</h3>
+                <div style="height:280px"><canvas id="timeChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Monthly Projection (1,200 tickets/month)</h3>
+                <div style="height:280px"><canvas id="projChart"></canvas></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Auto-Resolution Engine &mdash; Course 3: AI-Powered IT Service Management &mdash; Lecture 3 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+const TICKETS = [
+    { text: "Password expired — can't log into email", autoResolve: true, method: "AD password reset via self-service portal + MFA verification", timeSaved: 22, costSaved: 22, confidence: 0.97 },
+    { text: "Need access to the Finance SharePoint site", autoResolve: true, method: "Auto-provisioned via AD group membership + manager approval API", timeSaved: 35, costSaved: 22, confidence: 0.93 },
+    { text: "How do I set up email on my new phone?", autoResolve: true, method: "KB article #1042 sent with step-by-step + MDM enrollment link", timeSaved: 18, costSaved: 22, confidence: 0.95 },
+    { text: "Laptop won't boot — black screen with blinking cursor", autoResolve: false, method: "Escalated to Desktop Support — physical hardware diagnosis required", timeSaved: 0, costSaved: 0, confidence: 0.42 },
+    { text: "VPN client shows 'certificate expired' error", autoResolve: true, method: "Certificate auto-renewed via SCEP + VPN profile pushed via MDM", timeSaved: 40, costSaved: 22, confidence: 0.91 },
+    { text: "Can't print to the 3rd floor Canon — shows offline", autoResolve: true, method: "Print spooler restarted remotely + driver reinstalled via SCCM", timeSaved: 25, costSaved: 22, confidence: 0.89 },
+    { text: "Outlook search not returning any results", autoResolve: true, method: "Search index rebuilt via remote PowerShell + cache cleared", timeSaved: 30, costSaved: 22, confidence: 0.92 },
+    { text: "Production database showing intermittent connection timeouts", autoResolve: false, method: "Escalated to DBA team — requires connection pool analysis + query review", timeSaved: 0, costSaved: 0, confidence: 0.31 },
+    { text: "Need Adobe Acrobat Pro installed for contract reviews", autoResolve: true, method: "Software deployed via SCCM + license assigned from pool automatically", timeSaved: 28, costSaved: 22, confidence: 0.96 },
+    { text: "Network switch in server room showing amber lights and packet loss", autoResolve: false, method: "Escalated to Network Engineering — requires physical inspection + possible replacement", timeSaved: 0, costSaved: 0, confidence: 0.28 }
+];
+
+let processed = [];
+
+function renderTickets() {
+    document.getElementById('ticketBody').innerHTML = TICKETS.map((t, i) => {
+        const p = processed[i];
+        let rowClass = '';
+        let outcomeCell = '<span class="text-gray-300">Pending</span>';
+        let methodCell = '', timeCell = '', costCell = '', confCell = '';
+
+        if (p) {
+            if (t.autoResolve) {
+                rowClass = 'resolved';
+                outcomeCell = '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-semibold fade-in">Auto-Resolved</span>';
+            } else {
+                rowClass = 'escalated';
+                outcomeCell = '<span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700 font-semibold fade-in">Escalated</span>';
+            }
+            methodCell = `<span class="text-xs text-gray-600 fade-in">${t.method}</span>`;
+            timeCell = t.timeSaved > 0 ? `<span class="text-green-600 font-semibold fade-in">${t.timeSaved} min</span>` : '<span class="text-gray-400 fade-in">&mdash;</span>';
+            costCell = t.costSaved > 0 ? `<span class="text-green-600 font-semibold fade-in">$${t.costSaved}</span>` : '<span class="text-gray-400 fade-in">&mdash;</span>';
+            const confColor = t.confidence >= 0.8 ? 'text-green-600' : t.confidence >= 0.5 ? 'text-amber-600' : 'text-red-600';
+            confCell = `<span class="${confColor} font-semibold fade-in">${(t.confidence * 100).toFixed(0)}%</span>`;
+        }
+
+        return `<tr class="${rowClass}" id="row-${i}">
+            <td class="px-4 py-3 text-gray-400 font-mono text-xs">${i + 1}</td>
+            <td class="px-4 py-3 text-gray-700">${t.text}</td>
+            <td class="px-4 py-3">${outcomeCell}</td>
+            <td class="px-4 py-3">${methodCell}</td>
+            <td class="px-4 py-3">${timeCell}</td>
+            <td class="px-4 py-3">${costCell}</td>
+            <td class="px-4 py-3">${confCell}</td>
+        </tr>`;
+    }).join('');
+}
+
+function updateKPIs() {
+    const done = processed.filter(Boolean).length;
+    const resolved = TICKETS.filter((t, i) => processed[i] && t.autoResolve).length;
+    const escalated = TICKETS.filter((t, i) => processed[i] && !t.autoResolve).length;
+    const timeSaved = TICKETS.filter((t, i) => processed[i]).reduce((s, t) => s + t.timeSaved, 0);
+    const costSaved = TICKETS.filter((t, i) => processed[i]).reduce((s, t) => s + t.costSaved, 0);
+
+    document.getElementById('kpiResolved').textContent = resolved;
+    document.getElementById('kpiEscalated').textContent = escalated;
+    document.getElementById('kpiTime').textContent = (timeSaved / 60).toFixed(1) + ' hrs';
+    document.getElementById('kpiCost').textContent = '$' + costSaved;
+    document.getElementById('kpiRate').textContent = done > 0 ? Math.round((resolved / done) * 100) + '%' : '\u2014';
+}
+
+async function runAutoResolve() {
+    const btn = document.getElementById('runBtn');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    btn.classList.add('opacity-60');
+
+    for (let i = 0; i < TICKETS.length; i++) {
+        const row = document.getElementById('row-' + i);
+        row.classList.add('processing');
+        await new Promise(r => setTimeout(r, 500 + Math.random() * 400));
+        processed[i] = true;
+        row.classList.remove('processing');
+        renderTickets();
+        updateKPIs();
+    }
+
+    btn.textContent = 'Complete';
+    renderCharts();
+}
+
+function renderCharts() {
+    new Chart(document.getElementById('timeChart'), {
+        type: 'bar',
+        data: {
+            labels: TICKETS.map((_, i) => 'T' + (i + 1)),
+            datasets: [{
+                data: TICKETS.map(t => t.timeSaved),
+                backgroundColor: TICKETS.map(t => t.autoResolve ? '#22c55e' : '#f59e0b'),
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { callback: v => v + ' min', font: { family: 'Inter' } } }, x: { ticks: { font: { family: 'Inter' } } } }
+        }
+    });
+
+    new Chart(document.getElementById('projChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Traditional', 'With AI (70%)'],
+            datasets: [
+                { label: 'Human-Handled', data: [1200, 360], backgroundColor: '#ef4444', borderRadius: 4 },
+                { label: 'Auto-Resolved', data: [0, 840], backgroundColor: '#22c55e', borderRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
+            scales: {
+                x: { stacked: true, ticks: { font: { family: 'Inter' } } },
+                y: { stacked: true, beginAtZero: true, ticks: { font: { family: 'Inter' } }, title: { display: true, text: 'Tickets / Month', font: { family: 'Inter', size: 11 } } }
+            }
+        }
+    });
+}
+
+function resetDemo() {
+    processed = [];
+    const btn = document.getElementById('runBtn');
+    btn.disabled = false;
+    btn.textContent = 'Run Auto-Resolution';
+    btn.classList.remove('opacity-60');
+    document.getElementById('kpiResolved').textContent = '0';
+    document.getElementById('kpiEscalated').textContent = '0';
+    document.getElementById('kpiTime').textContent = '0 hrs';
+    document.getElementById('kpiCost').textContent = '$0';
+    document.getElementById('kpiRate').innerHTML = '&mdash;';
+    renderTickets();
+}
+
+renderTickets();
+</script>
+</body>
+</html>

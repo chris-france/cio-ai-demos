@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">Revenue & Churn Prediction Dashboard</h1>
+            <p class="text-sky-300 text-sm mt-1">Predictive Analytics Without Data Science &mdash; AI-Generated Forecasts</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Revenue Forecast &mdash; Next 6 Months</h3>
+                <div style="height:300px"><canvas id="revenueChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Churn Prediction by Segment</h3>
+                <div style="height:300px"><canvas id="churnChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">At-Risk Customers &mdash; Churn Probability > 60%</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase">
+                    <th class="px-4 py-3">Customer</th><th class="px-4 py-3">Segment</th><th class="px-4 py-3">ARR</th>
+                    <th class="px-4 py-3">Churn Prob</th><th class="px-4 py-3">Key Risk Factors</th><th class="px-4 py-3">Recommended Action</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <section class="bg-sky-50 border border-sky-200 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-sky-800 mb-2">AI Forecast Summary</h3>
+            <p class="text-sm text-sky-700">Based on 24 months of historical data, revenue is projected to grow 12% over the next 6 months (from $2.4M to $2.69M/month). However, churn in the Enterprise segment is trending upward — if unaddressed, it could offset $840K in new revenue. The 8 at-risk accounts below represent $1.2M in ARR. Proactive outreach to these accounts has a 65% save rate based on historical intervention data.</p>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Predictive Analytics Dashboard &mdash; Course 7 &mdash; Lecture 5 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+document.getElementById('kpiCards').innerHTML=[
+    {label:'Forecasted Q2 Revenue',value:'$7.8M',color:'#10b981',trend:'+12% vs Q1'},
+    {label:'Predicted Churn (90d)',value:'34',color:'#ef4444',trend:'$1.2M ARR at risk'},
+    {label:'Forecast Accuracy',value:'91%',color:'#0ea5e9',trend:'MAPE: 9.2%'},
+    {label:'Revenue at Risk',value:'$1.2M',color:'#f59e0b',trend:'If churn not addressed'}
+].map(k=>`<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+const months=['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+new Chart(document.getElementById('revenueChart'),{type:'line',data:{labels:months,datasets:[
+    {label:'Actual',data:[2100,2200,2450,2300,2350,2400,null,null,null,null,null,null],borderColor:'#0ea5e9',pointRadius:4,tension:0.3},
+    {label:'Forecast',data:[null,null,null,null,null,2400,2480,2550,2610,2650,2680,2690],borderColor:'#10b981',borderDash:[5,5],pointRadius:3,tension:0.3},
+    {label:'Upper Bound',data:[null,null,null,null,null,2400,2580,2700,2810,2880,2920,2950],borderColor:'rgba(16,185,129,0.2)',pointRadius:0,fill:false},
+    {label:'Lower Bound',data:[null,null,null,null,null,2400,2380,2400,2410,2420,2440,2430],borderColor:'rgba(16,185,129,0.2)',pointRadius:0,fill:'-1',backgroundColor:'rgba(16,185,129,0.1)'}
+]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{title:{display:true,text:'Revenue ($K)'}}}}});
+
+new Chart(document.getElementById('churnChart'),{type:'bar',data:{labels:['Enterprise','Mid-Market','SMB','Startup'],datasets:[
+    {label:'Current Churn %',data:[8.2,5.4,12.1,18.5],backgroundColor:'#0ea5e9'},
+    {label:'Predicted (90d)',data:[11.5,6.1,10.8,16.2],backgroundColor:'#ef4444'}
+]},options:{responsive:true,maintainAspectRatio:false}});
+
+const CUSTOMERS=[
+    {name:'Meridian Corp',segment:'Enterprise',arr:'$240K',prob:87,risk:'No product usage in 45d, support escalation, contract renewal in 60d',action:'Executive sponsor call + custom retention offer'},
+    {name:'BlueWave Tech',segment:'Enterprise',arr:'$180K',prob:82,risk:'Champion left company, 3 unresolved tickets, declining login frequency',action:'New champion identification + QBR scheduling'},
+    {name:'Vertex Solutions',segment:'Mid-Market',arr:'$95K',prob:76,risk:'Competitor evaluation detected (competitor login on shared device)',action:'Competitive displacement offer + feature demo'},
+    {name:'Atlas Manufacturing',segment:'Enterprise',arr:'$210K',prob:74,risk:'Budget review flagged, CFO requested pricing comparison',action:'Value realization report + pricing discussion'},
+    {name:'NovaStar Inc',segment:'Mid-Market',arr:'$88K',prob:71,risk:'3 missed QBR meetings, declining feature adoption',action:'Re-onboarding program + success plan'},
+    {name:'PeakPoint Analytics',segment:'SMB',arr:'$42K',prob:68,risk:'Downgraded plan last month, support satisfaction dropped',action:'Usage optimization workshop'},
+    {name:'Ironclad Systems',segment:'Enterprise',arr:'$195K',prob:65,risk:'Multi-year contract ending, no renewal discussion initiated',action:'Early renewal with incentive'},
+    {name:'Greenfield Data',segment:'SMB',arr:'$38K',prob:62,risk:'Invoice disputed, payment 45 days overdue',action:'Finance resolution + account health check'},
+];
+
+document.getElementById('tableBody').innerHTML=CUSTOMERS.map(c=>{
+    const pc=c.prob>=80?'text-red-600 font-bold':c.prob>=70?'text-amber-600 font-semibold':'text-amber-500';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${c.prob>=80?'bg-red-50':''}">
+        <td class="px-4 py-3 font-medium">${c.name}</td><td class="px-4 py-3">${c.segment}</td>
+        <td class="px-4 py-3 font-semibold">${c.arr}</td><td class="px-4 py-3 ${pc}">${c.prob}%</td>
+        <td class="px-4 py-3 text-xs">${c.risk}</td><td class="px-4 py-3 text-xs text-sky-700">${c.action}</td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

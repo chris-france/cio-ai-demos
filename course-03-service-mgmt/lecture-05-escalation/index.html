@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escalation Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .workflow-step { opacity: 0; transition: all 0.5s ease; }
+        .workflow-step.visible { opacity: 1; }
+        .flow-arrow { width: 40px; display: flex; align-items: center; justify-content: center; color: #cbd5e1; font-size: 20px; }
+        .context-item { border-left: 3px solid #3b82f6; padding-left: 12px; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Escalation Intelligence</h1>
+                <p class="text-slate-300 text-sm mt-1">Smart Routing with Full Context &mdash; No More Repeating Yourself</p>
+            </div>
+            <div class="text-right flex items-center gap-3">
+                <button onclick="runEscalation(currentEscalation)" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors" id="runBtn">
+                    Simulate Escalation
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+
+        <!-- Escalation Selector -->
+        <section class="flex gap-3">
+            <button onclick="selectEscalation(0)" class="esc-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-100 text-blue-700" id="tab-0">Recurring Network Issue</button>
+            <button onclick="selectEscalation(1)" class="esc-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-100 text-gray-600" id="tab-1">VIP Executive Laptop</button>
+            <button onclick="selectEscalation(2)" class="esc-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-100 text-gray-600" id="tab-2">Data Loss Incident</button>
+        </section>
+
+        <!-- Workflow Visualization -->
+        <section id="workflowArea" class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <!-- Populated by JS -->
+        </section>
+
+        <!-- Context Package -->
+        <section id="contextArea" class="hidden">
+            <!-- Populated by JS -->
+        </section>
+
+        <!-- Escalation Metrics -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Escalation Priority Score Breakdown</h3>
+                <div style="height:280px"><canvas id="priorityChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Traditional vs AI-Powered Escalation</h3>
+                <div style="height:280px"><canvas id="compChart"></canvas></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Escalation Intelligence &mdash; Course 3: AI-Powered IT Service Management &mdash; Lecture 5 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+const ESCALATIONS = [
+    {
+        title: 'Recurring Network Connectivity Drops',
+        ticket: { id: 'TK-5102', text: 'VPN drops every 10-15 minutes during video calls. This has been happening for 3 weeks. Tried reinstalling the VPN client twice.', user: 'Sarah Chen', dept: 'Marketing', priority: 'High', submitted: '2026-03-28 09:14 AM' },
+        aiAnalysis: { category: 'Network / VPN', confidence: 0.91, severity: 'High', autoResolvable: false, reason: 'Recurring pattern across 3 weeks + prior failed remediation attempts indicates infrastructure issue beyond standard L1 resolution' },
+        context: {
+            history: ['TK-4923 (Mar 12): Same user, VPN timeout — resolved with client reinstall', 'TK-4811 (Mar 7): Same user, VPN slow — resolved with DNS flush', 'TK-4650 (Feb 28): Same user, WiFi drops — no resolution recorded'],
+            similar: ['TK-5098: 2 other users on Floor 3 reported VPN drops this week', 'TK-5089: Network team replaced a switch on Floor 3 last Friday', 'INC-0042: Floor 3 WiFi AP firmware update pending since Feb 15'],
+            attempted: ['VPN client reinstall (2x)', 'DNS cache flush', 'Network adapter driver update', 'Split-tunnel configuration change'],
+            impact: 'User is on the launch team for Q2 campaign. Video call drops affecting client presentations.'
+        },
+        routing: { team: 'Network Engineering', specialist: 'David Park (Senior Network Engineer)', reason: 'Floor 3 infrastructure correlation + recurring pattern requires hands-on AP/switch diagnostics', sla: '4 hours', priorityScore: 87 },
+        userMessage: 'Hi Sarah — I\'m assigning your ticket to David Park on our Network Engineering team. He has your full history (3 prior tickets, all the steps we\'ve already tried) and knows about the Floor 3 switch replacement last week. You won\'t need to re-explain anything. David will reach out within 30 minutes.',
+        priorityFactors: { businessImpact: 25, recurringPattern: 22, slaRisk: 18, relatedIncidents: 12, vipStatus: 10 }
+    },
+    {
+        title: 'VIP Executive — Laptop Blue Screen',
+        ticket: { id: 'TK-5108', text: 'CEO laptop blue-screened during board presentation. Getting DRIVER_IRQL_NOT_LESS_OR_EQUAL error on reboot. Need this fixed immediately.', user: 'James Whitfield (CEO)', dept: 'Executive', priority: 'Critical', submitted: '2026-03-28 10:02 AM' },
+        aiAnalysis: { category: 'Hardware', confidence: 0.88, severity: 'Critical', autoResolvable: false, reason: 'VIP user + production-down during board meeting + BSOD indicates driver/hardware failure requiring physical diagnosis' },
+        context: {
+            history: ['TK-4700 (Mar 1): Executive assistant reported laptop running slow — SSD health at 92%', 'TK-4512 (Feb 14): Docking station firmware updated', 'No prior BSOD tickets'],
+            similar: ['3 other Dell Latitude 7440 units reported BSOD after last month\'s Intel driver update (KB5034441)', 'Known issue tracked by Dell: DSA-2026-0087'],
+            attempted: ['None — first occurrence of BSOD'],
+            impact: 'CEO mid-board presentation. Board members waiting. Enterprise-wide visibility.'
+        },
+        routing: { team: 'Desktop Support — VIP', specialist: 'Rachel Torres (VIP Desktop Lead)', reason: 'CEO-level incident + active board meeting + known Dell driver issue = immediate physical response', sla: '30 minutes', priorityScore: 98 },
+        userMessage: 'Mr. Whitfield — Rachel Torres from our VIP support team is on her way to the boardroom now with a loaner laptop pre-configured with your profile. She\'s aware of the Dell driver issue that likely caused this and will have your primary laptop repaired within 2 hours.',
+        priorityFactors: { businessImpact: 30, recurringPattern: 5, slaRisk: 25, relatedIncidents: 15, vipStatus: 23 }
+    },
+    {
+        title: 'Accidental Deletion of Shared Financial Data',
+        ticket: { id: 'TK-5115', text: 'I accidentally deleted the entire Q1 Financial Reports folder from the Finance SharePoint site. It had about 200 files including the board deck. Can this be recovered?', user: 'Michael Torres', dept: 'Finance', priority: 'High', submitted: '2026-03-28 11:30 AM' },
+        aiAnalysis: { category: 'Email / M365', confidence: 0.94, severity: 'High', autoResolvable: false, reason: 'Mass file deletion of financial documents requires admin-level SharePoint recovery + audit trail for SOX compliance' },
+        context: {
+            history: ['TK-4901 (Mar 10): Same user requested SharePoint permissions change for Finance site', 'No prior data loss incidents for this user'],
+            similar: ['TK-4777 (Feb 22): Another Finance user deleted a subfolder — recovered from recycle bin in 10 min', 'SharePoint retention policy: 93-day recycle bin + 93-day second-stage'],
+            attempted: ['User checked SharePoint recycle bin — folder not visible (may have been permanently deleted or recycle bin is full)'],
+            impact: 'Q1 board deck due to CFO by end of day. SOX-regulated financial documents. 200+ files affected.'
+        },
+        routing: { team: 'M365 Administration', specialist: 'Lisa Nguyen (SharePoint Admin)', reason: 'Admin-level recovery from second-stage recycle bin + SOX audit logging required + time-sensitive board deadline', sla: '2 hours', priorityScore: 82 },
+        userMessage: 'Michael — I\'ve assigned this to Lisa Nguyen, our SharePoint admin. She can recover files from the second-stage recycle bin even if you can\'t see them. She\'s also logging this for SOX compliance. Your files should be back within the hour. Please don\'t attempt any further deletions or recreations in that folder until Lisa confirms recovery.',
+        priorityFactors: { businessImpact: 28, recurringPattern: 5, slaRisk: 22, relatedIncidents: 8, vipStatus: 19 }
+    }
+];
+
+let currentEscalation = 0;
+
+function selectEscalation(i) {
+    currentEscalation = i;
+    document.querySelectorAll('.esc-tab').forEach((tab, j) => {
+        tab.className = j === i ? 'esc-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-100 text-blue-700' : 'esc-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-100 text-gray-600';
+    });
+    document.getElementById('contextArea').classList.add('hidden');
+    renderWorkflow(i, false);
+}
+
+function renderWorkflow(i, animated) {
+    const e = ESCALATIONS[i];
+    document.getElementById('workflowArea').innerHTML = `
+        <h3 class="text-sm font-semibold text-gray-700 mb-6">Escalation Workflow: ${e.title}</h3>
+        <div class="flex flex-wrap items-start gap-4">
+            <!-- Step 1: Ticket -->
+            <div class="workflow-step ${animated ? '' : 'visible'} flex-1 min-w-[200px] border border-gray-200 rounded-xl p-4" id="step-0">
+                <div class="text-xs font-semibold text-blue-600 uppercase mb-2">1. Ticket Received</div>
+                <div class="text-xs font-mono text-gray-400 mb-1">${e.ticket.id}</div>
+                <div class="text-sm font-medium">${e.ticket.text}</div>
+                <div class="mt-2 text-xs text-gray-500">${e.ticket.user} &middot; ${e.ticket.dept} &middot; ${e.ticket.submitted}</div>
+            </div>
+            <div class="flow-arrow">&rarr;</div>
+            <!-- Step 2: AI Analysis -->
+            <div class="workflow-step ${animated ? '' : 'visible'} flex-1 min-w-[200px] border border-blue-200 rounded-xl p-4 bg-blue-50" id="step-1">
+                <div class="text-xs font-semibold text-blue-600 uppercase mb-2">2. AI Analysis</div>
+                <div class="text-sm"><span class="font-medium">Category:</span> ${e.aiAnalysis.category}</div>
+                <div class="text-sm"><span class="font-medium">Confidence:</span> ${(e.aiAnalysis.confidence * 100).toFixed(0)}%</div>
+                <div class="text-sm"><span class="font-medium">Severity:</span> <span class="font-semibold ${e.aiAnalysis.severity === 'Critical' ? 'text-red-600' : 'text-amber-600'}">${e.aiAnalysis.severity}</span></div>
+                <div class="text-xs text-gray-500 mt-2">${e.aiAnalysis.reason}</div>
+            </div>
+            <div class="flow-arrow">&rarr;</div>
+            <!-- Step 3: Context Package -->
+            <div class="workflow-step ${animated ? '' : 'visible'} flex-1 min-w-[200px] border border-purple-200 rounded-xl p-4 bg-purple-50" id="step-2">
+                <div class="text-xs font-semibold text-purple-600 uppercase mb-2">3. Context Packaged</div>
+                <div class="text-sm">${e.context.history.length} prior tickets found</div>
+                <div class="text-sm">${e.context.similar.length} related incidents</div>
+                <div class="text-sm">${e.context.attempted.length} steps already tried</div>
+                <div class="text-sm">Business impact assessed</div>
+            </div>
+            <div class="flow-arrow">&rarr;</div>
+            <!-- Step 4: Smart Routing -->
+            <div class="workflow-step ${animated ? '' : 'visible'} flex-1 min-w-[200px] border border-green-200 rounded-xl p-4 bg-green-50" id="step-3">
+                <div class="text-xs font-semibold text-green-600 uppercase mb-2">4. Routed to Specialist</div>
+                <div class="text-sm font-medium">${e.routing.specialist}</div>
+                <div class="text-sm">${e.routing.team}</div>
+                <div class="text-sm">SLA: <span class="font-semibold">${e.routing.sla}</span></div>
+                <div class="text-xs text-gray-500 mt-2">Score: ${e.routing.priorityScore}/100</div>
+            </div>
+        </div>
+        <!-- User Message -->
+        <div class="workflow-step ${animated ? '' : 'visible'} mt-6 bg-slate-50 border border-gray-200 rounded-xl p-4" id="step-4">
+            <div class="text-xs font-semibold text-slate-600 uppercase mb-2">Warm Handoff Message to User</div>
+            <div class="text-sm text-gray-700 italic">"${e.userMessage}"</div>
+        </div>`;
+}
+
+async function runEscalation(i) {
+    const btn = document.getElementById('runBtn');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    btn.classList.add('opacity-60');
+
+    renderWorkflow(i, true);
+    document.getElementById('contextArea').classList.add('hidden');
+
+    const steps = document.querySelectorAll('.workflow-step');
+    for (let s = 0; s < steps.length; s++) {
+        await new Promise(r => setTimeout(r, 700));
+        steps[s].classList.add('visible', 'fade-in');
+    }
+
+    await new Promise(r => setTimeout(r, 400));
+    showContextPackage(i);
+    renderCharts(i);
+
+    btn.disabled = false;
+    btn.textContent = 'Simulate Escalation';
+    btn.classList.remove('opacity-60');
+}
+
+function showContextPackage(i) {
+    const e = ESCALATIONS[i];
+    const area = document.getElementById('contextArea');
+    area.classList.remove('hidden');
+    area.innerHTML = `<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 fade-in">
+        <h3 class="text-sm font-semibold text-gray-700 mb-4">Full Context Package Sent to ${e.routing.specialist}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="text-xs font-semibold text-gray-500 uppercase mb-3">Customer History</h4>
+                <div class="space-y-2">${e.context.history.map(h => `<div class="context-item text-xs text-gray-600">${h}</div>`).join('')}</div>
+            </div>
+            <div>
+                <h4 class="text-xs font-semibold text-gray-500 uppercase mb-3">Related Incidents</h4>
+                <div class="space-y-2">${e.context.similar.map(s => `<div class="context-item text-xs text-gray-600">${s}</div>`).join('')}</div>
+            </div>
+            <div>
+                <h4 class="text-xs font-semibold text-gray-500 uppercase mb-3">Already Attempted</h4>
+                <div class="space-y-2">${e.context.attempted.map(a => `<div class="context-item text-xs text-gray-600">${a}</div>`).join('')}</div>
+            </div>
+            <div>
+                <h4 class="text-xs font-semibold text-gray-500 uppercase mb-3">Business Impact</h4>
+                <div class="context-item text-xs text-gray-600">${e.context.impact}</div>
+                <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div class="text-xs font-semibold text-amber-700">Routing Rationale</div>
+                    <div class="text-xs text-amber-600 mt-1">${e.routing.reason}</div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderCharts(i) {
+    const e = ESCALATIONS[i];
+    const pf = e.priorityFactors;
+
+    // Priority score breakdown
+    const ctx1 = document.getElementById('priorityChart');
+    if (ctx1._chart) ctx1._chart.destroy();
+    ctx1._chart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['Business Impact', 'Recurring Pattern', 'SLA Risk', 'Related Incidents', 'VIP Status'],
+            datasets: [{ data: [pf.businessImpact, pf.recurringPattern, pf.slaRisk, pf.relatedIncidents, pf.vipStatus], backgroundColor: ['#3b82f6', '#8b5cf6', '#ef4444', '#f59e0b', '#06b6d4'], borderRadius: 4 }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { max: 35, ticks: { font: { family: 'Inter' } } }, y: { ticks: { font: { family: 'Inter', size: 11 } } } }
+        }
+    });
+
+    // Comparison chart
+    const ctx2 = document.getElementById('compChart');
+    if (ctx2._chart) ctx2._chart.destroy();
+    ctx2._chart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Time to Route', 'Context Gathered', 'User Repeats Info', 'First-Contact Resolution'],
+            datasets: [
+                { label: 'Traditional', data: [45, 20, 100, 35], backgroundColor: '#ef4444', borderRadius: 4 },
+                { label: 'AI-Powered', data: [2, 95, 0, 78], backgroundColor: '#22c55e', borderRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
+            scales: {
+                y: { beginAtZero: true, ticks: { callback: v => v + '%', font: { family: 'Inter' } }, title: { display: true, text: 'Minutes / Percentage', font: { family: 'Inter', size: 11 } } },
+                x: { ticks: { font: { family: 'Inter', size: 10 } } }
+            }
+        }
+    });
+}
+
+selectEscalation(0);
+renderCharts(0);
+</script>
+</body>
+</html>

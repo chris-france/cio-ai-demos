@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Metric Anomaly Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">Business Metric Anomaly Finder</h1>
+            <p class="text-sky-300 text-sm mt-1">Anomaly Detection &mdash; Catch Problems Before They Become Crises</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4" id="kpiCards"></section>
+
+        <section class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Revenue with Anomaly Detection &mdash; 90 Days</h3>
+            <div style="height:350px"><canvas id="anomalyChart"></canvas></div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Detected Anomalies</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase">
+                    <th class="px-4 py-3">Date</th><th class="px-4 py-3">Metric</th><th class="px-4 py-3">Expected</th>
+                    <th class="px-4 py-3">Actual</th><th class="px-4 py-3">Deviation</th><th class="px-4 py-3">Severity</th>
+                    <th class="px-4 py-3">Probable Cause</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Business Metric Anomaly Finder &mdash; Course 7 &mdash; Lecture 4 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const days=Array.from({length:90},(_,i)=>{const d=new Date(2026,0,1+i);return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});});
+const baseline=days.map((_,i)=>85000+Math.sin(i*0.1)*15000+i*200);
+const actual=baseline.map((v,i)=>{
+    if(i===15)return v*0.55;if(i===42)return v*1.45;if(i===67)return v*0.62;if(i===78)return v*1.38;
+    return v+(Math.random()-0.5)*8000;
+});
+const upper=baseline.map(v=>v*1.2);const lower=baseline.map(v=>v*0.8);
+
+const ANOMALIES=[
+    {date:'Jan 16',metric:'Daily Revenue',expected:'$87K',actual:'$48K',deviation:'-44.8%',severity:'Critical',cause:'Payment gateway outage — Stripe incident 3:00-7:00 AM EST'},
+    {date:'Feb 12',metric:'Daily Revenue',expected:'$95K',actual:'$138K',deviation:'+45.3%',severity:'High',cause:'Flash sale campaign launched without finance notification'},
+    {date:'Mar 9',metric:'Daily Revenue',expected:'$102K',actual:'$63K',deviation:'-38.2%',severity:'Critical',cause:'Website CDN failure — 4hr outage during peak hours'},
+    {date:'Mar 20',metric:'Daily Revenue',expected:'$106K',actual:'$146K',deviation:'+37.7%',severity:'Medium',cause:'Quarter-end deal acceleration — 12 deals closed same day'},
+    {date:'Feb 5',metric:'Support Tickets',expected:'42',actual:'127',deviation:'+202%',severity:'High',cause:'Password reset emails delayed — users flooding help desk'},
+    {date:'Mar 15',metric:'Customer Churn',expected:'12',actual:'34',deviation:'+183%',severity:'Critical',cause:'Competitor launched aggressive pricing — Enterprise segment hit'},
+];
+
+document.getElementById('kpiCards').innerHTML=[
+    {label:'Anomalies (90d)',value:'6',color:'#ef4444',trend:'4 critical, 2 medium'},
+    {label:'Mean Detection Time',value:'12 min',color:'#10b981',trend:'Was: discovered in weekly review'},
+    {label:'False Positive Rate',value:'8%',color:'#0ea5e9',trend:'92% true anomalies'},
+    {label:'Revenue Impact',value:'$284K',color:'#f59e0b',trend:'Prevented by early detection'}
+].map(k=>`<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+new Chart(document.getElementById('anomalyChart'),{type:'line',data:{labels:days,datasets:[
+    {label:'Actual Revenue',data:actual,borderColor:'#0ea5e9',pointRadius:actual.map((v,i)=>[15,42,67,78].includes(i)?6:0),pointBackgroundColor:actual.map((v,i)=>[15,67].includes(i)?'#ef4444':[42,78].includes(i)?'#f59e0b':'#0ea5e9'),tension:0.3},
+    {label:'Upper Bound',data:upper,borderColor:'rgba(239,68,68,0.3)',borderDash:[5,5],pointRadius:0,fill:false},
+    {label:'Lower Bound',data:lower,borderColor:'rgba(239,68,68,0.3)',borderDash:[5,5],pointRadius:0,fill:'-1',backgroundColor:'rgba(239,68,68,0.05)'},
+    {label:'Baseline',data:baseline,borderColor:'rgba(107,114,128,0.4)',borderDash:[3,3],pointRadius:0,fill:false}
+]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{maxRotation:45,font:{size:9},maxTicksLimit:20}},y:{beginAtZero:false}},plugins:{legend:{position:'top',labels:{font:{size:10}}}}}});
+
+document.getElementById('tableBody').innerHTML=ANOMALIES.map(a=>{
+    const sc=a.severity==='Critical'?'bg-red-100 text-red-700':a.severity==='High'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700';
+    const dc=a.deviation.startsWith('-')?'text-red-600':'text-green-600';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${a.severity==='Critical'?'bg-red-50':''}">
+        <td class="px-4 py-3">${a.date}</td><td class="px-4 py-3 font-medium">${a.metric}</td>
+        <td class="px-4 py-3">${a.expected}</td><td class="px-4 py-3 font-semibold">${a.actual}</td>
+        <td class="px-4 py-3 ${dc} font-semibold">${a.deviation}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${sc}">${a.severity}</span></td>
+        <td class="px-4 py-3 text-xs">${a.cause}</td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

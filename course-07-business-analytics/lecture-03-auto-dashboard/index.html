@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Generated KPI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Auto-Generated KPI Dashboard</h1>
+                <p class="text-sky-300 text-sm mt-1">Self-Building Dashboards &mdash; AI Detects Your KPIs</p>
+            </div>
+            <button onclick="regenerate()" class="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-semibold hover:bg-sky-700">Regenerate Dashboard</button>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
+            <div class="text-xs font-semibold text-sky-700 mb-1">AI Analysis</div>
+            <p class="text-sm text-sky-800">Scanned 4 data sources (CRM, ERP, HRIS, Support). Detected 12 KPIs across 5 business domains. Auto-generated optimal visualizations based on data type and cardinality.</p>
+        </div>
+
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-700">Revenue by Product Line</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">Auto-detected: CRM data</span>
+                </div>
+                <div style="height:280px"><canvas id="revenueChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-700">Employee Satisfaction Trend</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">Auto-detected: HRIS data</span>
+                </div>
+                <div style="height:280px"><canvas id="satisfactionChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-700">Support Ticket Resolution</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">Auto-detected: Support data</span>
+                </div>
+                <div style="height:280px"><canvas id="supportChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-700">Cash Flow Forecast</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">Auto-detected: ERP data</span>
+                </div>
+                <div style="height:280px"><canvas id="cashChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Detected KPIs &amp; Data Sources</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase">
+                    <th class="px-4 py-3">KPI</th><th class="px-4 py-3">Source</th><th class="px-4 py-3">Value</th>
+                    <th class="px-4 py-3">Trend</th><th class="px-4 py-3">Chart Type</th><th class="px-4 py-3">Confidence</th>
+                </tr></thead>
+                <tbody id="kpiTable"></tbody>
+            </table>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Auto-Generated KPI Dashboard &mdash; Course 7 &mdash; Lecture 3 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const KPIS = [
+    { kpi: 'Monthly Revenue', source: 'CRM', value: '$2.4M', trend: '+8.2%', chart: 'Bar', confidence: 98 },
+    { kpi: 'Customer Count', source: 'CRM', value: '4,280', trend: '+3.1%', chart: 'Counter', confidence: 99 },
+    { kpi: 'Employee Satisfaction', source: 'HRIS', value: '7.8/10', trend: '+0.3', chart: 'Line', confidence: 92 },
+    { kpi: 'Headcount', source: 'HRIS', value: '312', trend: '+4', chart: 'Counter', confidence: 99 },
+    { kpi: 'Open Tickets', source: 'Support', value: '147', trend: '-12%', chart: 'Gauge', confidence: 97 },
+    { kpi: 'Avg Resolution Time', source: 'Support', value: '4.2 hrs', trend: '-18 min', chart: 'Line', confidence: 95 },
+    { kpi: 'Cash on Hand', source: 'ERP', value: '$8.1M', trend: '+$400K', chart: 'Area', confidence: 99 },
+    { kpi: 'Accounts Receivable', source: 'ERP', value: '$3.2M', trend: '-$200K', chart: 'Bar', confidence: 96 },
+    { kpi: 'Customer Churn', source: 'CRM', value: '4.8%', trend: '-0.6%', chart: 'Line', confidence: 88 },
+    { kpi: 'NPS Score', source: 'Support', value: '42', trend: '+5', chart: 'Gauge', confidence: 90 },
+    { kpi: 'Profit Margin', source: 'ERP', value: '18.4%', trend: '+1.2%', chart: 'Line', confidence: 94 },
+    { kpi: 'Turnover Rate', source: 'HRIS', value: '12%', trend: '-2%', chart: 'Bar', confidence: 91 },
+];
+
+document.getElementById('kpiCards').innerHTML = KPIS.slice(0,4).map(k => {
+    const trendColor = k.trend.startsWith('+')?'text-green-600':'text-red-600';
+    return `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #0ea5e9">
+        <span class="text-xs font-semibold text-gray-500 uppercase">${k.kpi}</span>
+        <div class="text-3xl font-extrabold mt-1 text-sky-700">${k.value}</div>
+        <div class="text-xs mt-2 ${trendColor} font-medium">${k.trend} vs last period</div>
+        <div class="text-[10px] text-gray-400 mt-1">Source: ${k.source}</div></div>`;
+}).join('');
+
+new Chart(document.getElementById('revenueChart'),{type:'bar',data:{labels:['Enterprise','Cloud','Analytics','Security','DevOps','Consulting'],datasets:[{label:'Revenue ($K)',data:[820,640,410,290,180,60],backgroundColor:['#0ea5e9','#38bdf8','#7dd3fc','#bae6fd','#e0f2fe','#f0f9ff']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('satisfactionChart'),{type:'line',data:{labels:['Q1','Q2','Q3','Q4','Q1','Q2','Q3','Q4'],datasets:[{label:'Satisfaction',data:[7.1,7.0,7.3,7.2,7.4,7.5,7.6,7.8],borderColor:'#0ea5e9',tension:0.3,fill:true,backgroundColor:'rgba(14,165,233,0.1)'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:6,max:9}}}});
+new Chart(document.getElementById('supportChart'),{type:'doughnut',data:{labels:['Resolved <1hr','Resolved 1-4hr','Resolved 4-24hr','Open >24hr'],datasets:[{data:[45,30,18,7],backgroundColor:['#10b981','#0ea5e9','#f59e0b','#ef4444']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});
+new Chart(document.getElementById('cashChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Actual',data:[7200,7500,7800,8100,null,null],borderColor:'#0ea5e9',tension:0.3},{label:'Forecast',data:[null,null,null,8100,8400,8700],borderColor:'#0ea5e9',borderDash:[5,5],tension:0.3}]},options:{responsive:true,maintainAspectRatio:false}});
+
+document.getElementById('kpiTable').innerHTML = KPIS.map(k=>{
+    const cc=k.confidence>=95?'bg-green-100 text-green-700':k.confidence>=90?'bg-sky-100 text-sky-700':'bg-amber-100 text-amber-700';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50">
+        <td class="px-4 py-3 font-medium">${k.kpi}</td><td class="px-4 py-3">${k.source}</td>
+        <td class="px-4 py-3 font-semibold">${k.value}</td>
+        <td class="px-4 py-3 ${k.trend.startsWith('+')?'text-green-600':'text-amber-600'}">${k.trend}</td>
+        <td class="px-4 py-3">${k.chart}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${cc}">${k.confidence}%</span></td></tr>`;
+}).join('');
+
+function regenerate(){location.reload();}
+</script>
+</body>
+</html>

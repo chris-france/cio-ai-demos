@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bandwidth Optimization Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div><h1 class="text-2xl font-extrabold tracking-tight">Bandwidth Optimization Dashboard</h1>
+            <p class="text-blue-300 text-sm mt-1">Utilization Analyzer &amp; Rightsizing Recommendations</p></div>
+            <div class="text-right text-sm"><div class="text-blue-300">Analysis Period</div><div class="font-semibold text-lg">Feb-Mar 2026</div></div>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Provisioned vs Peak Usage</h3>
+                <div style="height:300px"><canvas id="scatterChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Bandwidth Usage by Time of Day</h3>
+                <div style="height:300px"><canvas id="todChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">Rightsizing Recommendations</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Circuit</th><th class="px-4 py-3">Location</th><th class="px-4 py-3">Current BW</th>
+                        <th class="px-4 py-3">Peak Usage</th><th class="px-4 py-3">Recommended</th><th class="px-4 py-3">Current Cost</th>
+                        <th class="px-4 py-3">Projected Cost</th><th class="px-4 py-3">Monthly Savings</th><th class="px-4 py-3">Action</th>
+                    </tr></thead>
+                    <tbody id="rightsizeBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-green-50 border border-green-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-green-800 mb-2">Total Optimization Opportunity</h3>
+            <p class="text-3xl font-extrabold text-green-700" id="totalSavings"></p>
+            <p class="text-sm text-green-700 mt-1">Estimated monthly savings from rightsizing over-provisioned circuits</p>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Bandwidth Optimization &mdash; Course 18 &mdash; Lecture 4 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const CIRCUITS = [
+    { id: 'CKT-001', location: 'HQ - New York', currentBW: 500, peakMbps: 380, cost: 4200, recBW: 500, recCost: 4200, action: 'Keep' },
+    { id: 'CKT-002', location: 'HQ - New York', currentBW: 1000, peakMbps: 310, cost: 3800, recBW: 500, recCost: 2200, action: 'Downgrade' },
+    { id: 'CKT-003', location: 'Chicago Office', currentBW: 200, peakMbps: 165, cost: 2400, recBW: 200, recCost: 2400, action: 'Keep' },
+    { id: 'CKT-005', location: 'Dallas DC', currentBW: 10000, peakMbps: 5800, cost: 8500, recBW: 10000, recCost: 8500, action: 'Keep' },
+    { id: 'CKT-006', location: 'Dallas DC', currentBW: 1000, peakMbps: 280, cost: 5200, recBW: 500, recCost: 3100, action: 'Downgrade' },
+    { id: 'CKT-007', location: 'San Francisco', currentBW: 500, peakMbps: 220, cost: 4400, recBW: 300, recCost: 2800, action: 'Downgrade' },
+    { id: 'CKT-010', location: 'Boston Office', currentBW: 200, peakMbps: 42, cost: 2600, recBW: 100, recCost: 1400, action: 'Downgrade' },
+    { id: 'CKT-013', location: 'Denver Office', currentBW: 1000, peakMbps: 340, cost: 3200, recBW: 500, recCost: 1800, action: 'Downgrade' },
+    { id: 'CKT-015', location: 'Seattle Office', currentBW: 500, peakMbps: 125, cost: 4100, recBW: 200, recCost: 2000, action: 'Downgrade' },
+    { id: 'CKT-017', location: 'Miami Branch', currentBW: 100, peakMbps: 15, cost: 1800, recBW: 50, recCost: 900, action: 'Downgrade' },
+    { id: 'CKT-019', location: 'Phoenix Office', currentBW: 500, peakMbps: 210, cost: 3100, recBW: 300, recCost: 2000, action: 'Downgrade' },
+    { id: 'CKT-022', location: 'DR Site - Virginia', currentBW: 10000, peakMbps: 1200, cost: 7800, recBW: 2000, recCost: 3500, action: 'Downgrade' },
+];
+
+const overProv = CIRCUITS.filter(c => c.action === 'Downgrade');
+const underProv = CIRCUITS.filter(c => c.peakMbps / c.currentBW > 0.85);
+const totalSavings = CIRCUITS.reduce((s,c) => s + (c.cost - c.recCost), 0);
+
+const KPI = [
+    { label: 'Total Provisioned', value: CIRCUITS.reduce((s,c)=>s+c.currentBW,0).toLocaleString()+' Mbps', color: '#3b82f6' },
+    { label: 'Avg Utilization', value: Math.round(CIRCUITS.reduce((s,c)=>s+c.peakMbps/c.currentBW*100,0)/CIRCUITS.length)+'%', color: '#8b5cf6' },
+    { label: 'Over-Provisioned', value: overProv.length, color: '#f59e0b' },
+    { label: 'Under-Provisioned', value: underProv.length, color: '#ef4444' },
+    { label: 'Projected Savings/Mo', value: '$'+totalSavings.toLocaleString(), color: '#10b981' },
+];
+
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+new Chart(document.getElementById('scatterChart'), {
+    type: 'scatter',
+    data: { datasets: [{
+        label: 'Circuits',
+        data: CIRCUITS.map(c => ({ x: c.currentBW, y: c.peakMbps })),
+        backgroundColor: CIRCUITS.map(c => c.action === 'Downgrade' ? '#f59e0b' : '#3b82f6'),
+        pointRadius: 8,
+    }, {
+        label: 'Right-Size Line',
+        data: [{ x: 0, y: 0 }, { x: 10000, y: 10000 }],
+        type: 'line', borderColor: '#ef4444', borderDash: [5,5], pointRadius: 0, fill: false,
+    }]},
+    options: { responsive: true, maintainAspectRatio: false, scales: {
+        x: { title: { display: true, text: 'Provisioned (Mbps)' } },
+        y: { title: { display: true, text: 'Peak Usage (Mbps)' } } } }
+});
+
+const hours = Array.from({length:24}, (_,i) => i+':00');
+const avgUsage = [15,12,10,8,7,9,18,42,68,74,72,65,58,62,71,73,69,55,42,35,28,24,20,17];
+new Chart(document.getElementById('todChart'), {
+    type: 'line',
+    data: { labels: hours, datasets: [{ label: 'Avg Utilization %', data: avgUsage, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4 }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: '% of Provisioned' } } } }
+});
+
+document.getElementById('rightsizeBody').innerHTML = CIRCUITS.map(c => {
+    const savings = c.cost - c.recCost;
+    const actionBadge = c.action === 'Downgrade' ? '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 font-semibold">Downgrade</span>' : '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">Keep</span>';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${savings > 0 ? 'bg-amber-50' : ''}">
+        <td class="px-4 py-3 font-mono text-xs">${c.id}</td><td class="px-4 py-3">${c.location}</td>
+        <td class="px-4 py-3">${c.currentBW} Mbps</td><td class="px-4 py-3">${c.peakMbps} Mbps</td>
+        <td class="px-4 py-3 font-semibold">${c.recBW} Mbps</td><td class="px-4 py-3">$${c.cost.toLocaleString()}</td>
+        <td class="px-4 py-3">$${c.recCost.toLocaleString()}</td>
+        <td class="px-4 py-3 ${savings>0?'text-green-600 font-semibold':''}">$${savings.toLocaleString()}</td>
+        <td class="px-4 py-3">${actionBadge}</td></tr>`;
+}).join('');
+
+document.getElementById('totalSavings').textContent = '$' + totalSavings.toLocaleString() + '/month ($' + (totalSavings*12).toLocaleString() + '/year)';
+</script>
+</body>
+</html>

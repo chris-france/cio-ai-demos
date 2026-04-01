@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Trust Policy Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+    .pillar { border-left: 4px solid; }
+    .pillar-network { border-color: #6366f1; }
+    .pillar-identity { border-color: #f59e0b; }
+    .pillar-data { border-color: #10b981; }
+    .pillar-device { border-color: #ec4899; }
+    .phase { position: relative; padding-left: 24px; }
+    .phase::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
+    .phase-dot { width: 18px; height: 18px; border-radius: 50%; position: absolute; left: 0; top: 2px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
+    .policy-item { transition: all 0.2s; }
+    .policy-item:hover { background: #f8fafc; }
+    details summary { cursor: pointer; list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary .chevron { transform: rotate(90deg); }
+    .chevron { transition: transform 0.2s; display: inline-block; }
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-indigo-600 text-sm font-medium tracking-wide uppercase">Course 5, Lecture 8 — Zero Trust Architecture</p>
+                <h1 class="text-3xl font-bold text-gray-900 mt-1">Zero Trust Policy Generator</h1>
+                <p class="text-gray-500 mt-1">AI-generated policies and implementation roadmap based on your organization profile</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Input Form -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Organization Profile</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Organization Size</label>
+                <select id="orgSize" onchange="generatePolicies()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="small">Small (25-100 employees)</option>
+                    <option value="medium" selected>Mid-Market (100-500 employees)</option>
+                    <option value="large">Enterprise (500+ employees)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+                <select id="industry" onchange="generatePolicies()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="engineering" selected>Engineering / AEC</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="financial">Financial Services</option>
+                    <option value="manufacturing">Manufacturing</option>
+                    <option value="technology">Technology</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Current Architecture</label>
+                <select id="currentArch" onchange="generatePolicies()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="perimeter" selected>Traditional Perimeter (Firewall + VPN)</option>
+                    <option value="hybrid">Hybrid (Some Cloud, Some On-Prem)</option>
+                    <option value="cloud-first">Cloud-First (Mostly SaaS)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generated Policies -->
+<div class="max-w-7xl mx-auto px-6 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="policiesContainer">
+    </div>
+</div>
+
+<!-- Implementation Roadmap -->
+<div class="max-w-7xl mx-auto px-6 mt-6 mb-12">
+    <div class="card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-2">Implementation Roadmap — 4 Phases</h2>
+        <p class="text-xs text-gray-400 mb-6">Estimated total duration: 6-9 months for mid-market organization</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6" id="roadmapContainer">
+        </div>
+
+        <!-- Gantt-style timeline -->
+        <div class="mt-8">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">Timeline View</h3>
+            <canvas id="ganttChart" height="80"></canvas>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-white text-gray-400 text-center py-6 text-xs border-t border-gray-200">
+    CIO AI Security Operations Course — Lecture 8 Demo Output &bull; Zero Trust Policy Generator &bull; Generated March 2026
+</footer>
+
+<script>
+const policyData = {
+    network: {
+        title: 'Network — Micro-Segmentation',
+        color: 'indigo',
+        pillarClass: 'pillar-network',
+        policies: [
+            { name: 'Eliminate flat network topology', desc: 'Create separate VLANs for corporate workstations, servers, guest WiFi, IoT/OT devices, and management interfaces. No direct communication between segments without explicit firewall rules.', priority: 'Critical', tools: 'Existing managed switches + firewall ACLs' },
+            { name: 'Implement application-aware firewall rules', desc: 'Replace "allow any" rules with application-specific rules. Example: Engineering workstations can reach CAD license server on port 27000 only, not full server subnet.', priority: 'High', tools: 'Next-gen firewall (Palo Alto, Fortinet, pfSense)' },
+            { name: 'Deploy network access control (NAC)', desc: 'Every device connecting to the network must authenticate and pass posture check before gaining access. Unknown devices land in quarantine VLAN.', priority: 'High', tools: 'PacketFence (open-source) or Cisco ISE' },
+            { name: 'Encrypt all internal traffic (mTLS)', desc: 'Server-to-server communication must use mutual TLS. Eliminates risk of lateral sniffing if attacker gains network access.', priority: 'Medium', tools: 'Service mesh (Linkerd/Istio) or certificate automation' },
+            { name: 'DNS filtering and monitoring', desc: 'All DNS queries routed through filtering resolver. Block known malicious domains, log all queries for threat detection.', priority: 'Medium', tools: 'Cloudflare Gateway, Cisco Umbrella, or Pi-hole' },
+        ]
+    },
+    identity: {
+        title: 'Identity — MFA + RBAC',
+        color: 'amber',
+        pillarClass: 'pillar-identity',
+        policies: [
+            { name: 'Mandatory MFA for all accounts', desc: 'Every user account requires multi-factor authentication. Phishing-resistant methods (FIDO2/WebAuthn hardware keys) for admin accounts. Authenticator app minimum for standard users.', priority: 'Critical', tools: 'Microsoft Entra ID, Duo, or YubiKeys' },
+            { name: 'Role-based access control (RBAC)', desc: 'Define roles (Engineer, PM, Accounting, Admin, Executive) with minimum required permissions. No individual permission grants — everything through role membership.', priority: 'Critical', tools: 'Active Directory groups + application RBAC' },
+            { name: 'Just-in-time (JIT) privileged access', desc: 'Admin access is not permanent. Users request elevated privileges for a specific duration (max 4 hours). All privileged sessions are recorded.', priority: 'High', tools: 'Microsoft PIM, CyberArk, or open-source Teleport' },
+            { name: 'Continuous authentication / session scoring', desc: 'AI monitors session behavior in real-time. If behavior deviates from baseline (impossible travel, unusual access patterns), require step-up authentication or terminate session.', priority: 'High', tools: 'Microsoft Entra + Conditional Access, or custom AI engine' },
+            { name: 'Automated lifecycle management', desc: 'Accounts provisioned on hire, modified on role change, disabled within 1 hour of termination. Quarterly access reviews with automatic revocation of unused permissions.', priority: 'Medium', tools: 'HR system integration + Azure AD / Okta lifecycle' },
+        ]
+    },
+    data: {
+        title: 'Data — Encryption + DLP',
+        color: 'emerald',
+        pillarClass: 'pillar-data',
+        policies: [
+            { name: 'Classify all data by sensitivity', desc: 'Four tiers: Public, Internal, Confidential, Restricted. Every file share, database, and cloud storage bucket must be classified. AI auto-classification for new content.', priority: 'Critical', tools: 'Microsoft Purview, or manual classification + automation' },
+            { name: 'Encrypt data at rest and in transit', desc: 'AES-256 for data at rest. TLS 1.2+ for all data in transit. No exceptions. BitLocker on all endpoints. Database-level encryption for all production data.', priority: 'Critical', tools: 'BitLocker, TLS certificates, database TDE' },
+            { name: 'Data loss prevention (DLP) policies', desc: 'Block sensitive data from leaving the organization via email, USB, cloud uploads, or print. Alert on patterns: SSN, credit card numbers, project codes, client names.', priority: 'High', tools: 'Microsoft Purview DLP, or Nightfall AI' },
+            { name: 'Disable USB mass storage', desc: 'Block all USB storage devices via Group Policy. Exception process requires manager + security approval with time-limited access and full audit logging.', priority: 'High', tools: 'GPO + endpoint management' },
+            { name: 'Cloud storage access controls', desc: 'SharePoint/OneDrive: no anonymous links, no external sharing without approval, sensitivity labels enforce encryption and access restrictions on confidential files.', priority: 'Medium', tools: 'SharePoint admin center + sensitivity labels' },
+        ]
+    },
+    device: {
+        title: 'Devices — Posture Checking',
+        color: 'pink',
+        pillarClass: 'pillar-device',
+        policies: [
+            { name: 'Device compliance requirements', desc: 'Every device accessing corporate resources must meet minimum posture: OS updated within 30 days, endpoint protection active, disk encrypted, firewall enabled. Non-compliant devices blocked.', priority: 'Critical', tools: 'Microsoft Intune, Jamf (Mac), or Kandji' },
+            { name: 'No BYOD for sensitive data access', desc: 'Personal devices can access email and Teams only (via MAM policies). Access to engineering systems, file shares, and databases requires corporate-managed device only.', priority: 'High', tools: 'Conditional Access policies + MDM enrollment' },
+            { name: 'Automated patch management', desc: 'OS and application patches deployed within 72 hours of release for critical, 14 days for high, 30 days for medium. Automated compliance reporting.', priority: 'High', tools: 'WSUS/Intune (Windows), Jamf (Mac), Automox' },
+            { name: 'Endpoint detection and response (EDR)', desc: 'Every endpoint runs EDR agent. AI-powered behavioral detection. Automated isolation of compromised endpoints. 24/7 monitoring via AI SOC.', priority: 'High', tools: 'Microsoft Defender for Endpoint, CrowdStrike, or Wazuh' },
+            { name: 'Hardware inventory and control', desc: 'Every device tracked in asset inventory. MAC address + certificate authentication for network access. Decommissioned devices wiped within 24 hours.', priority: 'Medium', tools: 'Intune + NAC + asset management' },
+        ]
+    }
+};
+
+const phases = [
+    {
+        name: 'Phase 1: Foundation',
+        duration: '4-6 weeks',
+        color: '#6366f1',
+        items: [
+            'Deploy MFA for all users (identity)',
+            'Implement RBAC and remove individual permissions',
+            'Enable BitLocker on all endpoints',
+            'Enforce TLS 1.2+ everywhere',
+            'Create data classification framework',
+            'Baseline current network architecture'
+        ]
+    },
+    {
+        name: 'Phase 2: Segmentation',
+        duration: '6-8 weeks',
+        color: '#f59e0b',
+        items: [
+            'Create VLANs and segment network',
+            'Deploy next-gen firewall rules',
+            'Implement device compliance policies',
+            'Deploy EDR on all endpoints',
+            'Enable DLP policies (monitor mode)',
+            'Disable USB mass storage'
+        ]
+    },
+    {
+        name: 'Phase 3: Automation',
+        duration: '4-6 weeks',
+        color: '#10b981',
+        items: [
+            'Deploy AI-powered behavioral monitoring',
+            'Implement just-in-time admin access',
+            'Automate patch management',
+            'Enable DLP in enforcement mode',
+            'Deploy NAC for device authentication',
+            'Integrate HR system for lifecycle management'
+        ]
+    },
+    {
+        name: 'Phase 4: Continuous',
+        duration: 'Ongoing',
+        color: '#ec4899',
+        items: [
+            'Continuous posture assessment',
+            'Quarterly access reviews (automated)',
+            'AI-driven anomaly detection tuning',
+            'Penetration testing against zero trust controls',
+            'Policy refinement based on incident data',
+            'Employee training on zero trust principles'
+        ]
+    }
+];
+
+function generatePolicies() {
+    const container = document.getElementById('policiesContainer');
+    container.innerHTML = '';
+
+    Object.values(policyData).forEach(pillar => {
+        let html = `<div class="card pillar ${pillar.pillarClass} p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">${pillar.title}</h2>
+            <div class="space-y-3">`;
+        pillar.policies.forEach(p => {
+            const priBg = p.priority === 'Critical' ? 'bg-red-100 text-red-700' : p.priority === 'High' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700';
+            html += `<details class="policy-item border border-gray-100 rounded-lg p-3">
+                <summary class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-800 flex items-center gap-2">
+                        <span class="chevron text-gray-400">&#9654;</span>
+                        ${p.name}
+                    </span>
+                    <span class="px-2 py-0.5 rounded text-xs font-bold ${priBg}">${p.priority}</span>
+                </summary>
+                <div class="mt-3 pl-5 text-xs text-gray-600 space-y-2">
+                    <p>${p.desc}</p>
+                    <p class="text-indigo-600"><strong>Recommended tools:</strong> ${p.tools}</p>
+                </div>
+            </details>`;
+        });
+        html += '</div></div>';
+        container.innerHTML += html;
+    });
+
+    // Roadmap
+    const roadmap = document.getElementById('roadmapContainer');
+    roadmap.innerHTML = '';
+    phases.forEach((phase, i) => {
+        roadmap.innerHTML += `<div class="border-t-4 rounded-lg bg-white border border-gray-200 p-4" style="border-top-color: ${phase.color}">
+            <div class="text-sm font-bold text-gray-900">${phase.name}</div>
+            <div class="text-xs text-gray-400 mb-3">${phase.duration}</div>
+            <ul class="text-xs text-gray-600 space-y-1">
+                ${phase.items.map(item => `<li class="flex items-start gap-1"><span style="color:${phase.color}">&#8226;</span> ${item}</li>`).join('')}
+            </ul>
+        </div>`;
+    });
+}
+
+generatePolicies();
+
+// Gantt Chart
+new Chart(document.getElementById('ganttChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Phase 1: Foundation', 'Phase 2: Segmentation', 'Phase 3: Automation', 'Phase 4: Continuous'],
+        datasets: [
+            { label: 'Start (weeks)', data: [0, 5, 11, 16], backgroundColor: 'transparent', borderWidth: 0 },
+            { label: 'Duration (weeks)', data: [5, 7, 5, 20], backgroundColor: ['#6366f1', '#f59e0b', '#10b981', '#ec4899'], borderRadius: 4 }
+        ]
+    },
+    options: {
+        responsive: true, indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { stacked: true, title: { display: true, text: 'Weeks', font: { size: 11 } }, max: 36 },
+            y: { stacked: true, ticks: { font: { size: 11, family: 'Inter' } } }
+        }
+    }
+});
+</script>
+</body>
+</html>

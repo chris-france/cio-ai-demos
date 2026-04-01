@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Utilization Audit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform 0.15s ease;}.kpi-card:hover{transform:translateY(-2px);}.sortable{cursor:pointer;user-select:none;}.sortable:hover{background:#f1f5f9;}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-sky-900 via-sky-800 to-sky-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight">Dashboard Utilization Audit</h1>
+            <p class="text-sky-300 text-sm mt-1">The Dashboard Graveyard &mdash; Find the Dead Weight</p>
+        </div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Dashboard Views &mdash; Last 90 Days</h3>
+                <div style="height:300px"><canvas id="viewsChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Utilization Distribution</h3>
+                <div style="height:300px"><canvas id="distChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-700">All Dashboards &mdash; Utilization Report</h3>
+                <select id="statusFilter" onchange="renderTable()" class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
+                    <option value="all">All</option><option value="dead">Dead (0 views)</option>
+                    <option value="low">Low (< 10 views)</option><option value="active">Active</option>
+                </select>
+            </div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th class="px-4 py-3 sortable" onclick="sortT(0)">Dashboard</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(1)">Owner</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(2)">Platform</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(3)">Created</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(4)">Views (90d)</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(5)">Unique Users</th>
+                    <th class="px-4 py-3 sortable" onclick="sortT(6)">License Cost/mo</th>
+                    <th class="px-4 py-3">Status</th>
+                </tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <section class="bg-red-50 border border-red-200 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-red-800 mb-2">Waste Summary</h3>
+            <p class="text-sm text-red-700" id="wasteSummary"></p>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Dashboard Utilization Audit &mdash; Course 7: AI-Powered Business Analytics &mdash; Lecture 1 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const DASHBOARDS = [
+    { name: 'Executive Revenue Summary', owner: 'CFO', platform: 'Tableau', created: '2023-06-15', views: 342, users: 12, cost: 500, status: 'Active' },
+    { name: 'Sales Pipeline Tracker', owner: 'VP Sales', platform: 'Power BI', created: '2024-01-20', views: 287, users: 18, cost: 400, status: 'Active' },
+    { name: 'HR Headcount Dashboard', owner: 'HR Director', platform: 'Tableau', created: '2022-03-10', views: 0, users: 0, cost: 500, status: 'Dead' },
+    { name: 'Marketing ROI Tracker', owner: 'CMO', platform: 'Looker', created: '2023-11-05', views: 8, users: 2, cost: 600, status: 'Low' },
+    { name: 'Ops Daily Metrics', owner: 'COO', platform: 'Power BI', created: '2024-06-01', views: 445, users: 25, cost: 400, status: 'Active' },
+    { name: 'IT Incident Tracker', owner: 'CIO', platform: 'Grafana', created: '2024-08-15', views: 198, users: 8, cost: 0, status: 'Active' },
+    { name: 'Q3 2024 Board Pack', owner: 'CFO', platform: 'Tableau', created: '2024-09-30', views: 0, users: 0, cost: 500, status: 'Dead' },
+    { name: 'Vendor Spend Analysis', owner: 'Procurement', platform: 'Power BI', created: '2023-08-22', views: 3, users: 1, cost: 400, status: 'Low' },
+    { name: 'Customer Churn Model', owner: 'Data Team', platform: 'Looker', created: '2024-02-14', views: 156, users: 6, cost: 600, status: 'Active' },
+    { name: 'Supply Chain Monitor', owner: 'Supply Chain', platform: 'Tableau', created: '2023-04-01', views: 0, users: 0, cost: 500, status: 'Dead' },
+    { name: 'Employee Satisfaction', owner: 'HR', platform: 'Google Sheets', created: '2022-11-20', views: 5, users: 2, cost: 0, status: 'Low' },
+    { name: 'Website Analytics', owner: 'Marketing', platform: 'Looker', created: '2024-03-10', views: 89, users: 4, cost: 600, status: 'Active' },
+    { name: 'Project Portfolio View', owner: 'PMO', platform: 'Power BI', created: '2023-07-15', views: 2, users: 1, cost: 400, status: 'Low' },
+    { name: 'Finance Monthly Close', owner: 'Controller', platform: 'Tableau', created: '2024-01-05', views: 67, users: 5, cost: 500, status: 'Active' },
+    { name: 'Training Completion', owner: 'L&D', platform: 'Google Sheets', created: '2022-06-01', views: 0, users: 0, cost: 0, status: 'Dead' },
+    { name: 'Compliance Scorecard', owner: 'Legal', platform: 'Power BI', created: '2023-12-01', views: 45, users: 3, cost: 400, status: 'Active' },
+    { name: 'Legacy Sales v1', owner: 'Sales Ops', platform: 'Tableau', created: '2021-09-01', views: 0, users: 0, cost: 500, status: 'Dead' },
+    { name: 'Social Media KPIs', owner: 'Marketing', platform: 'Looker', created: '2024-05-20', views: 7, users: 2, cost: 600, status: 'Low' },
+];
+
+let sortCol = -1, sortAsc = true;
+const dead = DASHBOARDS.filter(d => d.views === 0);
+const low = DASHBOARDS.filter(d => d.views > 0 && d.views < 10);
+const wastedCost = [...dead,...low].reduce((s,d)=>s+d.cost,0);
+
+document.getElementById('kpiCards').innerHTML = [
+    { label: 'Total Dashboards', value: DASHBOARDS.length, color: '#0ea5e9', trend: 'Across 4 platforms' },
+    { label: 'Dead (0 views)', value: dead.length, color: '#ef4444', trend: `${Math.round(dead.length/DASHBOARDS.length*100)}% of total` },
+    { label: 'Low Usage (<10)', value: low.length, color: '#f59e0b', trend: 'Candidates for review' },
+    { label: 'Active', value: DASHBOARDS.filter(d=>d.views>=10).length, color: '#10b981', trend: 'Regular usage' },
+    { label: 'Wasted $/month', value: `$${wastedCost.toLocaleString()}`, color: '#dc2626', trend: `$${(wastedCost*12).toLocaleString()}/year` }
+].map(k => `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+    <span class="text-xs font-semibold text-gray-500 uppercase">${k.label}</span>
+    <div class="text-3xl font-extrabold mt-1" style="color:${k.color}">${k.value}</div>
+    <div class="text-xs mt-2 text-gray-500">${k.trend}</div></div>`).join('');
+
+document.getElementById('wasteSummary').textContent = `${dead.length} dashboards have zero views in 90 days. ${low.length} more have fewer than 10 views. Combined, these ${dead.length+low.length} unused dashboards cost $${wastedCost.toLocaleString()}/month ($${(wastedCost*12).toLocaleString()}/year) in platform licensing alone — not counting the analyst hours spent maintaining them.`;
+
+new Chart(document.getElementById('viewsChart'), {
+    type: 'bar', data: { labels: DASHBOARDS.map(d=>d.name.length>20?d.name.substring(0,20)+'...':d.name),
+        datasets: [{ label: 'Views (90d)', data: DASHBOARDS.map(d=>d.views), backgroundColor: DASHBOARDS.map(d=>d.views===0?'#ef4444':d.views<10?'#f59e0b':'#0ea5e9') }]
+    }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true }, y: { ticks: { font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('distChart'), {
+    type: 'doughnut', data: { labels: ['Active (10+)','Low (<10)','Dead (0)'],
+        datasets: [{ data: [DASHBOARDS.filter(d=>d.views>=10).length, low.length, dead.length],
+            backgroundColor: ['#0ea5e9','#f59e0b','#ef4444'] }]
+    }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+});
+
+function renderTable() {
+    const f = document.getElementById('statusFilter').value;
+    let data = f==='all'?[...DASHBOARDS]:DASHBOARDS.filter(d=>f==='dead'?d.views===0:f==='low'?(d.views>0&&d.views<10):d.views>=10);
+    if(sortCol>=0){const keys=['name','owner','platform','created','views','users','cost'];
+        data.sort((a,b)=>{let va=a[keys[sortCol]],vb=b[keys[sortCol]];return typeof va==='string'?(sortAsc?va.localeCompare(vb):vb.localeCompare(va)):(sortAsc?va-vb:vb-va);});}
+    document.getElementById('tableBody').innerHTML = data.map(d=>{
+        const sc=d.views===0?'bg-red-100 text-red-700':d.views<10?'bg-amber-100 text-amber-700':'bg-green-100 text-green-700';
+        const bg=d.views===0?'bg-red-50':'';
+        return `<tr class="border-t border-gray-100 hover:bg-gray-50 ${bg}">
+            <td class="px-4 py-3 font-medium">${d.name}</td><td class="px-4 py-3">${d.owner}</td>
+            <td class="px-4 py-3">${d.platform}</td><td class="px-4 py-3">${d.created}</td>
+            <td class="px-4 py-3 font-semibold">${d.views}</td><td class="px-4 py-3">${d.users}</td>
+            <td class="px-4 py-3">$${d.cost}</td>
+            <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full ${sc}">${d.status}</span></td></tr>`;
+    }).join('');
+}
+function sortT(c){if(sortCol===c)sortAsc=!sortAsc;else{sortCol=c;sortAsc=true;}renderTable();}
+renderTable();
+</script>
+</body>
+</html>

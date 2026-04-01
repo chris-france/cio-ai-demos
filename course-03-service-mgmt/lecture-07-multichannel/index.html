@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Channel Ingestion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .slide-in { animation: slideIn 0.4s ease forwards; }
+        @keyframes dropIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .drop-in { animation: dropIn 0.3s ease forwards; }
+        .channel-card { min-height: 400px; }
+        .msg-bubble { max-width: 100%; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Multi-Channel Ingestion</h1>
+                <p class="text-slate-300 text-sm mt-1">One AI Brain, Every Channel &mdash; Email, Slack, Web Portal</p>
+            </div>
+            <div class="text-right flex items-center gap-3">
+                <button id="simBtn" onclick="startSimulation()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors">
+                    Start Live Simulation
+                </button>
+                <button onclick="resetDemo()" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors">Reset</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+
+        <!-- KPIs -->
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #3b82f6">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Total Ingested</div>
+                <div class="text-3xl font-extrabold text-blue-600 mt-1" id="kpiTotal">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #8b5cf6">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Email</div>
+                <div class="text-3xl font-extrabold text-purple-600 mt-1" id="kpiEmail">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #e11d48">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Slack</div>
+                <div class="text-3xl font-extrabold text-rose-600 mt-1" id="kpiSlack">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #06b6d4">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Web Portal</div>
+                <div class="text-3xl font-extrabold text-cyan-600 mt-1" id="kpiWeb">0</div>
+            </div>
+            <div class="border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid #22c55e">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Auto-Resolved</div>
+                <div class="text-3xl font-extrabold text-green-600 mt-1" id="kpiAuto">0</div>
+            </div>
+        </section>
+
+        <!-- Three Channel Feeds -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Email -->
+            <div class="channel-card bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 bg-purple-50 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+                    <span class="text-sm font-semibold text-purple-700">Email Channel</span>
+                    <span class="ml-auto text-xs text-purple-500" id="emailCount">0 messages</span>
+                </div>
+                <div id="emailFeed" class="p-3 space-y-2 overflow-y-auto" style="max-height:350px"></div>
+            </div>
+
+            <!-- Slack -->
+            <div class="channel-card bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 bg-rose-50 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                    <span class="text-sm font-semibold text-rose-700">Slack #it-help</span>
+                    <span class="ml-auto text-xs text-rose-500" id="slackCount">0 messages</span>
+                </div>
+                <div id="slackFeed" class="p-3 space-y-2 overflow-y-auto" style="max-height:350px"></div>
+            </div>
+
+            <!-- Web Portal -->
+            <div class="channel-card bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 bg-cyan-50 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-cyan-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16z" clip-rule="evenodd"/></svg>
+                    <span class="text-sm font-semibold text-cyan-700">Web Portal</span>
+                    <span class="ml-auto text-xs text-cyan-500" id="webCount">0 submissions</span>
+                </div>
+                <div id="webFeed" class="p-3 space-y-2 overflow-y-auto" style="max-height:350px"></div>
+            </div>
+        </section>
+
+        <!-- Unified Queue -->
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-700">Unified Ticket Queue &mdash; All Channels Merged</h3>
+                <p class="text-xs text-gray-400 mt-1">Every request hits the same AI classification engine regardless of source</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3">Ticket ID</th>
+                            <th class="px-4 py-3">Source</th>
+                            <th class="px-4 py-3">User</th>
+                            <th class="px-4 py-3">Issue</th>
+                            <th class="px-4 py-3">AI Category</th>
+                            <th class="px-4 py-3">Priority</th>
+                            <th class="px-4 py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="unifiedQueue"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Channel Distribution -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Channel Distribution</h3>
+                <div style="height:280px"><canvas id="channelChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Response Time by Channel</h3>
+                <div style="height:280px"><canvas id="responseChart"></canvas></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Multi-Channel Ingestion &mdash; Course 3: AI-Powered IT Service Management &mdash; Lecture 7 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+const INCOMING = [
+    { channel: 'email', user: 'Maria Santos', text: 'Subject: Cannot access SharePoint. Hi IT, I\'ve been locked out of the Finance SharePoint site since this morning. Error says "Access Denied." Please help urgently.', cat: 'Password / Access', pri: 'High', autoResolve: true },
+    { channel: 'slack', user: 'tom.bradley', text: 'hey does anyone know why Zoom keeps crashing? just updated to the latest version and now it freezes every time I join a meeting', cat: 'Software', pri: 'Medium', autoResolve: true },
+    { channel: 'web', user: 'Jennifer Park', text: 'New hire starting April 1 in Engineering. Need: laptop (MacBook Pro 16"), GitHub access, AWS console access, Slack workspace invite, IDE licenses (JetBrains).', cat: 'Onboarding', pri: 'Medium', autoResolve: false },
+    { channel: 'slack', user: 'sarah.chen', text: 'printer on 2nd floor is making a horrible grinding noise and jammed again. this is the third time this week', cat: 'Hardware', pri: 'Low', autoResolve: false },
+    { channel: 'email', user: 'David Kim', text: 'Subject: VPN Timeout Issue. For the past two days my VPN disconnects exactly after 30 minutes. I\'m working from our Chicago office this week. Network team said it\'s not on their end.', cat: 'Network / VPN', pri: 'High', autoResolve: true },
+    { channel: 'web', user: 'Rachel Foster', text: 'Requesting installation of Tableau Desktop on my work laptop. Manager approval: James Wilson. License type: Creator. Needed for Q2 analytics project.', cat: 'Software Install', pri: 'Low', autoResolve: true },
+    { channel: 'email', user: 'Chris Martinez', text: 'Subject: URGENT - Production database slow. Our customer-facing app is running extremely slow. The database team says queries that normally take 200ms are now taking 8 seconds. Multiple customers complaining.', cat: 'Infrastructure', pri: 'Critical', autoResolve: false },
+    { channel: 'slack', user: 'lisa.nguyen', text: 'quick question - how do I set up out-of-office in Outlook? going on vacation next week', cat: 'Email / M365', pri: 'Low', autoResolve: true },
+    { channel: 'web', user: 'Marcus Johnson', text: 'My Dell monitor flickers when connected via USB-C but works fine with HDMI. Model: Dell U2723QE. Laptop: ThinkPad X1 Carbon Gen 11.', cat: 'Hardware', pri: 'Medium', autoResolve: false },
+    { channel: 'email', user: 'Priya Patel', text: 'Subject: MFA not working on new phone. Switched to a new iPhone and now Microsoft Authenticator push notifications don\'t arrive. I can still use the 6-digit codes. Can someone help me re-register?', cat: 'Password / Access', pri: 'High', autoResolve: true },
+    { channel: 'slack', user: 'james.wilson', text: 'Teams meeting recordings not showing up in SharePoint anymore. had 3 important client calls recorded yesterday and I can\'t find them', cat: 'Email / M365', pri: 'High', autoResolve: false },
+    { channel: 'web', user: 'Ana Rodriguez', text: 'Requesting removal of former employee Michael Torres from all systems: AD, M365, Salesforce, GitHub, AWS. Last day was March 25. Manager confirmation attached.', cat: 'Offboarding', pri: 'High', autoResolve: true }
+];
+
+let ingestedCount = { email: 0, slack: 0, web: 0 };
+let unifiedTickets = [];
+let ticketCounter = 5300;
+let channelChart = null, responseChart = null;
+
+const SOURCE_BADGES = {
+    email: '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700 font-semibold">Email</span>',
+    slack: '<span class="px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-700 font-semibold">Slack</span>',
+    web: '<span class="px-2 py-0.5 text-xs rounded-full bg-cyan-100 text-cyan-700 font-semibold">Web Portal</span>'
+};
+
+const PRI_BADGES = {
+    Critical: '<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-semibold">Critical</span>',
+    High: '<span class="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700 font-semibold">High</span>',
+    Medium: '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 font-semibold">Medium</span>',
+    Low: '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">Low</span>'
+};
+
+function addToChannelFeed(item) {
+    const feed = document.getElementById(item.channel + 'Feed');
+    const colors = { email: 'purple', slack: 'rose', web: 'cyan' };
+    const c = colors[item.channel];
+    const bubble = document.createElement('div');
+    bubble.className = `msg-bubble bg-${c}-50 border border-${c}-200 rounded-lg p-3 slide-in`;
+    bubble.innerHTML = `<div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-semibold text-${c}-700">${item.user}</span>
+        <span class="text-xs text-gray-400">${new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'})}</span>
+    </div>
+    <div class="text-xs text-gray-700">${item.text.substring(0, 120)}${item.text.length > 120 ? '...' : ''}</div>`;
+    feed.prepend(bubble);
+
+    ingestedCount[item.channel]++;
+    document.getElementById(item.channel + 'Count').textContent = ingestedCount[item.channel] + (item.channel === 'web' ? ' submissions' : ' messages');
+}
+
+function addToUnifiedQueue(item) {
+    ticketCounter++;
+    const ticket = { id: 'TK-' + ticketCounter, ...item };
+    unifiedTickets.unshift(ticket);
+
+    const statusBadge = item.autoResolve ?
+        '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">Auto-Resolved</span>' :
+        '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-semibold">Assigned</span>';
+
+    const row = document.createElement('tr');
+    row.className = 'border-t border-gray-100 hover:bg-gray-50 drop-in';
+    row.innerHTML = `
+        <td class="px-4 py-3 font-mono text-xs">${ticket.id}</td>
+        <td class="px-4 py-3">${SOURCE_BADGES[item.channel]}</td>
+        <td class="px-4 py-3">${item.user}</td>
+        <td class="px-4 py-3 text-xs text-gray-600">${item.text.substring(0, 60)}...</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-700 font-semibold">${item.cat}</span></td>
+        <td class="px-4 py-3">${PRI_BADGES[item.pri]}</td>
+        <td class="px-4 py-3">${statusBadge}</td>`;
+
+    const tbody = document.getElementById('unifiedQueue');
+    tbody.prepend(row);
+}
+
+function updateKPIs() {
+    const total = ingestedCount.email + ingestedCount.slack + ingestedCount.web;
+    document.getElementById('kpiTotal').textContent = total;
+    document.getElementById('kpiEmail').textContent = ingestedCount.email;
+    document.getElementById('kpiSlack').textContent = ingestedCount.slack;
+    document.getElementById('kpiWeb').textContent = ingestedCount.web;
+    const autoResolved = unifiedTickets.filter(t => t.autoResolve).length;
+    document.getElementById('kpiAuto').textContent = autoResolved;
+}
+
+async function startSimulation() {
+    const btn = document.getElementById('simBtn');
+    btn.disabled = true;
+    btn.textContent = 'Ingesting...';
+    btn.classList.add('opacity-60');
+
+    for (const item of INCOMING) {
+        addToChannelFeed(item);
+        await new Promise(r => setTimeout(r, 300));
+        addToUnifiedQueue(item);
+        updateKPIs();
+        await new Promise(r => setTimeout(r, 400));
+    }
+
+    btn.textContent = 'Simulation Complete';
+    renderCharts();
+}
+
+function renderCharts() {
+    if (channelChart) channelChart.destroy();
+    channelChart = new Chart(document.getElementById('channelChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Email', 'Slack', 'Web Portal'],
+            datasets: [{ data: [ingestedCount.email, ingestedCount.slack, ingestedCount.web], backgroundColor: ['#8b5cf6', '#e11d48', '#06b6d4'], borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { font: { family: 'Inter', size: 12 } } } } }
+    });
+
+    if (responseChart) responseChart.destroy();
+    responseChart = new Chart(document.getElementById('responseChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Email', 'Slack', 'Web Portal'],
+            datasets: [
+                { label: 'Traditional (minutes)', data: [120, 45, 30], backgroundColor: '#ef4444', borderRadius: 4 },
+                { label: 'AI-Powered (seconds)', data: [2, 0.5, 1], backgroundColor: '#22c55e', borderRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
+            scales: { y: { beginAtZero: true, ticks: { font: { family: 'Inter' } }, title: { display: true, text: 'Response Time', font: { family: 'Inter', size: 11 } } }, x: { ticks: { font: { family: 'Inter' } } } }
+        }
+    });
+}
+
+function resetDemo() {
+    ingestedCount = { email: 0, slack: 0, web: 0 };
+    unifiedTickets = [];
+    ticketCounter = 5300;
+    document.getElementById('emailFeed').innerHTML = '';
+    document.getElementById('slackFeed').innerHTML = '';
+    document.getElementById('webFeed').innerHTML = '';
+    document.getElementById('unifiedQueue').innerHTML = '';
+    document.getElementById('emailCount').textContent = '0 messages';
+    document.getElementById('slackCount').textContent = '0 messages';
+    document.getElementById('webCount').textContent = '0 submissions';
+    updateKPIs();
+    const btn = document.getElementById('simBtn');
+    btn.disabled = false;
+    btn.textContent = 'Start Live Simulation';
+    btn.classList.remove('opacity-60');
+}
+</script>
+</body>
+</html>

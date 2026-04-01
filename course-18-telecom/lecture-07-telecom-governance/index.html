@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telecom Governance Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <style>body{font-family:'Inter',sans-serif;}.kpi-card{transition:transform .15s ease;}.kpi-card:hover{transform:translateY(-2px);}</style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto"><h1 class="text-2xl font-extrabold">Continuous Telecom Governance</h1>
+        <p class="text-blue-300 text-sm mt-1">Spend Trending &amp; Governance Scorecard</p></div>
+    </header>
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kpiCards"></section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Monthly Telecom Spend &mdash; 24 Months</h3>
+                <div style="height:300px"><canvas id="spendChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Governance Maturity Radar</h3>
+                <div style="height:300px"><canvas id="radarChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h3 class="text-sm font-semibold text-gray-700">SLA Compliance Tracker</h3></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-4 py-3">Carrier</th><th class="px-4 py-3">SLA Target</th><th class="px-4 py-3">Actual</th>
+                        <th class="px-4 py-3">Status</th><th class="px-4 py-3">Credits Owed</th>
+                    </tr></thead>
+                    <tbody id="slaBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-amber-800 mb-3">Cost Anomalies Detected</h3>
+            <div class="space-y-2">
+                <div class="bg-white rounded-lg p-3 border border-amber-200">&#9888; <span class="font-semibold">Jan 2026:</span> AT&T invoice $2,400 above baseline &mdash; Overage charges on CKT-003. Action: Review usage, consider bandwidth upgrade.</div>
+                <div class="bg-white rounded-lg p-3 border border-amber-200">&#9888; <span class="font-semibold">Nov 2025:</span> Lumen invoice $1,800 above baseline &mdash; Unbudgeted installation fee. Action: Dispute charge, request credit.</div>
+            </div>
+        </section>
+
+        <section class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-sm font-semibold text-blue-800 mb-3">Governance Action Items</h3>
+            <div class="space-y-2">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span><span class="text-sm"><strong>High:</strong> Claim $4,200 in SLA credits from Lumen (Q1 violations)</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-sm"><strong>Medium:</strong> Update circuit inventory with Q1 discovery scan results</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-sm"><strong>Medium:</strong> Begin Verizon renewal negotiation (60 days to auto-renew)</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-sm"><strong>Low:</strong> Schedule Q2 bandwidth utilization review</span></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Telecom Governance &mdash; Course 18 &mdash; Lecture 7 &mdash; Confidential
+        </footer>
+    </main>
+<script>
+const KPI = [
+    { label: 'Monthly Spend', value: '$52,400', color: '#3b82f6' },
+    { label: 'YoY Change', value: '-8.2%', color: '#10b981' },
+    { label: 'SLA Compliance', value: '94%', color: '#8b5cf6' },
+    { label: 'Governance Score', value: '3.4/5', color: '#f59e0b' },
+    { label: 'Cost/Employee', value: '$262', color: '#ef4444' },
+];
+
+document.getElementById('kpiCards').innerHTML = KPI.map(k =>
+    `<div class="kpi-card border border-gray-200 rounded-xl p-5 shadow-sm" style="border-top:3px solid ${k.color}">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${k.label}</span>
+        <div class="text-3xl font-extrabold mt-2" style="color:${k.color}">${k.value}</div></div>`
+).join('');
+
+const months24 = Array.from({length:24}, (_,i) => { const d=new Date(2024,4+i,1); return d.toLocaleDateString('en-US',{month:'short',year:'2-digit'}); });
+const spend = [58200,57800,56500,57100,55800,56200,54900,55300,54100,53800,52600,53200,52800,53400,52100,54500,51800,52200,51600,52000,51200,52800,52400,51900];
+new Chart(document.getElementById('spendChart'), {
+    type: 'line',
+    data: { labels: months24, datasets: [{ label: 'Monthly Spend', data: spend, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: v => '$'+v.toLocaleString() } } } }
+});
+
+new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+        labels: ['Inventory\nAccuracy', 'Contract\nMgmt', 'Cost\nOptimization', 'Vendor\nMgmt', 'SLA\nMonitoring', 'Policy\nCompliance'],
+        datasets: [
+            { label: 'Current', data: [3.5, 2.8, 3.2, 3.0, 4.0, 3.5], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.15)' },
+            { label: 'Target', data: [4.5, 4.5, 4.5, 4.0, 4.5, 4.5], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', borderDash: [5,5] },
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } } } }
+});
+
+const SLA = [
+    { carrier: 'AT&T', target: '99.95%', actual: '99.92%', met: true, credits: '$0' },
+    { carrier: 'Verizon', target: '99.99%', actual: '99.97%', met: false, credits: '$850' },
+    { carrier: 'Lumen', target: '99.95%', actual: '99.82%', met: false, credits: '$4,200' },
+    { carrier: 'Zayo', target: '99.99%', actual: '99.98%', met: true, credits: '$0' },
+    { carrier: 'Comcast', target: '99.9%', actual: '99.85%', met: false, credits: '$320' },
+];
+document.getElementById('slaBody').innerHTML = SLA.map(s => {
+    const badge = s.met ? '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-semibold">Met</span>' : '<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-semibold">Missed</span>';
+    return `<tr class="border-t border-gray-100 hover:bg-gray-50"><td class="px-4 py-3 font-semibold">${s.carrier}</td>
+        <td class="px-4 py-3">${s.target}</td><td class="px-4 py-3">${s.actual}</td><td class="px-4 py-3">${badge}</td>
+        <td class="px-4 py-3 ${s.credits!=='$0'?'text-red-600 font-semibold':''}">${s.credits}</td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

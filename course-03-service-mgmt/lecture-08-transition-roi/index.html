@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transition Plan &amp; ROI Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .phase-card { transition: transform 0.15s ease; }
+        .phase-card:hover { transform: translateY(-2px); }
+        input[type="range"] { -webkit-appearance: none; height: 6px; background: #e5e7eb; border-radius: 3px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #3b82f6; border-radius: 50%; cursor: pointer; }
+        .timeline-dot { width: 16px; height: 16px; border-radius: 50%; border: 3px solid; flex-shrink: 0; }
+        .timeline-line { width: 2px; min-height: 40px; flex-shrink: 0; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white px-8 py-6">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Transition Plan &amp; ROI Calculator</h1>
+                <p class="text-slate-300 text-sm mt-1">From 5-Person Help Desk to 1 Person + AI in 90 Days</p>
+            </div>
+            <div class="text-right text-sm">
+                <div class="text-slate-300">Planning Tool</div>
+                <div class="font-semibold text-lg">Your Organization</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
+
+        <!-- ROI Calculator -->
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-6">ROI Calculator</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Sliders -->
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-semibold text-gray-700">Monthly Ticket Volume</label>
+                            <span class="text-sm font-bold text-blue-600" id="volDisplay">1,200</span>
+                        </div>
+                        <input type="range" id="volSlider" min="200" max="5000" step="100" value="1200" oninput="updateROI()" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-400"><span>200</span><span>5,000</span></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-semibold text-gray-700">Cost per Ticket</label>
+                            <span class="text-sm font-bold text-blue-600" id="costDisplay">$22</span>
+                        </div>
+                        <input type="range" id="costSlider" min="8" max="50" step="1" value="22" oninput="updateROI()" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-400"><span>$8</span><span>$50</span></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-semibold text-gray-700">Target Automation Rate</label>
+                            <span class="text-sm font-bold text-blue-600" id="rateDisplay">50%</span>
+                        </div>
+                        <input type="range" id="rateSlider" min="20" max="80" step="5" value="50" oninput="updateROI()" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-400"><span>20%</span><span>80%</span></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-semibold text-gray-700">Current Help Desk Staff</label>
+                            <span class="text-sm font-bold text-blue-600" id="staffDisplay">5</span>
+                        </div>
+                        <input type="range" id="staffSlider" min="2" max="20" step="1" value="5" oninput="updateROI()" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-400"><span>2</span><span>20</span></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-semibold text-gray-700">AI Platform Cost (monthly)</label>
+                            <span class="text-sm font-bold text-blue-600" id="aiCostDisplay">$3,000</span>
+                        </div>
+                        <input type="range" id="aiCostSlider" min="500" max="15000" step="500" value="3000" oninput="updateROI()" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-400"><span>$500</span><span>$15,000</span></div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <div class="text-xs font-semibold text-blue-600 uppercase">Current Annual Cost</div>
+                            <div class="text-2xl font-extrabold text-blue-700 mt-1" id="currentCost">$0</div>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                            <div class="text-xs font-semibold text-green-600 uppercase">Projected Annual Cost</div>
+                            <div class="text-2xl font-extrabold text-green-700 mt-1" id="projCost">$0</div>
+                        </div>
+                        <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                            <div class="text-xs font-semibold text-purple-600 uppercase">Annual Savings</div>
+                            <div class="text-2xl font-extrabold text-purple-700 mt-1" id="savings">$0</div>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                            <div class="text-xs font-semibold text-amber-600 uppercase">Break-Even</div>
+                            <div class="text-2xl font-extrabold text-amber-700 mt-1" id="breakEven">0 months</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 border border-gray-200 rounded-xl p-4">
+                        <div class="text-xs font-semibold text-gray-600 uppercase mb-2">ROI Summary</div>
+                        <div class="text-sm text-gray-700" id="roiSummary"></div>
+                    </div>
+                    <div style="height:200px"><canvas id="roiChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 90-Day Roadmap -->
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-6">90-Day Implementation Roadmap</h2>
+
+            <!-- Phase Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="phase-card border-2 border-blue-200 rounded-xl p-5 bg-blue-50">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                        <h3 class="font-bold text-blue-800">Month 1: Shadow Mode</h3>
+                    </div>
+                    <p class="text-sm text-blue-700 mb-3">AI watches and learns. Zero risk. Humans do everything.</p>
+                    <ul class="text-xs text-blue-600 space-y-1.5">
+                        <li>Week 1-2: Deploy AI, connect to ticket system</li>
+                        <li>Week 2-3: AI classifies every ticket silently</li>
+                        <li>Week 3-4: Compare AI vs human decisions</li>
+                        <li>Target: 90%+ classification accuracy</li>
+                    </ul>
+                    <div class="mt-3 p-2 bg-white rounded-lg border border-blue-200">
+                        <div class="text-xs font-semibold text-blue-700">Risk Level: None</div>
+                        <div class="text-xs text-blue-500">AI never touches a ticket</div>
+                    </div>
+                </div>
+
+                <div class="phase-card border-2 border-purple-200 rounded-xl p-5 bg-purple-50">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                        <h3 class="font-bold text-purple-800">Month 2: Assist Mode</h3>
+                    </div>
+                    <p class="text-sm text-purple-700 mb-3">AI suggests, humans approve with one click.</p>
+                    <ul class="text-xs text-purple-600 space-y-1.5">
+                        <li>Week 5-6: AI drafts responses for top 5 categories</li>
+                        <li>Week 6-7: Humans approve/edit with one click</li>
+                        <li>Week 7-8: Track approval rate and edit frequency</li>
+                        <li>Target: 80%+ approval without edits</li>
+                    </ul>
+                    <div class="mt-3 p-2 bg-white rounded-lg border border-purple-200">
+                        <div class="text-xs font-semibold text-purple-700">Risk Level: Low</div>
+                        <div class="text-xs text-purple-500">Human always in the loop</div>
+                    </div>
+                </div>
+
+                <div class="phase-card border-2 border-green-200 rounded-xl p-5 bg-green-50">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                        <h3 class="font-bold text-green-800">Month 3: Auto Mode</h3>
+                    </div>
+                    <p class="text-sm text-green-700 mb-3">AI resolves top categories. Humans review and handle exceptions.</p>
+                    <ul class="text-xs text-green-600 space-y-1.5">
+                        <li>Week 9-10: Enable auto-resolution for top 3 categories</li>
+                        <li>Week 10-11: Expand to all categories above 90% accuracy</li>
+                        <li>Week 11-12: Full rollout + knowledge base auto-generation</li>
+                        <li>Target: 50-70% auto-resolution rate</li>
+                    </ul>
+                    <div class="mt-3 p-2 bg-white rounded-lg border border-green-200">
+                        <div class="text-xs font-semibold text-green-700">Risk Level: Managed</div>
+                        <div class="text-xs text-green-500">Proven accuracy before automation</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="bg-slate-50 border border-gray-200 rounded-xl p-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Week-by-Week Timeline</h3>
+                <div class="space-y-0">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Success Metrics -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Expected Metrics by Week</h3>
+                <div style="height:300px"><canvas id="metricsChart"></canvas></div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Team Composition Transition</h3>
+                <div style="height:300px"><canvas id="teamChart"></canvas></div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+            Transition Plan &amp; ROI Calculator &mdash; Course 3: AI-Powered IT Service Management &mdash; Lecture 8 &mdash; Confidential
+        </footer>
+    </main>
+
+<script>
+// Timeline HTML (built server-side equivalent)
+function buildTimelineHTML() {
+    const weeks = [
+        { week: 1, phase: 'blue', title: 'Deploy & Connect', desc: 'Install AI platform, connect to ticketing system (ServiceNow/Jira), begin data ingestion' },
+        { week: 2, phase: 'blue', title: 'Silent Classification Begins', desc: 'AI classifies every incoming ticket. No actions taken. Baseline accuracy measured.' },
+        { week: 3, phase: 'blue', title: 'Weekly Accuracy Review #1', desc: 'Compare AI classifications to human decisions. Identify gaps. Fine-tune model.' },
+        { week: 4, phase: 'blue', title: 'Shadow Mode Complete', desc: 'Target: 90%+ classification accuracy. Decision point: proceed to Assist Mode.' },
+        { week: 5, phase: 'purple', title: 'Assist Mode Launch', desc: 'AI begins suggesting responses for top 5 ticket categories. Agents see suggestions inline.' },
+        { week: 6, phase: 'purple', title: 'One-Click Approve', desc: 'Agents approve, edit, or reject AI suggestions. Track acceptance rate and edit patterns.' },
+        { week: 7, phase: 'purple', title: 'Knowledge Base Seeding', desc: 'AI generates KB articles from approved resolutions. Human reviewer approves publication.' },
+        { week: 8, phase: 'purple', title: 'Assist Mode Review', desc: 'Target: 80%+ approval without edits. Decision point: which categories go to Auto Mode.' },
+        { week: 9, phase: 'green', title: 'Auto Mode: Top 3 Categories', desc: 'Password resets, software installs, and access requests auto-resolve without human touch.' },
+        { week: 10, phase: 'green', title: 'Expand Auto-Resolution', desc: 'Add categories that hit 90%+ accuracy in Assist Mode. Monitor for quality regression.' },
+        { week: 11, phase: 'green', title: 'Full Channel Integration', desc: 'Connect Slack, email, and web portal. AI responds directly in every channel.' },
+        { week: 12, phase: 'green', title: 'Full Rollout & Optimization', desc: 'All proven categories in Auto Mode. Team restructured. Continuous improvement loop active.' }
+    ];
+
+    const phaseColors = { blue: { dot: '#3b82f6', line: '#93c5fd', bg: 'bg-blue-50' }, purple: { dot: '#8b5cf6', line: '#c4b5fd', bg: 'bg-purple-50' }, green: { dot: '#22c55e', line: '#86efac', bg: 'bg-green-50' } };
+
+    return weeks.map((w, i) => {
+        const pc = phaseColors[w.phase];
+        return `<div class="flex gap-4 items-start">
+            <div class="flex flex-col items-center">
+                <div class="timeline-dot" style="border-color:${pc.dot}; background:${i === 11 ? pc.dot : 'white'}"></div>
+                ${i < 11 ? `<div class="timeline-line" style="background:${pc.line}"></div>` : ''}
+            </div>
+            <div class="${pc.bg} rounded-lg p-3 flex-1 mb-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold" style="color:${pc.dot}">Week ${w.week}</span>
+                    <span class="text-sm font-semibold text-gray-800">${w.title}</span>
+                </div>
+                <div class="text-xs text-gray-600 mt-1">${w.desc}</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// Inject timeline
+document.querySelector('.space-y-0').innerHTML = buildTimelineHTML();
+
+let roiChart = null;
+
+function updateROI() {
+    const vol = parseInt(document.getElementById('volSlider').value);
+    const cost = parseInt(document.getElementById('costSlider').value);
+    const rate = parseInt(document.getElementById('rateSlider').value);
+    const staff = parseInt(document.getElementById('staffSlider').value);
+    const aiCost = parseInt(document.getElementById('aiCostSlider').value);
+
+    document.getElementById('volDisplay').textContent = vol.toLocaleString();
+    document.getElementById('costDisplay').textContent = '$' + cost;
+    document.getElementById('rateDisplay').textContent = rate + '%';
+    document.getElementById('staffDisplay').textContent = staff;
+    document.getElementById('aiCostDisplay').textContent = '$' + aiCost.toLocaleString();
+
+    const annualTicketCost = vol * cost * 12;
+    const avgSalary = 55000; // avg L1 salary
+    const currentStaffCost = staff * avgSalary;
+    const totalCurrentCost = annualTicketCost;
+
+    const automatedTickets = vol * (rate / 100);
+    const remainingTickets = vol - automatedTickets;
+    const newTicketCost = remainingTickets * cost * 12;
+    const aiAnnualCost = aiCost * 12;
+    const staffNeeded = Math.max(1, Math.ceil(staff * (1 - rate / 100)));
+    const newStaffCost = staffNeeded * avgSalary;
+    const totalProjectedCost = newTicketCost + aiAnnualCost;
+
+    const annualSavings = totalCurrentCost - totalProjectedCost;
+    const implementationCost = 25000 + aiCost * 3; // setup + 3 months ramp
+    const breakEvenMonths = annualSavings > 0 ? Math.ceil(implementationCost / (annualSavings / 12)) : 99;
+
+    document.getElementById('currentCost').textContent = '$' + totalCurrentCost.toLocaleString();
+    document.getElementById('projCost').textContent = '$' + Math.max(0, totalProjectedCost).toLocaleString();
+    document.getElementById('savings').textContent = '$' + Math.max(0, annualSavings).toLocaleString();
+    document.getElementById('breakEven').textContent = breakEvenMonths + ' months';
+
+    const roi = ((annualSavings / implementationCost) * 100).toFixed(0);
+    document.getElementById('roiSummary').innerHTML = `At <strong>${vol.toLocaleString()} tickets/month</strong> and <strong>${rate}% automation</strong>,
+        you save <strong>$${Math.max(0, annualSavings).toLocaleString()}/year</strong>.
+        Implementation cost: <strong>$${implementationCost.toLocaleString()}</strong>.
+        ROI: <strong>${roi}%</strong> in year one.
+        Staff requirement drops from <strong>${staff}</strong> to <strong>${staffNeeded}</strong> agents
+        (${staff - staffNeeded} can be redeployed to higher-value work).`;
+
+    // ROI Chart - cumulative savings over 12 months
+    const monthlyLabels = ['Mo 1','Mo 2','Mo 3','Mo 4','Mo 5','Mo 6','Mo 7','Mo 8','Mo 9','Mo 10','Mo 11','Mo 12'];
+    const monthlySavings = monthlyLabels.map((_, m) => {
+        if (m < 1) return -implementationCost; // implementation month
+        const rampRate = m < 3 ? (m + 1) * (rate / 3) / 100 : rate / 100;
+        const saved = vol * cost * rampRate;
+        return -implementationCost + (saved - aiCost) * m;
+    });
+
+    if (roiChart) roiChart.destroy();
+    roiChart = new Chart(document.getElementById('roiChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyLabels,
+            datasets: [{
+                label: 'Cumulative Net Savings',
+                data: monthlySavings,
+                borderColor: '#3b82f6',
+                backgroundColor: monthlySavings.map(v => v >= 0 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.08)'),
+                fill: true, tension: 0.3, pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, annotation: {} },
+            scales: {
+                y: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k', font: { family: 'Inter' } } },
+                x: { ticks: { font: { family: 'Inter' } } }
+            }
+        }
+    });
+}
+
+function renderCharts() {
+    // Metrics by week
+    new Chart(document.getElementById('metricsChart'), {
+        type: 'line',
+        data: {
+            labels: ['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6','Wk7','Wk8','Wk9','Wk10','Wk11','Wk12'],
+            datasets: [
+                { label: 'Classification Accuracy %', data: [72,81,87,92,93,94,95,95,96,96,97,97], borderColor: '#3b82f6', tension: 0.3, pointRadius: 3 },
+                { label: 'Auto-Resolution Rate %', data: [0,0,0,0,5,12,20,28,42,55,62,68], borderColor: '#22c55e', tension: 0.3, pointRadius: 3 },
+                { label: 'CSAT Score (x20)', data: [64,64,66,68,70,72,74,78,80,82,84,86], borderColor: '#f59e0b', tension: 0.3, pointRadius: 3, borderDash: [5,3] }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } } },
+            scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%', font: { family: 'Inter' } } }, x: { ticks: { font: { family: 'Inter' } } } }
+        }
+    });
+
+    // Team composition
+    new Chart(document.getElementById('teamChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Current', 'Month 1', 'Month 2', 'Month 3', '6 Months', '12 Months'],
+            datasets: [
+                { label: 'L1 Agents (tickets)', data: [4, 4, 3, 2, 1, 1], backgroundColor: '#ef4444', borderRadius: 4 },
+                { label: 'L1 Agents (AI oversight)', data: [0, 0, 1, 1, 1, 0], backgroundColor: '#f59e0b', borderRadius: 4 },
+                { label: 'L2/L3 Specialists', data: [1, 1, 1, 1, 1, 1], backgroundColor: '#3b82f6', borderRadius: 4 },
+                { label: 'Redeployed to Projects', data: [0, 0, 0, 1, 2, 3], backgroundColor: '#22c55e', borderRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 10 } } } },
+            scales: {
+                x: { stacked: true, ticks: { font: { family: 'Inter' } } },
+                y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Inter' } }, title: { display: true, text: 'Staff Count', font: { family: 'Inter', size: 11 } } }
+            }
+        }
+    });
+}
+
+updateROI();
+renderCharts();
+</script>
+</body>
+</html>
