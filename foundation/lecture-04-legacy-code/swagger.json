@@ -1,0 +1,543 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Legacy Accounting System — Modernized API",
+    "description": "REST API converted from a 1985 COBOL accounting system. All original business rules preserved: account status enforcement, transaction limits, minimum balance checks, and transaction logging.\n\n**CIO AI Curriculum — Lecture 04: Legacy Code Modernization**\n\n### Authentication\nAll endpoints except `/login` require a JWT Bearer token. Obtain one via `POST /login`, then include it as `Authorization: Bearer <token>` in all subsequent requests.\n\n### Demo Credentials\n| Username | Password | Role |\n|----------|----------|------|\n| admin | admin123 | Full access |\n| teller | teller123 | Transactions |\n| auditor | auditor123 | View only |",
+    "version": "2.0.0",
+    "contact": {
+      "name": "CIO AI Curriculum"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5050",
+      "description": "Local development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from POST /login"
+      }
+    },
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "example": "admin123"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT Bearer token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "user": {
+            "type": "string",
+            "example": "admin"
+          },
+          "name": {
+            "type": "string",
+            "example": "System Admin"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["admin", "teller", "auditor"],
+            "example": "admin"
+          },
+          "expires_in": {
+            "type": "integer",
+            "description": "Token lifetime in seconds",
+            "example": 1800
+          }
+        }
+      },
+      "BalanceResponse": {
+        "type": "object",
+        "properties": {
+          "account_number": {
+            "type": "string",
+            "example": "00001234"
+          },
+          "name": {
+            "type": "string",
+            "example": "JOHN DOE"
+          },
+          "account_type": {
+            "type": "string",
+            "enum": ["CHECKING", "SAVINGS", "BUSINESS"],
+            "example": "CHECKING"
+          },
+          "balance": {
+            "type": "string",
+            "description": "Current balance as decimal string",
+            "example": "5000.00"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ACTIVE", "FROZEN", "CLOSED"],
+            "example": "ACTIVE"
+          }
+        }
+      },
+      "CreditRequest": {
+        "type": "object",
+        "required": ["account_number", "amount"],
+        "properties": {
+          "account_number": {
+            "type": "string",
+            "example": "00001234"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 50000,
+            "example": 1500.00
+          }
+        }
+      },
+      "CreditResponse": {
+        "type": "object",
+        "properties": {
+          "account_number": {
+            "type": "string",
+            "example": "00001234"
+          },
+          "credited": {
+            "type": "string",
+            "example": "1500"
+          },
+          "new_balance": {
+            "type": "string",
+            "example": "6500.00"
+          }
+        }
+      },
+      "DebitRequest": {
+        "type": "object",
+        "required": ["account_number", "amount"],
+        "properties": {
+          "account_number": {
+            "type": "string",
+            "example": "00001234"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 10000,
+            "description": "Max $50,000 per transaction, max $10,000 daily withdrawal limit",
+            "example": 250.00
+          }
+        }
+      },
+      "DebitResponse": {
+        "type": "object",
+        "properties": {
+          "account_number": {
+            "type": "string",
+            "example": "00001234"
+          },
+          "debited": {
+            "type": "string",
+            "example": "250"
+          },
+          "new_balance": {
+            "type": "string",
+            "example": "5750.00"
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-03-17T20:49:48.969123"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["C", "D", "I"],
+            "description": "C=Credit, D=Debit, I=Inquiry",
+            "example": "C"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500"
+          },
+          "result": {
+            "type": "string",
+            "enum": ["OK", "FL"],
+            "description": "OK=Success, FL=Failed",
+            "example": "OK"
+          },
+          "new_balance": {
+            "type": "string",
+            "example": "6500.00"
+          }
+        }
+      },
+      "TransactionsResponse": {
+        "type": "object",
+        "properties": {
+          "account_number": {
+            "type": "string",
+            "example": "00001234"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            },
+            "maxItems": 10,
+            "description": "Last 10 transactions, newest first"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Account not found."
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Authenticate and obtain JWT token",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful — JWT token returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/balance/{account_number}": {
+      "get": {
+        "summary": "View account balance",
+        "description": "Returns account details and current balance. Account must not be closed. Logs an inquiry transaction.\n\n**COBOL equivalent:** `VIEW-BALANCE` paragraph",
+        "tags": ["Accounts"],
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "account_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{8}$",
+              "example": "00001234"
+            },
+            "description": "8-digit account number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account details returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Account is closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions/{account_number}": {
+      "get": {
+        "summary": "Get last 10 transactions",
+        "description": "Returns the most recent 10 transactions for the account in reverse chronological order. Includes credits, debits, inquiries, and failed attempts.\n\n**COBOL equivalent:** `TRANSLOG.DAT` sequential file",
+        "tags": ["Transactions"],
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "account_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{8}$",
+              "example": "00001234"
+            },
+            "description": "8-digit account number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction list returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit": {
+      "post": {
+        "summary": "Credit (deposit) to an account",
+        "description": "Applies a credit to the specified account.\n\n**Business Rules (from COBOL):**\n- Account must be **Active** (not Frozen, not Closed)\n- Amount must be **positive**\n- Amount must not exceed **$50,000** (maximum transaction limit)\n\n**COBOL equivalent:** `CREDIT-ACCOUNT` paragraph",
+        "tags": ["Transactions"],
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreditRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credit applied successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (inactive account, negative amount, exceeds limit)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_active": {
+                    "value": {"error": "Account is not active. Cannot credit."}
+                  },
+                  "negative": {
+                    "value": {"error": "Amount must be positive."}
+                  },
+                  "exceeds_max": {
+                    "value": {"error": "Exceeds maximum transaction limit."}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/debit": {
+      "post": {
+        "summary": "Debit (withdrawal) from an account",
+        "description": "Applies a debit to the specified account.\n\n**Business Rules (from COBOL):**\n- Account must be **Active** (not Frozen, not Closed)\n- Amount must be **positive**\n- Amount must not exceed **$50,000** (maximum transaction limit)\n- Amount must not exceed **$10,000** (daily withdrawal limit)\n- Balance after debit must not fall below **$0.00** (minimum balance)\n\nFailed debits (insufficient funds) are logged with result `FL`.\n\n**COBOL equivalent:** `DEBIT-ACCOUNT` paragraph",
+        "tags": ["Transactions"],
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DebitRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Debit applied successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DebitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_active": {
+                    "value": {"error": "Account is not active. Cannot debit."}
+                  },
+                  "frozen": {
+                    "value": {"error": "Account is frozen. Contact admin."}
+                  },
+                  "negative": {
+                    "value": {"error": "Amount must be positive."}
+                  },
+                  "exceeds_max": {
+                    "value": {"error": "Exceeds maximum transaction limit."}
+                  },
+                  "exceeds_daily": {
+                    "value": {"error": "Exceeds daily withdrawal limit."}
+                  },
+                  "insufficient": {
+                    "value": {"error": "Insufficient funds."}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "JWT token management"
+    },
+    {
+      "name": "Accounts",
+      "description": "Account information and balance inquiries"
+    },
+    {
+      "name": "Transactions",
+      "description": "Credits, debits, and transaction history"
+    }
+  ]
+}

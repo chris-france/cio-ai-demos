@@ -1,7 +1,7 @@
 """Demo API routes."""
 
 from fastapi import APIRouter
-from demos import FOUNDATION_DEMOS, ADVANCED_DEMOS, enrich_demos
+from demos import FOUNDATION_DEMOS, ADVANCED_DEMOS, SERVICE_MGMT_DEMOS, enrich_demos
 
 router = APIRouter(prefix="/api")
 
@@ -26,5 +26,14 @@ def get_demos():
                 "and self-hosted infrastructure."
             ),
             "demos": enrich_demos(ADVANCED_DEMOS),
+        },
+        "service_mgmt": {
+            "title": "AI-Powered IT Service Management",
+            "subtitle": "Course 3 — Demos 14-21",
+            "description": (
+                "Build an AI help desk from scratch: analytics, triage, auto-resolution, "
+                "knowledge base, escalation, SLA prediction, multi-channel, and ROI planning."
+            ),
+            "demos": enrich_demos(SERVICE_MGMT_DEMOS),
         },
     }

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Planning Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+<div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-8">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-2 h-10 bg-gradient-to-b from-blue-600 to-emerald-500 rounded-full"></div>
+                <h1 class="text-3xl font-extrabold tracking-tight">Financial Planning Dashboard</h1>
+            </div>
+            <p class="text-sm text-gray-500 ml-5">Replaces <span class="mono bg-gray-200 px-1.5 py-0.5 rounded text-xs font-mono">sample-workbook.xlsx</span> — 5 sheets → 5 API endpoints, all logic in Python</p>
+        </div>
+        <div class="flex items-center gap-2 mt-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-xs font-medium text-emerald-600">Live Data — API Connected</span>
+        </div>
+    </div>
+
+    <!-- Before/After Banner -->
+    <div class="bg-gradient-to-r from-red-50 to-emerald-50 border border-gray-200 rounded-xl p-5 mb-8 grid grid-cols-2 gap-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                <span class="text-xs font-bold text-red-600 uppercase tracking-wider">Before: Excel Spreadsheet</span>
+            </div>
+            <ul class="text-xs text-gray-600 space-y-1">
+                <li>19 hardcoded values pretending to be data</li>
+                <li>7 assumptions — 5 over 4 years old, 3 by UNKNOWN</li>
+                <li>10 nested IF formulas for risk scoring</li>
+                <li>5-sheet dependency chain, no tests, no audit trail</li>
+            </ul>
+        </div>
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">After: Python Application</span>
+            </div>
+            <ul class="text-xs text-gray-600 space-y-1">
+                <li>All values calculated from data, nothing hardcoded</li>
+                <li>Assumptions have staleness detection & severity ratings</li>
+                <li>Risk scoring is explicit, readable Python — testable</li>
+                <li>REST API, real-time dashboard, version-controlled</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-6 gap-3 mb-8" id="kpiRow">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Revenue</p>
+            <p class="text-xl font-extrabold text-gray-900" id="kpiRevenue">—</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Costs</p>
+            <p class="text-xl font-extrabold text-gray-900" id="kpiCosts">—</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-emerald-200 bg-emerald-50/30">
+            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Gross Margin</p>
+            <p class="text-xl font-extrabold text-emerald-700" id="kpiMargin">—</p>
+            <p class="text-xs text-gray-400 mt-0.5" id="kpiMarginPct">—</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Vendor Spend</p>
+            <p class="text-xl font-extrabold text-gray-900" id="kpiVendor">—</p>
+            <p class="text-xs text-gray-400 mt-0.5" id="kpiVendorPct">—</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Headcount</p>
+            <p class="text-xl font-extrabold text-gray-900" id="kpiHeadcount">—</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm" id="kpiAlertCard">
+            <p class="text-xs font-semibold uppercase tracking-wider mb-1" id="kpiAlertLabel">Alerts</p>
+            <p class="text-xl font-extrabold" id="kpiAlerts">—</p>
+            <p class="text-xs text-gray-400 mt-0.5" id="kpiAlertSub">—</p>
+        </div>
+    </div>
+
+    <!-- Charts Row 1: Revenue + Cumulative -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Monthly Revenue by Product</h2>
+            <div style="height:280px;"><canvas id="revenueChart"></canvas></div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">YoY Growth — Calculated vs Spreadsheet</h2>
+            <p class="text-xs text-gray-400 -mt-2 mb-3">Green = calculated from prior year actuals. Red dashed = old hardcoded values.</p>
+            <div style="height:260px;"><canvas id="growthChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2: Departments + Vendors -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Department Cost Breakdown</h2>
+            <div style="height:280px;"><canvas id="deptChart"></canvas></div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Vendor Utilization vs Cost</h2>
+            <div style="height:280px;"><canvas id="vendorChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Assumptions Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Assumptions Registry</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Replaces hidden "Assumptions" sheet — now with staleness detection</p>
+            </div>
+            <span class="text-xs text-gray-400" id="staleCount">—</span>
+        </div>
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-left text-xs text-gray-500 uppercase tracking-wider">
+                <tr>
+                    <th class="px-5 py-2.5">Parameter</th>
+                    <th class="px-5 py-2.5 text-right">Value</th>
+                    <th class="px-5 py-2.5">Last Updated</th>
+                    <th class="px-5 py-2.5">Owner</th>
+                    <th class="px-5 py-2.5 text-right">Age</th>
+                    <th class="px-5 py-2.5">Status</th>
+                </tr>
+            </thead>
+            <tbody id="assumptionsBody" class="divide-y divide-gray-100"></tbody>
+        </table>
+    </div>
+
+    <!-- Vendor Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Vendor Contracts</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Risk scoring now in explicit Python — not nested IF formulas</p>
+        </div>
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-left text-xs text-gray-500 uppercase tracking-wider">
+                <tr>
+                    <th class="px-5 py-2.5">Vendor</th>
+                    <th class="px-5 py-2.5 text-right">Annual Cost</th>
+                    <th class="px-5 py-2.5 text-right">Users</th>
+                    <th class="px-5 py-2.5 text-right">$/User</th>
+                    <th class="px-5 py-2.5">Expires</th>
+                    <th class="px-5 py-2.5 text-right">Utilization</th>
+                    <th class="px-5 py-2.5">Auto-Renew</th>
+                    <th class="px-5 py-2.5">Risk</th>
+                </tr>
+            </thead>
+            <tbody id="vendorBody" class="divide-y divide-gray-100"></tbody>
+        </table>
+    </div>
+
+    <!-- API Reference -->
+    <div class="bg-gray-900 rounded-xl p-5 mb-6">
+        <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">API Endpoints — What Powers This Dashboard</h2>
+        <div class="grid grid-cols-5 gap-3 text-xs font-mono">
+            <a href="/api/summary" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded-lg p-3 transition-colors">
+                <div class="text-gray-500 mb-1">GET</div>/api/summary
+            </a>
+            <a href="/api/revenue" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded-lg p-3 transition-colors">
+                <div class="text-gray-500 mb-1">GET</div>/api/revenue
+            </a>
+            <a href="/api/departments" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded-lg p-3 transition-colors">
+                <div class="text-gray-500 mb-1">GET</div>/api/departments
+            </a>
+            <a href="/api/vendors" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded-lg p-3 transition-colors">
+                <div class="text-gray-500 mb-1">GET</div>/api/vendors
+            </a>
+            <a href="/api/assumptions" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded-lg p-3 transition-colors">
+                <div class="text-gray-500 mb-1">GET</div>/api/assumptions
+            </a>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Lecture 05: From Shadow IT to Real Application</p>
+</div>
+
+<script>
+const API = window.location.origin;
+const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+const fmtM = n => '$' + (n / 1000000).toFixed(1) + 'M';
+const pct = n => (n * 100).toFixed(1) + '%';
+
+// Old hardcoded growth rates from the spreadsheet (for comparison)
+const oldGrowth = [0.12, 0.15, 0.08, 0.18, 0.22, 0.14, 0.11, 0.19, 0.25, 0.16, 0.13, 0.21];
+
+async function loadDashboard() {
+    const [summary, revenue, departments, vendors, assumptions] = await Promise.all([
+        fetch(`${API}/api/summary`).then(r => r.json()),
+        fetch(`${API}/api/revenue`).then(r => r.json()),
+        fetch(`${API}/api/departments`).then(r => r.json()),
+        fetch(`${API}/api/vendors`).then(r => r.json()),
+        fetch(`${API}/api/assumptions`).then(r => r.json()),
+    ]);
+
+    // KPIs
+    document.getElementById('kpiRevenue').textContent = fmtM(summary.total_revenue);
+    document.getElementById('kpiCosts').textContent = fmtM(summary.total_costs);
+    document.getElementById('kpiMargin').textContent = fmtM(summary.gross_margin);
+    document.getElementById('kpiMarginPct').textContent = pct(summary.margin_pct) + ' margin';
+    document.getElementById('kpiVendor').textContent = fmtM(summary.vendor_spend);
+    document.getElementById('kpiVendorPct').textContent = pct(summary.vendor_pct) + ' of revenue';
+    document.getElementById('kpiHeadcount').textContent = summary.headcount;
+
+    const alertCount = summary.stale_assumptions + summary.high_risk_vendors;
+    document.getElementById('kpiAlerts').textContent = alertCount;
+    document.getElementById('kpiAlertSub').textContent = `${summary.stale_assumptions} stale, ${summary.high_risk_vendors} high-risk`;
+    const alertCard = document.getElementById('kpiAlertCard');
+    alertCard.className = alertCount > 0
+        ? 'bg-white rounded-xl p-4 shadow-sm border-2 border-red-200'
+        : 'bg-white rounded-xl p-4 shadow-sm border border-gray-200';
+    document.getElementById('kpiAlertLabel').className = alertCount > 0
+        ? 'text-xs font-semibold uppercase tracking-wider mb-1 text-red-500'
+        : 'text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400';
+
+    // Revenue Chart
+    const months = revenue.map(r => r.month);
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                { label: 'Product A', data: revenue.map(r => r.product_a), backgroundColor: '#3b82f6' },
+                { label: 'Product B', data: revenue.map(r => r.product_b), backgroundColor: '#10b981' },
+                { label: 'Product C', data: revenue.map(r => r.product_c), backgroundColor: '#f59e0b' },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+            scales: {
+                x: { stacked: true, grid: { display: false } },
+                y: { stacked: true, ticks: { callback: v => '$' + (v/1000) + 'K' }, grid: { color: '#f3f4f6' } }
+            }
+        }
+    });
+
+    // Growth Comparison Chart
+    const calcGrowth = revenue.map(r => r.yoy_growth !== null ? r.yoy_growth * 100 : null);
+    new Chart(document.getElementById('growthChart'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Calculated (from actuals)',
+                    data: calcGrowth,
+                    borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)',
+                    fill: true, tension: 0.3, pointRadius: 4, borderWidth: 2.5,
+                },
+                {
+                    label: 'Old Hardcoded (spreadsheet)',
+                    data: oldGrowth.map(g => g * 100),
+                    borderColor: '#ef4444', borderDash: [6, 4],
+                    pointRadius: 3, borderWidth: 2, pointStyle: 'crossRot',
+                },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+            scales: {
+                y: { ticks: { callback: v => v + '%' }, grid: { color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Department Chart
+    const deptColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'];
+    new Chart(document.getElementById('deptChart'), {
+        type: 'bar',
+        data: {
+            labels: departments.map(d => d.name),
+            datasets: [
+                {
+                    label: 'Fully Loaded Cost',
+                    data: departments.map(d => d.fully_loaded),
+                    backgroundColor: deptColors,
+                    borderRadius: 4,
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { callback: v => '$' + (v/1000000).toFixed(1) + 'M' }, grid: { color: '#f3f4f6' } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Vendor Bubble Chart
+    const riskColors = { LOW: 'rgba(16,185,129,0.7)', MEDIUM: 'rgba(245,158,11,0.7)', HIGH: 'rgba(239,68,68,0.7)' };
+    new Chart(document.getElementById('vendorChart'), {
+        type: 'bubble',
+        data: {
+            datasets: vendors.map(v => ({
+                label: v.name,
+                data: [{ x: v.annual_cost, y: v.utilization * 100, r: Math.max(6, Math.sqrt(v.annual_cost / 2000)) }],
+                backgroundColor: riskColors[v.risk_score],
+                borderColor: riskColors[v.risk_score].replace('0.7', '1'),
+                borderWidth: 1.5,
+            }))
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const v = vendors[ctx.datasetIndex];
+                            return `${v.name}: ${fmt(v.annual_cost)} — ${pct(v.utilization)} util — ${v.risk_score} risk`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Annual Cost', font: { size: 11, weight: '600' } }, ticks: { callback: v => '$' + (v/1000) + 'K' }, grid: { color: '#f3f4f6' } },
+                y: { title: { display: true, text: 'Utilization %', font: { size: 11, weight: '600' } }, min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f3f4f6' } }
+            }
+        },
+        plugins: [{
+            afterDraw(chart) {
+                const { ctx } = chart;
+                chart.data.datasets.forEach((ds, i) => {
+                    const meta = chart.getDatasetMeta(i);
+                    const elem = meta.data[0];
+                    if (elem) {
+                        ctx.save();
+                        ctx.font = '500 9px Inter, sans-serif';
+                        ctx.fillStyle = '#374151';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(vendors[i].name, elem.x, elem.y - ds.data[0].r - 4);
+                        ctx.restore();
+                    }
+                });
+            }
+        }]
+    });
+
+    // Assumptions Table
+    const stale = assumptions.filter(a => a.is_stale).length;
+    document.getElementById('staleCount').textContent = `${stale} of ${assumptions.length} stale`;
+
+    const sevColors = {
+        CRITICAL: 'bg-red-100 text-red-700',
+        HIGH: 'bg-amber-100 text-amber-700',
+        OK: 'bg-emerald-100 text-emerald-700',
+    };
+    document.getElementById('assumptionsBody').innerHTML = assumptions
+        .sort((a, b) => b.age_years - a.age_years)
+        .map(a => `<tr class="${a.severity === 'CRITICAL' ? 'bg-red-50/40' : ''} hover:bg-gray-50">
+            <td class="px-5 py-2.5 font-medium">${a.parameter}</td>
+            <td class="px-5 py-2.5 text-right font-mono font-semibold">${typeof a.value === 'number' && a.value < 1 ? pct(a.value) : a.value}</td>
+            <td class="px-5 py-2.5 text-gray-500">${a.last_updated}</td>
+            <td class="px-5 py-2.5 ${a.updated_by === 'UNKNOWN' ? 'text-red-600 font-medium' : 'text-gray-500'}">${a.updated_by}</td>
+            <td class="px-5 py-2.5 text-right font-semibold ${a.age_years >= 4 ? 'text-red-600' : a.age_years >= 2 ? 'text-amber-600' : 'text-gray-500'}">${a.age_years}y</td>
+            <td class="px-5 py-2.5"><span class="px-2 py-0.5 rounded text-xs font-bold ${sevColors[a.severity]}">${a.severity}</span></td>
+        </tr>`).join('');
+
+    // Vendor Table
+    const riskBadge = { LOW: 'bg-emerald-100 text-emerald-700', MEDIUM: 'bg-amber-100 text-amber-700', HIGH: 'bg-red-100 text-red-700' };
+    document.getElementById('vendorBody').innerHTML = vendors
+        .sort((a, b) => b.annual_cost - a.annual_cost)
+        .map(v => {
+            const expired = v.days_to_expiry < 0;
+            const soon = v.days_to_expiry >= 0 && v.days_to_expiry <= 90;
+            return `<tr class="${v.risk_score === 'HIGH' ? 'bg-red-50/40' : ''} hover:bg-gray-50">
+                <td class="px-5 py-2.5 font-medium">${v.name}</td>
+                <td class="px-5 py-2.5 text-right font-mono font-semibold">${fmt(v.annual_cost)}</td>
+                <td class="px-5 py-2.5 text-right">${v.users}</td>
+                <td class="px-5 py-2.5 text-right font-mono">${fmt(v.cost_per_user)}</td>
+                <td class="px-5 py-2.5 ${expired ? 'text-red-600 font-bold' : soon ? 'text-amber-600 font-medium' : 'text-gray-500'}">${v.contract_end}${expired ? ' (EXPIRED)' : soon ? ' (SOON)' : ''}</td>
+                <td class="px-5 py-2.5 text-right"><span class="${v.utilization < 0.5 ? 'text-red-600 font-bold' : ''}">${pct(v.utilization)}</span></td>
+                <td class="px-5 py-2.5">${v.auto_renew ? '<span class="text-amber-600 font-medium">Yes</span>' : 'No'}</td>
+                <td class="px-5 py-2.5"><span class="px-2 py-0.5 rounded text-xs font-bold ${riskBadge[v.risk_score]}">${v.risk_score}</span></td>
+            </tr>`;
+        }).join('');
+}
+
+loadDashboard();
+</script>
+
+</body>
+</html>

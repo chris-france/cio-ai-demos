@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Negotiation Emails</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f5f5f5; color: #1a1a1a; padding: 40px 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+        .header-bar { width: 8px; height: 40px; background: linear-gradient(to bottom, #ef4444, #f59e0b); border-radius: 4px; }
+        h1 { font-size: 28px; font-weight: 800; }
+        .subtitle { font-size: 13px; color: #6b7280; margin-left: 20px; margin-bottom: 32px; }
+        .email-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 24px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .email-toolbar { background: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 16px 24px; }
+        .email-toolbar .badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 8px; }
+        .meta-grid { display: grid; grid-template-columns: 50px 1fr; gap: 4px 8px; font-size: 13px; margin-top: 10px; }
+        .meta-label { color: #9ca3af; font-weight: 600; text-align: right; }
+        .meta-value { color: #374151; }
+        .email-body { padding: 24px; font-size: 14px; line-height: 1.8; color: #374151; }
+        .email-body p { margin-bottom: 14px; }
+        .email-body .greeting { margin-bottom: 14px; }
+        .email-body .signature { margin-top: 24px; border-top: 1px solid #f3f4f6; padding-top: 16px; color: #6b7280; font-size: 13px; }
+        .data-callout { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0; font-size: 13px; }
+        .data-callout table { width: 100%; border-collapse: collapse; }
+        .data-callout td { padding: 4px 0; }
+        .data-callout td:first-child { color: #6b7280; width: 200px; }
+        .data-callout td:last-child { font-weight: 700; font-family: monospace; }
+        .highlight { color: #dc2626; font-weight: 700; }
+        .copy-btn { float: right; background: #f3f4f6; border: 1px solid #d1d5db; color: #374151; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .copy-btn:hover { background: #e5e7eb; }
+        .strategy-note { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px 16px; margin: 16px 0; font-size: 12px; color: #92400e; }
+        .strategy-note strong { display: block; margin-bottom: 4px; }
+        @media print { body { background: white; padding: 20px; } .copy-btn { display: none; } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="header-bar"></div>
+        <h1>SaaS Negotiation Emails</h1>
+    </div>
+    <p class="subtitle">CIO AI Curriculum — Lecture 07: Three emails for your worst-value contracts. Firm, data-driven, professional.</p>
+
+    <!-- ═══ EMAIL 1: Snowflake ═══ -->
+    <div class="email-card">
+        <div class="email-toolbar">
+            <span class="badge" style="background:#fef2f2;color:#dc2626;">$1,000/USER/MO</span>
+            <span class="badge" style="background:#f3f4f6;color:#374151;">$240,000/yr</span>
+            <span class="badge" style="background:#fffbeb;color:#d97706;">Renews Jan 2026</span>
+            <button class="copy-btn" onclick="copyEmail('email1')">Copy to clipboard</button>
+            <div class="meta-grid">
+                <span class="meta-label">To:</span><span class="meta-value">Account Executive, Snowflake</span>
+                <span class="meta-label">CC:</span><span class="meta-value">CFO, VP Engineering</span>
+                <span class="meta-label">Subject:</span><span class="meta-value" style="font-weight:700;">Contract Review — Usage Optimization & Renewal Terms for [Company]</span>
+            </div>
+        </div>
+        <div class="email-body" id="email1">
+            <p class="greeting">Dear [Snowflake AE Name],</p>
+
+            <p>As we approach our January 2026 renewal, I'd like to open a conversation about optimizing our Snowflake contract to better align with our actual usage patterns.</p>
+
+            <p>Our internal audit has surfaced several data points I'd like to discuss:</p>
+
+            <div class="data-callout">
+                <table>
+                    <tr><td>Current annual contract</td><td>$240,000</td></tr>
+                    <tr><td>Licensed users</td><td>20</td></tr>
+                    <tr><td>Active users</td><td>18</td></tr>
+                    <tr><td>Effective cost per user/month</td><td class="highlight">$1,000</td></tr>
+                    <tr><td>Comparable alternatives evaluated</td><td>ClickHouse, DuckDB, Apache Spark</td></tr>
+                </table>
+            </div>
+
+            <p>At $1,000 per user per month, Snowflake is our single most expensive SaaS tool on a per-seat basis. While we value the platform's performance and ease of use, this cost level requires us to evaluate whether the current contract structure is sustainable for our organization.</p>
+
+            <p>We've begun preliminary evaluation of open-source alternatives including ClickHouse for our analytical workloads. We'd prefer to continue our partnership with Snowflake, but we need the economics to work. Specifically, we're looking for:</p>
+
+            <p><strong>1.</strong> A minimum <strong>25-30% reduction</strong> in our annual commitment<br>
+            <strong>2.</strong> A shift to a consumption-based model with committed-use discounts rather than flat licensing<br>
+            <strong>3.</strong> Quarterly usage reviews with right-sizing recommendations from your team</p>
+
+            <p>I'd appreciate the opportunity to discuss this before our renewal window. Could we schedule a call in the next two weeks?</p>
+
+            <div class="signature">
+                <strong>[Your Name]</strong><br>
+                Chief Information Officer<br>
+                [Company]
+            </div>
+        </div>
+        <div style="padding: 0 24px 20px;">
+            <div class="strategy-note">
+                <strong>Negotiation Strategy Notes (do not send):</strong>
+                Snowflake's biggest fear is losing you to Databricks or open-source. Mentioning ClickHouse signals you've done homework. Ask for consumption-based pricing — Snowflake's own model supports this, and it usually saves 20-40% for mid-size customers. Don't threaten to leave; let the data speak. The $1,000/user/month number is shocking enough on its own.
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ EMAIL 2: Splunk ═══ -->
+    <div class="email-card">
+        <div class="email-toolbar">
+            <span class="badge" style="background:#fef2f2;color:#dc2626;">$933/USER/MO</span>
+            <span class="badge" style="background:#f3f4f6;color:#374151;">$168,000/yr</span>
+            <span class="badge" style="background:#fef2f2;color:#dc2626;">Overlaps with Datadog</span>
+            <button class="copy-btn" onclick="copyEmail('email2')">Copy to clipboard</button>
+            <div class="meta-grid">
+                <span class="meta-label">To:</span><span class="meta-value">Account Executive, Splunk</span>
+                <span class="meta-label">CC:</span><span class="meta-value">CFO, CISO</span>
+                <span class="meta-label">Subject:</span><span class="meta-value" style="font-weight:700;">Splunk Cloud Renewal — Consolidation Discussion for [Company]</span>
+            </div>
+        </div>
+        <div class="email-body" id="email2">
+            <p class="greeting">Dear [Splunk AE Name],</p>
+
+            <p>I'm writing regarding our Splunk Cloud contract, which is scheduled for renewal on December 31, 2025. As part of a broader SaaS rationalization initiative, we've completed an audit of our monitoring and observability stack that I'd like to share with you.</p>
+
+            <div class="data-callout">
+                <table>
+                    <tr><td>Current Splunk annual cost</td><td>$168,000</td></tr>
+                    <tr><td>Licensed users</td><td>15</td></tr>
+                    <tr><td>Active users</td><td>12</td></tr>
+                    <tr><td>Effective cost per user/month</td><td class="highlight">$933</td></tr>
+                    <tr><td>Overlapping tool</td><td>Datadog Pro ($115,200/yr)</td></tr>
+                    <tr><td>Combined monitoring spend</td><td class="highlight">$283,200/yr</td></tr>
+                </table>
+            </div>
+
+            <p>Our engineering team currently uses both Splunk and Datadog, which creates significant overlap in log analysis, dashboarding, and alerting capabilities. We are consolidating to a single observability platform, and we need to make a decision before your renewal date.</p>
+
+            <p>Candidly, Datadog currently handles the majority of our real-time monitoring workflows, and our team has expressed a preference for its interface. However, Splunk's SIEM capabilities and compliance reporting are features Datadog doesn't fully replicate.</p>
+
+            <p>If we are to continue with Splunk, we would need:</p>
+
+            <p><strong>1.</strong> A <strong>40% reduction</strong> in annual cost to reflect our actual 12-user footprint<br>
+            <strong>2.</strong> A right-sized contract at our actual ingest volume, not the peak capacity we're currently paying for<br>
+            <strong>3.</strong> Inclusion of SIEM/compliance dashboards at no additional cost — this is the only feature keeping Splunk in our stack</p>
+
+            <p>Without a significantly restructured agreement, we will consolidate fully to Datadog at renewal. I'd welcome a conversation about how we can make this work for both sides.</p>
+
+            <div class="signature">
+                <strong>[Your Name]</strong><br>
+                Chief Information Officer<br>
+                [Company]
+            </div>
+        </div>
+        <div style="padding: 0 24px 20px;">
+            <div class="strategy-note">
+                <strong>Negotiation Strategy Notes (do not send):</strong>
+                This is your strongest hand. You have a working alternative (Datadog) already deployed. Splunk knows their biggest churn risk is Datadog consolidation. Lead with the overlap data, not emotion. The 40% ask is aggressive but justified — you're paying for 15 seats and using 12, at nearly $1K/user/month. Splunk will likely counter at 20-25%. Your walk-away is real: you can actually cancel. That's leverage.
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ EMAIL 3: Coupa ═══ -->
+    <div class="email-card">
+        <div class="email-toolbar">
+            <span class="badge" style="background:#fef2f2;color:#dc2626;">$200/USER/MO</span>
+            <span class="badge" style="background:#f3f4f6;color:#374151;">$120,000/yr</span>
+            <span class="badge" style="background:#fffbeb;color:#d97706;">44% Seats Unused</span>
+            <button class="copy-btn" onclick="copyEmail('email3')">Copy to clipboard</button>
+            <div class="meta-grid">
+                <span class="meta-label">To:</span><span class="meta-value">Account Executive, Coupa</span>
+                <span class="meta-label">CC:</span><span class="meta-value">CFO, VP Finance</span>
+                <span class="meta-label">Subject:</span><span class="meta-value" style="font-weight:700;">Coupa Procurement — License Right-Sizing Before September Renewal</span>
+            </div>
+        </div>
+        <div class="email-body" id="email3">
+            <p class="greeting">Dear [Coupa AE Name],</p>
+
+            <p>Our Coupa Procurement contract is coming up for renewal on September 30, 2025, and I'd like to discuss right-sizing our agreement before auto-renewal takes effect.</p>
+
+            <div class="data-callout">
+                <table>
+                    <tr><td>Current annual cost</td><td>$120,000</td></tr>
+                    <tr><td>Licensed users</td><td>50</td></tr>
+                    <tr><td>Active users</td><td>28</td></tr>
+                    <tr><td>Utilization rate</td><td class="highlight">56%</td></tr>
+                    <tr><td>Unused licenses</td><td class="highlight">22 seats ($52,800/yr wasted)</td></tr>
+                    <tr><td>Cost per active user/month</td><td class="highlight">$357</td></tr>
+                </table>
+            </div>
+
+            <p>We are currently paying for 50 licenses but only 28 people actively use the platform. That means 44% of our Coupa investment — approximately $52,800 per year — is going to unused seats. At $200 per user per month on a per-license basis (or $357 per <em>active</em> user), this is well above market rate for procurement software.</p>
+
+            <p>We've evaluated several alternatives including open-source options (ERPNext procurement module) and mid-market competitors (Precoro, Kissflow Procurement Cloud) that offer comparable P2P workflows at 40-60% lower cost per seat.</p>
+
+            <p>For our renewal, we're requesting:</p>
+
+            <p><strong>1.</strong> A contract restructured for <strong>30 seats</strong> (our actual usage plus a small buffer), not 50<br>
+            <strong>2.</strong> A per-seat rate reduction of at least <strong>15%</strong> given our multi-year tenure and the current market<br>
+            <strong>3.</strong> Elimination of auto-renewal — we prefer annual opt-in renewals going forward</p>
+
+            <p>This would bring our annual cost to approximately $61,200 — a fair price for the value delivered. I'd like to resolve this before the September renewal window. Can we schedule a call this week?</p>
+
+            <div class="signature">
+                <strong>[Your Name]</strong><br>
+                Chief Information Officer<br>
+                [Company]
+            </div>
+        </div>
+        <div style="padding: 0 24px 20px;">
+            <div class="strategy-note">
+                <strong>Negotiation Strategy Notes (do not send):</strong>
+                Coupa's weakness here is the utilization data — 56% is indefensible. They'll try to argue "you might grow into it." Counter with: "We've had 50 seats for the full contract term and never exceeded 28 active users." The auto-renewal elimination ask is important — it forces them to earn your business every year. Mention Precoro by name; it's a real competitor they track. Target outcome: $61K (49% reduction). You'll likely land around $72-78K (35-38% savings). That's still $42-48K saved.
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div style="background:white;border:1px solid #e5e7eb;border-radius:12px;padding:24px;text-align:center;">
+        <div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Combined Savings Target from These 3 Emails</div>
+        <div style="font-size:36px;font-weight:800;color:#059669;">$228,000 – $292,800/yr</div>
+        <div style="font-size:13px;color:#6b7280;margin-top:8px;">Snowflake: $60-72K + Splunk: $67-100K + Coupa: $42-58K (after right-sizing)</div>
+    </div>
+
+    <p style="text-align:center;font-size:11px;color:#9ca3af;margin-top:24px;">CIO AI Curriculum — Lecture 07: SaaS Renegotiation</p>
+</div>
+
+<script>
+function copyEmail(id) {
+    const el = document.getElementById(id);
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('copy');
+    sel.removeAllRanges();
+    const btn = el.closest('.email-card').querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy to clipboard', 2000);
+}
+</script>
+</body>
+</html>

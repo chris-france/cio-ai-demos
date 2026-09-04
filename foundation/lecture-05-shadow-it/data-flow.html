@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Flow Diagram — Spreadsheet Dependencies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'Courier New', monospace; }
+        @keyframes dashFlow { to { stroke-dashoffset: -20; } }
+        .flow-animate { animation: dashFlow 1.5s linear infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+        .node:hover { filter: brightness(0.95); }
+        .node { cursor: pointer; transition: filter 0.2s; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<div class="max-w-7xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-2">
+        <div class="flex items-center gap-3 mb-1">
+            <div class="w-2 h-10 bg-gradient-to-b from-red-500 to-amber-500 rounded-full"></div>
+            <h1 class="text-3xl font-extrabold tracking-tight">Spreadsheet Data Flow Diagram</h1>
+        </div>
+        <p class="text-sm text-gray-500 ml-5">CIO AI Curriculum — Lecture 05: Every arrow is a formula that breaks if someone inserts a row</p>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex items-center gap-6 mt-6 mb-4 text-xs text-gray-500">
+        <span class="flex items-center gap-2"><span class="w-4 h-0.5 bg-gray-400 inline-block"></span> Data reference</span>
+        <span class="flex items-center gap-2"><span class="w-4 h-0.5 bg-red-500 inline-block" style="border-bottom: 2px solid #ef4444;"></span> Critical dependency</span>
+        <span class="flex items-center gap-2"><span class="w-4 h-1 inline-block border-b-2 border-dashed border-amber-500"></span> Assumption chain</span>
+        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-100 border border-red-300 inline-block"></span> Hardcoded values</span>
+        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-blue-100 border border-blue-300 inline-block"></span> Formula cell</span>
+        <span class="text-gray-400 ml-4">Click any sheet to highlight its connections</span>
+    </div>
+
+    <!-- Main Diagram -->
+    <div class="relative bg-gray-50 border border-gray-200 rounded-2xl" style="height: 780px;" id="diagram">
+        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 1100 780" id="arrows">
+            <defs>
+                <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9ca3af"/></marker>
+                <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ef4444"/></marker>
+                <marker id="arrowAmber" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b"/></marker>
+                <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6"/></marker>
+                <marker id="arrowEmerald" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#10b981"/></marker>
+            </defs>
+
+            <!-- ═══ CONNECTIONS ═══ -->
+
+            <!-- Cost Allocation H2:H8 → Revenue Forecast E14 (7 formulas) -->
+            <path d="M 310 340 C 250 340, 250 200, 310 200" stroke="#ef4444" stroke-width="2.5" fill="none" marker-end="url(#arrowRed)" class="flow-animate" stroke-dasharray="6 4" data-from="cost" data-to="revenue"/>
+            <rect x="215" y="258" width="56" height="20" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>
+            <text x="243" y="272" text-anchor="middle" fill="#dc2626" font-size="9" font-weight="700" font-family="Inter">7 refs</text>
+
+            <!-- Summary B3 → Revenue Forecast E14 -->
+            <path d="M 630 570 C 500 520, 400 300, 400 220" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrowBlue)" data-from="summary" data-to="revenue"/>
+            <rect x="470" y="400" width="90" height="20" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+            <text x="515" y="414" text-anchor="middle" fill="#2563eb" font-size="9" font-weight="600" font-family="Inter, monospace">B3 ← E14</text>
+
+            <!-- Summary B4 → Cost Allocation G2:G8 -->
+            <path d="M 630 590 C 550 550, 480 420, 430 380" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrowBlue)" data-from="summary" data-to="cost"/>
+            <rect x="498" y="478" width="110" height="20" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+            <text x="553" y="492" text-anchor="middle" fill="#2563eb" font-size="9" font-weight="600" font-family="Inter, monospace">B4 ← SUM(G2:G8)</text>
+
+            <!-- Summary B8 → Vendor Contracts B2:B11 -->
+            <path d="M 780 570 C 830 500, 830 350, 800 280" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrowBlue)" data-from="summary" data-to="vendor"/>
+            <rect x="808" y="410" width="115" height="20" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+            <text x="865" y="424" text-anchor="middle" fill="#2563eb" font-size="9" font-weight="600" font-family="Inter, monospace">B8 ← SUM(B2:B11)</text>
+
+            <!-- Summary B11 → Assumptions B4 (Discount Rate) -->
+            <path d="M 700 640 C 700 700, 550 720, 480 700" stroke="#f59e0b" stroke-width="2" fill="none" marker-end="url(#arrowAmber)" stroke-dasharray="6 4" class="flow-animate" data-from="summary" data-to="assumptions"/>
+            <rect x="530" y="700" width="120" height="20" rx="4" fill="#fffbeb" stroke="#fcd34d" stroke-width="1"/>
+            <text x="590" y="714" text-anchor="middle" fill="#d97706" font-size="9" font-weight="600" font-family="Inter, monospace">B11 ← B4, B7</text>
+
+            <!-- Implicit: Cost Allocation benefits_rate uses Assumptions concept -->
+            <path d="M 360 380 C 360 500, 380 650, 400 680" stroke="#f59e0b" stroke-width="1.5" fill="none" marker-end="url(#arrowAmber)" stroke-dasharray="4 4" opacity="0.6" data-from="cost" data-to="assumptions"/>
+            <rect x="320" y="530" width="80" height="20" rx="4" fill="#fffbeb" stroke="#fcd34d" stroke-width="1" opacity="0.7"/>
+            <text x="360" y="544" text-anchor="middle" fill="#d97706" font-size="8" font-weight="600" font-family="Inter">conceptual</text>
+        </svg>
+
+        <!-- ═══ SHEET NODES ═══ -->
+
+        <!-- Revenue Forecast -->
+        <div class="node absolute" style="left: 280px; top: 80px; width: 260px;" data-sheet="revenue" onclick="highlight('revenue')">
+            <div class="bg-white rounded-xl border-2 border-blue-900 shadow-md overflow-hidden">
+                <div class="px-4 py-2.5" style="background: #1F4E79;">
+                    <div class="flex items-center justify-between">
+                        <span class="text-white text-sm font-bold">Revenue Forecast</span>
+                        <span class="text-blue-200 text-xs">Sheet 1</span>
+                    </div>
+                </div>
+                <div class="p-4 text-xs space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded bg-blue-100 border border-blue-300 flex-shrink-0"></span>
+                        <span class="text-gray-600"><strong>B2:D13</strong> — Product revenue (values)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded bg-blue-100 border border-blue-300 flex-shrink-0"></span>
+                        <span class="text-gray-600"><strong>E2:E13</strong> — =SUM(B:D) row totals</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-red-100 border border-red-300 flex-shrink-0"></span>
+                        <span class="text-red-600 font-medium"><strong>F2:F13</strong> — YoY Growth (HARDCODED!)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded bg-blue-100 border border-blue-300 flex-shrink-0"></span>
+                        <span class="text-gray-600"><strong>G2:G13</strong> — Cumulative (chain dependency)</span>
+                    </div>
+                    <div class="flex items-center gap-2 pt-1 border-t border-gray-100">
+                        <span class="w-2 h-2 rounded bg-emerald-100 border border-emerald-300 flex-shrink-0"></span>
+                        <span class="text-emerald-700 font-semibold"><strong>E14</strong> — Total Revenue (KEY OUTPUT)</span>
+                    </div>
+                    <div class="text-gray-400 text-right">28 formulas &middot; 68 values</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Allocation -->
+        <div class="node absolute" style="left: 80px; top: 300px; width: 260px;" data-sheet="cost" onclick="highlight('cost')">
+            <div class="bg-white rounded-xl border-2 shadow-md overflow-hidden" style="border-color: #C00000;">
+                <div class="px-4 py-2.5" style="background: #C00000;">
+                    <div class="flex items-center justify-between">
+                        <span class="text-white text-sm font-bold">Cost Allocation</span>
+                        <span class="text-red-200 text-xs">Sheet 2</span>
+                    </div>
+                </div>
+                <div class="p-4 text-xs space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded bg-blue-100 border border-blue-300 flex-shrink-0"></span>
+                        <span class="text-gray-600"><strong>B2:D8</strong> — Headcount, salary, benefits</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded bg-blue-100 border border-blue-300 flex-shrink-0"></span>
+                        <span class="text-gray-600"><strong>E2:E8</strong> — =B*C*(1+D) total comp</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-red-100 border border-red-300 flex-shrink-0"></span>
+                        <span class="text-red-600 font-medium"><strong>F2:F8</strong> — Overhead % (HARDCODED!)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded bg-blue-100 border border-blue-300 flex-shrink-0"></span>
+                        <span class="text-gray-600"><strong>G2:G8</strong> — =E*(1+F) fully loaded</span>
+                    </div>
+                    <div class="flex items-center gap-2 pt-1 border-t border-gray-100">
+                        <span class="w-2 h-2 rounded bg-red-200 border border-red-400 flex-shrink-0 pulse"></span>
+                        <span class="text-red-700 font-semibold"><strong>H2:H8</strong> — =G/'Rev Forecast'!E14</span>
+                    </div>
+                    <div class="text-gray-400 text-right">21 formulas &middot; 43 values</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vendor Contracts -->
+        <div class="node absolute" style="left: 660px; top: 120px; width: 260px;" data-sheet="vendor" onclick="highlight('vendor')">
+            <div class="bg-white rounded-xl border-2 shadow-md overflow-hidden" style="border-color: #2E75B6;">
+                <div class="px-4 py-2.5" style="background: #2E75B6;">
+                    <div class="flex items-center justify-between">
+                        <span class="text-white text-sm font-bold">Vendor Contracts</span>
+                        <span class="text-blue-200 text-xs">Sheet 3</span>
+                    </div>
+                </div>
+                <div class="p-4 text-xs space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded bg-blue-100 border border-blue-300 flex-shrink-0"></span>
+                        <span class="text-gray-600"><strong>A2:G11</strong> — Vendor data (10 vendors)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded bg-blue-100 border border-blue-300 flex-shrink-0"></span>
+                        <span class="text-gray-600"><strong>D2:D11</strong> — =B/C cost per user</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-red-100 border border-red-300 flex-shrink-0"></span>
+                        <span class="text-red-600 font-medium"><strong>H2:H11</strong> — Nested IF risk (5 levels!)</span>
+                    </div>
+                    <div class="mt-2 mono text-xs bg-gray-100 rounded p-2 text-gray-500 leading-relaxed" style="font-size:8px;">
+                        =IF(AND(G&lt;0.5,F="Yes"),"HIGH",<br>
+                        &nbsp;&nbsp;IF(G&lt;0.5,"MED",IF(AND(G&gt;0.8,B&lt;50K),"LOW","MED")))
+                    </div>
+                    <div class="text-gray-400 text-right">20 formulas &middot; 68 values</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assumptions -->
+        <div class="node absolute" style="left: 180px; top: 620px; width: 260px;" data-sheet="assumptions" onclick="highlight('assumptions')">
+            <div class="bg-white rounded-xl border-2 shadow-md overflow-hidden" style="border-color: #FFC000;">
+                <div class="px-4 py-2.5" style="background: #FFC000;">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-900 text-sm font-bold">Assumptions</span>
+                        <span class="text-amber-800 text-xs">Sheet 4 — DANGER ZONE</span>
+                    </div>
+                </div>
+                <div class="p-4 text-xs space-y-1.5">
+                    <div class="text-red-600 font-bold text-xs mb-2">"DO NOT MODIFY" — but 3 entries by UNKNOWN</div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                        <div><span class="text-gray-500">Tax Rate:</span> <span class="font-semibold">21%</span> <span class="text-red-500 text-xs">(4y old)</span></div>
+                        <div><span class="text-gray-500">Discount:</span> <span class="font-semibold">8%</span> <span class="text-red-500 text-xs">(5y old)</span></div>
+                        <div><span class="text-gray-500">Growth:</span> <span class="font-semibold">15%</span> <span class="text-amber-500 text-xs">(3y old)</span></div>
+                        <div><span class="text-gray-500">Inflation:</span> <span class="font-semibold">3.5%</span> <span class="text-red-500 text-xs">(6y old)</span></div>
+                        <div><span class="text-gray-500">FX EUR/USD:</span> <span class="font-semibold">1.08</span> <span class="text-amber-500 text-xs">(2y old)</span></div>
+                        <div><span class="text-gray-500">Benefits:</span> <span class="font-semibold">30%</span> <span class="text-red-600 font-bold text-xs">(7y!)</span></div>
+                        <div><span class="text-gray-500">Contingency:</span> <span class="font-semibold">10%</span> <span class="text-red-500 text-xs">(5y old)</span></div>
+                    </div>
+                    <div class="text-gray-400 text-right pt-1">0 formulas &middot; 33 values</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="node absolute" style="left: 560px; top: 520px; width: 300px;" data-sheet="summary" onclick="highlight('summary')">
+            <div class="bg-white rounded-xl border-2 shadow-md overflow-hidden" style="border-color: #548235;">
+                <div class="px-4 py-2.5" style="background: #548235;">
+                    <div class="flex items-center justify-between">
+                        <span class="text-white text-sm font-bold">Summary (Executive Dashboard)</span>
+                        <span class="text-green-200 text-xs">Sheet 5</span>
+                    </div>
+                </div>
+                <div class="p-4 text-xs space-y-2">
+                    <div class="text-gray-500 font-medium mb-2">Pulls from ALL other sheets — the single point of failure</div>
+                    <div class="space-y-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 mono">B3</span>
+                            <span class="text-gray-600">Total Revenue ← <strong class="text-blue-700">'Revenue Forecast'!E14</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 mono">B4</span>
+                            <span class="text-gray-600">Total Costs ← <strong class="text-red-700">SUM('Cost Allocation'!G2:G8)</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 mono">B5</span>
+                            <span class="text-gray-600">Gross Margin ← <strong>B3-B4</strong> (internal)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 mono">B8</span>
+                            <span class="text-gray-600">Vendor Spend ← <strong class="text-blue-700">SUM('Vendor Contracts'!B2:B11)</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-700 mono">B11</span>
+                            <span class="text-gray-600">Adj Margin ← B5 * <strong class="text-amber-600">Assumptions!B7</strong> * <strong class="text-amber-600">Assumptions!B4</strong></span>
+                        </div>
+                    </div>
+                    <div class="text-gray-400 text-right pt-1">7 formulas &middot; 8 values</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danger callout -->
+        <div class="absolute" style="right: 40px; bottom: 40px; width: 220px;">
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+                <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-2">Critical Path</div>
+                <div class="text-xs text-gray-600 leading-relaxed">
+                    Summary B11 depends on:<br>
+                    <span class="mono text-red-600 text-xs">
+                    Summary.B5<br>
+                    &nbsp;&nbsp;← Summary.B3 - Summary.B4<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;← Revenue Forecast.E14<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;← Cost Allocation.G2:G8<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← Revenue Forecast.E14<br>
+                    × Assumptions.B7<br>
+                    × Assumptions.B4<br>
+                    </span>
+                    <p class="mt-2 text-red-700 font-semibold">4 sheets, 5 hops, 0 validation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="grid grid-cols-5 gap-3 mt-6 mb-6">
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-extrabold text-gray-900">10</div>
+            <div class="text-xs text-gray-500">Cross-sheet references</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-extrabold text-red-600">19</div>
+            <div class="text-xs text-gray-500">Hardcoded values</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-extrabold text-amber-600">10</div>
+            <div class="text-xs text-gray-500">Nested IF formulas</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-extrabold text-red-600">5</div>
+            <div class="text-xs text-gray-500">Dependency hops (max)</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+            <div class="text-2xl font-extrabold text-red-600">0</div>
+            <div class="text-xs text-gray-500">Validation checks</div>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Lecture 05: Shadow IT — Data Flow Analysis</p>
+</div>
+
+<script>
+// Click a sheet node to highlight its connections
+let activeSheet = null;
+
+function highlight(sheet) {
+    const svg = document.getElementById('arrows');
+    const allPaths = svg.querySelectorAll('path, line');
+    const allLabels = svg.querySelectorAll('rect, text');
+    const allNodes = document.querySelectorAll('.node');
+
+    if (activeSheet === sheet) {
+        // Deselect — restore all
+        activeSheet = null;
+        allPaths.forEach(p => { p.style.opacity = ''; });
+        allLabels.forEach(l => { l.style.opacity = ''; });
+        allNodes.forEach(n => { n.style.opacity = ''; });
+        return;
+    }
+
+    activeSheet = sheet;
+
+    // Dim everything first
+    allPaths.forEach(p => { p.style.opacity = '0.1'; });
+    allLabels.forEach(l => { l.style.opacity = '0.1'; });
+    allNodes.forEach(n => { n.style.opacity = '0.3'; });
+
+    // Highlight selected node
+    const selectedNode = document.querySelector(`[data-sheet="${sheet}"]`);
+    if (selectedNode) selectedNode.style.opacity = '1';
+
+    // Highlight connected paths and their target nodes
+    allPaths.forEach(p => {
+        const from = p.getAttribute('data-from');
+        const to = p.getAttribute('data-to');
+        if (from === sheet || to === sheet) {
+            p.style.opacity = '1';
+            // Find the label elements near this path (next siblings that are rect/text)
+            let sibling = p.nextElementSibling;
+            while (sibling && (sibling.tagName === 'rect' || sibling.tagName === 'text')) {
+                sibling.style.opacity = '1';
+                sibling = sibling.nextElementSibling;
+            }
+            // Highlight connected node
+            const otherSheet = from === sheet ? to : from;
+            const otherNode = document.querySelector(`[data-sheet="${otherSheet}"]`);
+            if (otherNode) otherNode.style.opacity = '1';
+        }
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow IT Triage Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'Courier New', monospace; }
+        th.sortable { cursor: pointer; user-select: none; }
+        th.sortable:hover { background: #e5e7eb; }
+        th.sortable::after { content: ' ↕'; opacity: 0.3; }
+        th.sortable.asc::after { content: ' ↑'; opacity: 1; }
+        th.sortable.desc::after { content: ' ↓'; opacity: 1; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<div class="max-w-7xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-2">
+        <div class="flex items-center gap-3 mb-1">
+            <div class="w-2 h-10 bg-gradient-to-b from-red-500 to-amber-500 rounded-full"></div>
+            <h1 class="text-3xl font-extrabold tracking-tight">Shadow IT Triage Dashboard</h1>
+        </div>
+        <p class="text-sm text-gray-500 ml-5">CIO AI Curriculum — Lecture 05: Identify, Score, and Prioritize Shadow Systems</p>
+    </div>
+
+    <!-- Executive Summary -->
+    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8 mt-6">
+        <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Executive Summary</h2>
+        <p class="text-gray-700 leading-relaxed" id="execSummary"></p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Shadow Systems</p>
+            <p class="text-3xl font-extrabold text-gray-900" id="kpiTotal">—</p>
+            <p class="text-xs text-gray-400 mt-1">Unmanaged by IT</p>
+        </div>
+        <div class="bg-white border-2 border-red-200 rounded-xl p-5 shadow-sm bg-red-50/30">
+            <p class="text-xs font-semibold text-red-500 uppercase tracking-wider mb-1">Critical Risk</p>
+            <p class="text-3xl font-extrabold text-red-600" id="kpiCritical">—</p>
+            <p class="text-xs text-gray-400 mt-1">Migrate immediately</p>
+        </div>
+        <div class="bg-white border-2 border-amber-200 rounded-xl p-5 shadow-sm bg-amber-50/30">
+            <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-1">Monitor Closely</p>
+            <p class="text-3xl font-extrabold text-amber-600" id="kpiMonitor">—</p>
+            <p class="text-xs text-gray-400 mt-1">Plan migration</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Acceptable Risk</p>
+            <p class="text-3xl font-extrabold text-emerald-600" id="kpiAcceptable">—</p>
+            <p class="text-xs text-gray-400 mt-1">Low priority</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Est. Migration Effort</p>
+            <p class="text-3xl font-extrabold text-gray-900" id="kpiEffort">—</p>
+            <p class="text-xs text-gray-400 mt-1">Person-weeks total</p>
+        </div>
+    </div>
+
+    <!-- Risk Matrix -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Risk Matrix</h2>
+        <p class="text-sm text-gray-500 mb-4">X: Business Criticality → Y: Data Sensitivity. Bubble size = risk score. Click a bubble for details.</p>
+        <div style="height: 460px;"><canvas id="riskMatrix"></canvas></div>
+        <div class="flex items-center justify-center gap-6 mt-4 text-sm">
+            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Migrate Immediately (score ≥ 70)</span>
+            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Monitor Closely (40–69)</span>
+            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Acceptable Risk (&lt; 40)</span>
+        </div>
+    </div>
+
+    <!-- Action Table -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-bold text-gray-900">Prioritized Triage Actions</h2>
+            <p class="text-sm text-gray-500">Sorted by risk score — highest risk first. Click headers to re-sort.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="triageTable">
+                <thead class="bg-gray-50 text-left">
+                    <tr>
+                        <th class="sortable px-5 py-3 font-semibold text-gray-600" data-col="name">System</th>
+                        <th class="sortable px-5 py-3 font-semibold text-gray-600" data-col="owner">Owner</th>
+                        <th class="sortable px-5 py-3 font-semibold text-gray-600" data-col="sensitivity">Sensitivity</th>
+                        <th class="sortable px-5 py-3 font-semibold text-gray-600" data-col="criticality">Criticality</th>
+                        <th class="sortable px-5 py-3 font-semibold text-gray-600 text-right" data-col="score">Risk Score</th>
+                        <th class="sortable px-5 py-3 font-semibold text-gray-600" data-col="triage">Triage</th>
+                        <th class="px-5 py-3 font-semibold text-gray-600" data-col="effort">Effort</th>
+                        <th class="px-5 py-3 font-semibold text-gray-600">Recommended Action</th>
+                    </tr>
+                </thead>
+                <tbody id="triageBody" class="divide-y divide-gray-100"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Lecture 05: Shadow IT Triage</p>
+</div>
+
+<script>
+// ═══ Shadow IT Inventory ═══
+const systems = [
+    {
+        name: "Finance Planning Master.xlsx",
+        type: "Excel",
+        owner: "CFO Office",
+        sensitivity: "Confidential",
+        criticality: "Mission Critical",
+        users: 12,
+        description: "5-sheet financial planning workbook with cross-sheet dependencies, stale assumptions, and hardcoded growth rates",
+        recommendation: "Migrate to database-backed application with REST API (see Lecture 05 demo). Add assumption audit trail, validation, and role-based access.",
+        effort: "6-8 weeks"
+    },
+    {
+        name: "HR Headcount Tracker.xlsx",
+        type: "Excel",
+        owner: "HR Director",
+        sensitivity: "Restricted",
+        criticality: "High",
+        users: 5,
+        description: "Employee salary data, org chart, compensation bands, and headcount forecasting. Contains PII (names, salaries, SSN last-4).",
+        recommendation: "Migrate to HRIS (Workday/BambooHR). PII in an unencrypted spreadsheet on a shared drive is a compliance violation. Immediate risk.",
+        effort: "4-6 weeks"
+    },
+    {
+        name: "Sales Commission Calculator.xlsx",
+        type: "Excel",
+        owner: "Sales Ops",
+        sensitivity: "Confidential",
+        criticality: "High",
+        users: 8,
+        description: "Commission tiers, quota attainment, accelerators, and payout calculations. 15 nested IF formulas. Used to calculate actual paychecks.",
+        recommendation: "Migrate to CRM commission module (Salesforce CPQ) or dedicated tool (CaptivateIQ/Spiff). Formula errors = incorrect paychecks = legal liability.",
+        effort: "4-5 weeks"
+    },
+    {
+        name: "Vendor Contact Database.accdb",
+        type: "Access DB",
+        owner: "Procurement",
+        sensitivity: "Internal",
+        criticality: "Medium",
+        users: 4,
+        description: "Vendor contact info, contract terms, payment history. Single-user Access DB on a shared drive. No backup strategy.",
+        recommendation: "Migrate to vendor management system or PostgreSQL + simple web UI. Access DB corruption risk is high with multi-user access.",
+        effort: "2-3 weeks"
+    },
+    {
+        name: "Project Status Tracker.xlsx",
+        type: "Excel",
+        owner: "PMO Director",
+        sensitivity: "Internal",
+        criticality: "High",
+        users: 22,
+        description: "Master project list with RAG status, budget tracking, and resource allocation. Updated weekly by 8 different PMs. Frequent merge conflicts.",
+        recommendation: "Migrate to project management tool (Jira/Monday.com) or build a lightweight web app. Multi-editor Excel is a data loss risk.",
+        effort: "3-4 weeks"
+    },
+    {
+        name: "Customer Pricing Matrix.xlsx",
+        type: "Excel",
+        owner: "VP Sales",
+        sensitivity: "Confidential",
+        criticality: "Mission Critical",
+        users: 15,
+        description: "Customer-specific pricing, discount tiers, and margin floors. Used in real-time during deal negotiations. Emailed to field sales reps.",
+        recommendation: "URGENT: Confidential pricing emailed externally = data leak risk. Migrate to CRM price book with access controls and audit logging.",
+        effort: "5-6 weeks"
+    },
+    {
+        name: "IT Asset Inventory.xlsx",
+        type: "Excel",
+        owner: "IT Ops",
+        sensitivity: "Internal",
+        criticality: "Medium",
+        users: 3,
+        description: "Hardware/software inventory, license counts, warranty dates. Not connected to MDM or discovery tools.",
+        recommendation: "Replace with IT asset management tool (Snipe-IT/ServiceNow CMDB). Current spreadsheet misses 30-40% of actual assets.",
+        effort: "2-3 weeks"
+    },
+    {
+        name: "Compliance Checklist.xlsx",
+        type: "Excel",
+        owner: "Legal/Compliance",
+        sensitivity: "Restricted",
+        criticality: "High",
+        users: 6,
+        description: "SOX/SOC2 compliance checklist with evidence links, control owners, and audit dates. No version history. Last backup unknown.",
+        recommendation: "Migrate to GRC platform (Vanta/Drata) or at minimum a versioned document system. Auditors will flag uncontrolled compliance records.",
+        effort: "4-5 weeks"
+    },
+    {
+        name: "Marketing Campaign ROI.xlsx",
+        type: "Excel",
+        owner: "Marketing Ops",
+        sensitivity: "Internal",
+        criticality: "Low",
+        users: 4,
+        description: "Campaign spend vs. lead attribution. Manual data entry from 3 different ad platforms. Always 2 weeks behind.",
+        recommendation: "Connect ad platforms via APIs (HubSpot/Segment). Low risk, but high opportunity cost from delayed data.",
+        effort: "2 weeks"
+    },
+    {
+        name: "Board Deck Generator.pptx",
+        type: "PowerPoint + macros",
+        owner: "CFO Office",
+        sensitivity: "Confidential",
+        criticality: "Medium",
+        users: 3,
+        description: "Macro-enabled PowerPoint that pulls data from Finance Planning Master.xlsx. If the Excel breaks, the board deck breaks.",
+        recommendation: "Rebuild as automated report pipeline. Board deck should pull from the same API as the finance dashboard, not from another shadow system.",
+        effort: "3-4 weeks"
+    },
+];
+
+// ═══ Risk Scoring Engine ═══
+const sensitivityScore = { "Public": 10, "Internal": 30, "Restricted": 60, "Confidential": 85 };
+const criticalityScore = { "Low": 15, "Medium": 40, "High": 70, "Mission Critical": 95 };
+
+function scoreSystem(sys) {
+    const sScore = sensitivityScore[sys.sensitivity] || 50;
+    const cScore = criticalityScore[sys.criticality] || 50;
+    // Weighted: 45% sensitivity + 45% criticality + 10% user spread
+    const userFactor = Math.min(100, sys.users * 4);
+    const total = Math.round(sScore * 0.45 + cScore * 0.45 + userFactor * 0.10);
+    return Math.min(100, total);
+}
+
+function triageLevel(score) {
+    if (score >= 70) return { label: "Migrate Immediately", color: "red", bg: "bg-red-100 text-red-700", dot: "bg-red-500" };
+    if (score >= 40) return { label: "Monitor Closely", color: "amber", bg: "bg-amber-100 text-amber-700", dot: "bg-amber-500" };
+    return { label: "Acceptable Risk", color: "emerald", bg: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" };
+}
+
+// Score all systems
+systems.forEach(s => {
+    s.score = scoreSystem(s);
+    s.triage = triageLevel(s.score);
+    s.sensScore = sensitivityScore[s.sensitivity] || 50;
+    s.critScore = criticalityScore[s.criticality] || 50;
+});
+systems.sort((a, b) => b.score - a.score);
+
+// ═══ KPIs ═══
+const critical = systems.filter(s => s.score >= 70).length;
+const monitor = systems.filter(s => s.score >= 40 && s.score < 70).length;
+const acceptable = systems.filter(s => s.score < 40).length;
+
+// Parse effort like "4-6 weeks" → average weeks
+const totalEffort = systems.reduce((sum, s) => {
+    const m = s.effort.match(/(\d+)[-–]?(\d+)?/);
+    if (m) return sum + (m[2] ? (parseInt(m[1]) + parseInt(m[2])) / 2 : parseInt(m[1]));
+    return sum;
+}, 0);
+
+document.getElementById('kpiTotal').textContent = systems.length;
+document.getElementById('kpiCritical').textContent = critical;
+document.getElementById('kpiMonitor').textContent = monitor;
+document.getElementById('kpiAcceptable').textContent = acceptable;
+document.getElementById('kpiEffort').textContent = Math.round(totalEffort) + 'w';
+
+// ═══ Executive Summary ═══
+const topRisk = systems[0];
+document.getElementById('execSummary').innerHTML =
+    `This dashboard inventories <strong>${systems.length} shadow IT systems</strong> operating outside of IT governance. ` +
+    `<strong class="text-red-600">${critical} are critical risk</strong> and should be migrated immediately — they contain confidential data, ` +
+    `serve mission-critical functions, or both. ${monitor} require close monitoring with planned migration timelines. ` +
+    `The highest-risk system is <strong>"${topRisk.name}"</strong> (score: ${topRisk.score}/100) owned by ${topRisk.owner}. ` +
+    `Estimated total migration effort across all systems is <strong>${Math.round(totalEffort)} person-weeks</strong>. ` +
+    `Prioritize the red-zone systems first — every day they operate unmanaged is a day of uncontrolled data exposure and single-point-of-failure risk.`;
+
+// ═══ Risk Matrix Chart ═══
+const riskColors = { red: 'rgba(239,68,68,0.7)', amber: 'rgba(245,158,11,0.7)', emerald: 'rgba(16,185,129,0.7)' };
+const riskBorders = { red: '#ef4444', amber: '#f59e0b', emerald: '#10b981' };
+
+new Chart(document.getElementById('riskMatrix'), {
+    type: 'bubble',
+    data: {
+        datasets: systems.map(s => ({
+            label: s.name,
+            data: [{
+                x: s.critScore,
+                y: s.sensScore,
+                r: Math.max(8, s.score / 5),
+            }],
+            backgroundColor: riskColors[s.triage.color],
+            borderColor: riskBorders[s.triage.color],
+            borderWidth: 2,
+        }))
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: { display: true, text: 'Business Criticality →', font: { size: 13, weight: '600' } },
+                min: 0, max: 100,
+                ticks: { callback: v => { if (v===15) return 'Low'; if (v===40) return 'Medium'; if (v===70) return 'High'; if (v===95) return 'Mission Critical'; return ''; }, font: { size: 10 } },
+                grid: { color: '#f3f4f6' },
+            },
+            y: {
+                title: { display: true, text: '↑ Data Sensitivity', font: { size: 13, weight: '600' } },
+                min: 0, max: 100,
+                ticks: { callback: v => { if (v===10) return 'Public'; if (v===30) return 'Internal'; if (v===60) return 'Restricted'; if (v===85) return 'Confidential'; return ''; }, font: { size: 10 } },
+                grid: { color: '#f3f4f6' },
+            }
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => {
+                        const s = systems[ctx.datasetIndex];
+                        return [`${s.name}`, `Owner: ${s.owner}`, `Score: ${s.score}/100 — ${s.triage.label}`, `Users: ${s.users}`];
+                    }
+                }
+            }
+        }
+    },
+    plugins: [{
+        afterDraw(chart) {
+            const { ctx, chartArea: { left, right, top, bottom }, scales: { x, y } } = chart;
+            ctx.save();
+
+            // Zone backgrounds
+            const zoneX = x.getPixelForValue(55);
+            const zoneY = y.getPixelForValue(45);
+
+            // Top-right = red zone
+            ctx.fillStyle = 'rgba(239,68,68,0.04)';
+            ctx.fillRect(zoneX, top, right - zoneX, zoneY - top);
+
+            // Bottom-left = green zone
+            ctx.fillStyle = 'rgba(16,185,129,0.04)';
+            ctx.fillRect(left, zoneY, zoneX - left, bottom - zoneY);
+
+            // Zone labels
+            ctx.font = '700 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(239,68,68,0.25)';
+            ctx.fillText('MIGRATE IMMEDIATELY', (zoneX + right) / 2, top + 16);
+            ctx.fillStyle = 'rgba(16,185,129,0.25)';
+            ctx.fillText('ACCEPTABLE RISK', (left + zoneX) / 2, bottom - 8);
+            ctx.fillStyle = 'rgba(245,158,11,0.2)';
+            ctx.fillText('MONITOR', (left + zoneX) / 2, top + 16);
+            ctx.fillText('MONITOR', (zoneX + right) / 2, bottom - 8);
+
+            // Vendor labels
+            chart.data.datasets.forEach((ds, i) => {
+                const meta = chart.getDatasetMeta(i);
+                const el = meta.data[0];
+                if (el) {
+                    ctx.font = '500 9px Inter, sans-serif';
+                    ctx.fillStyle = '#374151';
+                    ctx.textAlign = 'center';
+                    const short = systems[i].name.replace('.xlsx','').replace('.accdb','').replace('.pptx','');
+                    ctx.fillText(short.length > 22 ? short.substring(0,20) + '…' : short, el.x, el.y - ds.data[0].r - 5);
+                }
+            });
+
+            ctx.restore();
+        }
+    }]
+});
+
+// ═══ Triage Table ═══
+let sortCol = 'score';
+let sortDir = 'desc';
+
+function renderTable() {
+    const sorted = [...systems].sort((a, b) => {
+        let va = a[sortCol], vb = b[sortCol];
+        if (sortCol === 'triage') { va = a.score; vb = b.score; }
+        if (typeof va === 'string') return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+        return sortDir === 'asc' ? va - vb : vb - va;
+    });
+
+    document.getElementById('triageBody').innerHTML = sorted.map(s => {
+        const highlight = s.score >= 70 ? 'bg-red-50/40' : '';
+        return `<tr class="${highlight} hover:bg-gray-50 transition-colors">
+            <td class="px-5 py-3">
+                <div class="font-semibold text-gray-900">${s.name}</div>
+                <div class="text-xs text-gray-400 mt-0.5">${s.type} · ${s.users} users</div>
+            </td>
+            <td class="px-5 py-3 text-gray-600">${s.owner}</td>
+            <td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${
+                s.sensitivity === 'Confidential' ? 'bg-red-100 text-red-700' :
+                s.sensitivity === 'Restricted' ? 'bg-amber-100 text-amber-700' :
+                'bg-gray-100 text-gray-600'
+            }">${s.sensitivity}</span></td>
+            <td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${
+                s.criticality === 'Mission Critical' ? 'bg-red-100 text-red-700' :
+                s.criticality === 'High' ? 'bg-amber-100 text-amber-700' :
+                'bg-gray-100 text-gray-600'
+            }">${s.criticality}</span></td>
+            <td class="px-5 py-3 text-right">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="w-16 h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <div class="h-full rounded-full ${s.score >= 70 ? 'bg-red-500' : s.score >= 40 ? 'bg-amber-500' : 'bg-emerald-500'}" style="width:${s.score}%"></div>
+                    </div>
+                    <span class="font-bold mono ${s.score >= 70 ? 'text-red-600' : s.score >= 40 ? 'text-amber-600' : 'text-emerald-600'}">${s.score}</span>
+                </div>
+            </td>
+            <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${s.triage.bg}">${s.triage.label}</span></td>
+            <td class="px-5 py-3 text-xs text-gray-500 mono">${s.effort}</td>
+            <td class="px-5 py-3 text-xs text-gray-600 max-w-xs leading-relaxed">${s.recommendation}</td>
+        </tr>`;
+    }).join('');
+
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
+        if (th.dataset.col === sortCol) th.classList.add(sortDir);
+    });
+}
+
+document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+        else { sortCol = col; sortDir = col === 'score' ? 'desc' : 'asc'; }
+        renderTable();
+    });
+});
+
+renderTable();
+</script>
+
+</body>
+</html>

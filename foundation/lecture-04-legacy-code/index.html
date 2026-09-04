@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy Accounting System — Modernized</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .terminal { font-family: 'Courier New', monospace; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes pulse-green { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); } }
+        .pulse-green { animation: pulse-green 2s infinite; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+    <div class="w-full max-w-sm">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-2 h-10 bg-gradient-to-b from-emerald-500 to-blue-600 rounded-full"></div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight">Accounting System</h1>
+                    <p class="text-xs text-gray-400">JWT-authenticated API — Lecture 04</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Username</label>
+                    <input type="text" id="loginUser" value="admin" autocomplete="username"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Password</label>
+                    <input type="password" id="loginPass" value="admin123" autocomplete="current-password"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                </div>
+                <button onclick="doLogin()" id="loginBtn"
+                    class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold py-2.5 rounded-lg transition-colors">
+                    Sign In
+                </button>
+                <div id="loginError" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 hidden"></div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-gray-100">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Demo Credentials</p>
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <button onclick="fillLogin('admin','admin123')" class="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 text-left transition-colors">
+                        <div class="font-semibold text-gray-700">admin</div>
+                        <div class="text-gray-400">Full access</div>
+                    </button>
+                    <button onclick="fillLogin('teller','teller123')" class="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 text-left transition-colors">
+                        <div class="font-semibold text-gray-700">teller</div>
+                        <div class="text-gray-400">Transactions</div>
+                    </button>
+                    <button onclick="fillLogin('auditor','auditor123')" class="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 text-left transition-colors">
+                        <div class="font-semibold text-gray-700">auditor</div>
+                        <div class="text-gray-400">View only</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MAIN APP (hidden until login) ═══ -->
+<div id="appScreen" class="hidden">
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-8 flex items-start justify-between">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-2 h-10 bg-gradient-to-b from-emerald-500 to-blue-600 rounded-full"></div>
+                <h1 class="text-3xl font-extrabold tracking-tight">Legacy Accounting System — Modernized</h1>
+            </div>
+            <p class="text-sm text-gray-500 ml-5">CIO AI Curriculum — Lecture 04: COBOL (1985) → Python + REST API (2026)</p>
+        </div>
+        <div class="flex items-center gap-3 mt-1">
+            <div class="text-right">
+                <div class="text-sm font-semibold text-gray-700" id="userDisplay">—</div>
+                <div class="text-xs text-gray-400" id="roleDisplay">—</div>
+            </div>
+            <button onclick="doLogout()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">Logout</button>
+        </div>
+    </div>
+
+    <!-- JWT Info Bar -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl px-5 py-3 mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span class="text-xs text-blue-700"><strong>JWT Auth Active</strong> — All API requests include <code class="bg-blue-100 px-1.5 py-0.5 rounded font-mono text-xs">Authorization: Bearer &lt;token&gt;</code></span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-blue-500" id="tokenExpiry">—</span>
+            <button onclick="showToken()" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium px-3 py-1 rounded-lg transition-colors">View Token</button>
+        </div>
+    </div>
+
+    <!-- Token Detail (hidden) -->
+    <div id="tokenDetail" class="hidden bg-gray-900 rounded-xl p-5 mb-6 fade-in">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">JWT Token (decoded)</span>
+            <button onclick="document.getElementById('tokenDetail').classList.add('hidden')" class="text-xs text-gray-500 hover:text-gray-300">Close</button>
+        </div>
+        <div class="grid grid-cols-3 gap-4 text-xs font-mono">
+            <div>
+                <div class="text-red-400 font-bold mb-1">HEADER</div>
+                <pre class="text-red-300 bg-gray-800 rounded-lg p-3 overflow-x-auto" id="tokenHeader"></pre>
+            </div>
+            <div>
+                <div class="text-purple-400 font-bold mb-1">PAYLOAD</div>
+                <pre class="text-purple-300 bg-gray-800 rounded-lg p-3 overflow-x-auto" id="tokenPayload"></pre>
+            </div>
+            <div>
+                <div class="text-cyan-400 font-bold mb-1">RAW TOKEN</div>
+                <pre class="text-cyan-300 bg-gray-800 rounded-lg p-3 overflow-x-auto break-all whitespace-pre-wrap text-xs" id="tokenRaw" style="word-break:break-all;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Before / After -->
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Before: COBOL (1985)</span>
+            </div>
+            <div class="terminal text-xs text-gray-600 bg-gray-900 text-green-400 rounded-lg p-4 leading-relaxed overflow-x-auto">
+<pre>       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ACCOUNTING-SYSTEM.
+       AUTHOR. LEGACY-CORP.
+       DATE-WRITTEN. 1985-06-15.
+
+       IF ACCT-BALANCE - WS-AMOUNT
+           < WS-MINIMUM-BALANCE
+           DISPLAY 'INSUFFICIENT FUNDS.'
+           PERFORM LOG-TRANSACTION-FAILED
+           EXIT PARAGRAPH
+       END-IF
+
+       SUBTRACT WS-AMOUNT FROM ACCT-BALANCE</pre>
+            </div>
+            <div class="mt-3 text-xs text-gray-400">310 lines • ACCOUNTS.DAT indexed file • Terminal UI • No API</div>
+        </div>
+        <div class="border-2 border-emerald-200 rounded-xl p-5 bg-emerald-50/30">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-green"></span>
+                <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">After: Python + Flask (2026)</span>
+            </div>
+            <div class="terminal text-xs bg-gray-900 text-blue-400 rounded-lg p-4 leading-relaxed overflow-x-auto">
+<pre>class Account:
+    def debit(self, amount: Decimal) -> Decimal:
+        if self.balance - amount < MINIMUM_BALANCE:
+            self._log(TransactionType.DEBIT,
+                      amount, TransactionResult.FAIL)
+            raise ValueError("Insufficient funds.")
+
+        self.balance -= amount</pre>
+            </div>
+            <div class="mt-3 text-xs text-gray-400">123 lines • In-memory + REST API • 32 unit tests • Type-safe</div>
+        </div>
+    </div>
+
+    <!-- Live API Status -->
+    <div class="flex items-center gap-2 mb-6 px-1">
+        <span class="w-2 h-2 rounded-full" id="apiDot"></span>
+        <span class="text-xs font-medium" id="apiStatus">Checking API...</span>
+    </div>
+
+    <!-- Account Selector + KPI Cards -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+        <div class="flex items-center gap-4 mb-5">
+            <label class="text-sm font-semibold text-gray-700">Select Account:</label>
+            <select id="accountSelect" class="border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                <option value="00001234">00001234 — JOHN DOE (Checking)</option>
+                <option value="00005678">00005678 — JANE SMITH (Savings)</option>
+                <option value="00009999">00009999 — LEGACY CORP (Business)</option>
+            </select>
+            <button onclick="loadAccount()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Refresh</button>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4" id="kpiCards">
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Account</p>
+                <p class="text-lg font-bold text-gray-900" id="kpiAccount">—</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Name</p>
+                <p class="text-lg font-bold text-gray-900" id="kpiName">—</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Type</p>
+                <p class="text-lg font-bold text-gray-900" id="kpiType">—</p>
+            </div>
+            <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+                <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Balance</p>
+                <p class="text-2xl font-extrabold text-emerald-700" id="kpiBalance">—</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operations -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <!-- Credit -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-bold">+</span>
+                Credit (Deposit)
+            </h3>
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                    <input type="number" id="creditAmount" placeholder="0.00" min="0.01" step="0.01"
+                        class="w-full border border-gray-300 rounded-lg pl-7 pr-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                </div>
+                <button onclick="doCredit()" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap">Apply Credit</button>
+            </div>
+            <div id="creditResult" class="mt-3 text-sm hidden"></div>
+        </div>
+
+        <!-- Debit -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xs font-bold">−</span>
+                Debit (Withdrawal)
+            </h3>
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                    <input type="number" id="debitAmount" placeholder="0.00" min="0.01" step="0.01"
+                        class="w-full border border-gray-300 rounded-lg pl-7 pr-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none">
+                </div>
+                <button onclick="doDebit()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap">Apply Debit</button>
+            </div>
+            <div id="debitResult" class="mt-3 text-sm hidden"></div>
+        </div>
+    </div>
+
+    <!-- Transaction Log -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Transaction Log</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Live session activity (replaces TRANSLOG.DAT)</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-400" id="logCount">0 transactions</span>
+                <button onclick="loadTransactions()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium px-3 py-1 rounded-lg transition-colors">Refresh from server</button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-left">
+                    <tr>
+                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase">Time</th>
+                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase">Type</th>
+                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase text-right">Amount</th>
+                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase">Result</th>
+                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase text-right">New Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="logBody" class="divide-y divide-gray-50">
+                    <tr><td colspan="5" class="px-6 py-4 text-center text-gray-400 text-xs">No transactions yet — use the controls above</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Business Rules Reference -->
+    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6">
+        <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Business Rules (Preserved from COBOL)</h3>
+        <div class="grid grid-cols-3 gap-4 text-xs text-gray-600">
+            <div>
+                <p class="font-semibold text-gray-800 mb-1">Credit Rules</p>
+                <ul class="space-y-1 list-disc list-inside">
+                    <li>Account must be Active</li>
+                    <li>Amount must be positive</li>
+                    <li>Max single transaction: $50,000</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-800 mb-1">Debit Rules</p>
+                <ul class="space-y-1 list-disc list-inside">
+                    <li>Account must be Active (not Frozen)</li>
+                    <li>Amount must be positive</li>
+                    <li>Max single transaction: $50,000</li>
+                    <li>Daily withdrawal limit: $10,000</li>
+                    <li>Balance cannot go below $0.00</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-800 mb-1">Account Status</p>
+                <ul class="space-y-1 list-disc list-inside">
+                    <li><span class="font-mono bg-emerald-100 text-emerald-700 px-1 rounded">Active</span> — all operations</li>
+                    <li><span class="font-mono bg-amber-100 text-amber-700 px-1 rounded">Frozen</span> — view only</li>
+                    <li><span class="font-mono bg-red-100 text-red-700 px-1 rounded">Closed</span> — no access</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Lecture 04: Legacy Code Modernization</p>
+</div>
+</div><!-- end appScreen -->
+
+<script>
+const API = window.location.origin;
+const txLog = [];
+let authToken = null;
+
+// ── Auth helpers ─────────────────────────────────────────────
+
+function authHeaders() {
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken };
+}
+
+function fillLogin(u, p) {
+    document.getElementById('loginUser').value = u;
+    document.getElementById('loginPass').value = p;
+}
+
+async function doLogin() {
+    const username = document.getElementById('loginUser').value;
+    const password = document.getElementById('loginPass').value;
+    const errEl = document.getElementById('loginError');
+    errEl.classList.add('hidden');
+
+    try {
+        const res = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            authToken = data.token;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('userDisplay').textContent = data.name;
+            document.getElementById('roleDisplay').textContent = data.role.toUpperCase();
+            updateTokenExpiry();
+            setInterval(updateTokenExpiry, 30000);
+            loadAccount();
+        } else {
+            errEl.textContent = data.error;
+            errEl.classList.remove('hidden');
+        }
+    } catch(e) {
+        errEl.textContent = 'Cannot reach API. Is the server running?';
+        errEl.classList.remove('hidden');
+    }
+}
+
+function doLogout() {
+    authToken = null;
+    document.getElementById('appScreen').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('tokenDetail').classList.add('hidden');
+}
+
+function updateTokenExpiry() {
+    if (!authToken) return;
+    try {
+        const payload = JSON.parse(atob(authToken.split('.')[1]));
+        const exp = new Date(payload.exp * 1000);
+        const mins = Math.max(0, Math.round((exp - Date.now()) / 60000));
+        document.getElementById('tokenExpiry').textContent = `Expires in ${mins} min`;
+    } catch(e) {}
+}
+
+function showToken() {
+    const el = document.getElementById('tokenDetail');
+    if (!authToken) return;
+    const parts = authToken.split('.');
+    try {
+        const header = JSON.parse(atob(parts[0]));
+        const payload = JSON.parse(atob(parts[1]));
+        document.getElementById('tokenHeader').textContent = JSON.stringify(header, null, 2);
+        document.getElementById('tokenPayload').textContent = JSON.stringify(payload, null, 2);
+        document.getElementById('tokenRaw').textContent = authToken;
+    } catch(e) {}
+    el.classList.toggle('hidden');
+}
+
+// Enter key on login
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function fmt(n) {
+    return '$' + parseFloat(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function showResult(elId, msg, isError) {
+    const el = document.getElementById(elId);
+    el.className = `mt-3 text-sm fade-in ${isError ? 'text-red-600 bg-red-50 border border-red-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200'} rounded-lg px-3 py-2`;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+function addLogEntry(type, amount, result, newBalance) {
+    const now = new Date().toLocaleTimeString();
+    txLog.unshift({ time: now, type, amount, result, newBalance });
+
+    const typeColors = {
+        'CREDIT': 'bg-emerald-100 text-emerald-700',
+        'DEBIT': 'bg-red-100 text-red-700',
+        'INQUIRY': 'bg-blue-100 text-blue-700',
+    };
+    const resultColors = {
+        'OK': 'text-emerald-600',
+        'FAIL': 'text-red-600 font-bold',
+    };
+
+    const tbody = document.getElementById('logBody');
+    const row = document.createElement('tr');
+    row.className = 'fade-in hover:bg-gray-50';
+    row.innerHTML = `
+        <td class="px-6 py-2.5 text-gray-500 font-mono text-xs">${now}</td>
+        <td class="px-6 py-2.5"><span class="px-2 py-0.5 rounded text-xs font-semibold ${typeColors[type] || ''}">${type}</span></td>
+        <td class="px-6 py-2.5 text-right font-mono font-medium">${amount > 0 ? fmt(amount) : '—'}</td>
+        <td class="px-6 py-2.5"><span class="${resultColors[result] || ''} font-semibold text-xs">${result}</span></td>
+        <td class="px-6 py-2.5 text-right font-mono font-semibold">${fmt(newBalance)}</td>
+    `;
+
+    if (txLog.length === 1) tbody.innerHTML = '';
+    tbody.insertBefore(row, tbody.firstChild);
+    document.getElementById('logCount').textContent = `${txLog.length} transaction${txLog.length !== 1 ? 's' : ''}`;
+}
+
+async function checkAPI() {
+    try {
+        const res = await fetch(`${API}/balance/00001234`, { headers: authHeaders() });
+        if (res.ok) {
+            document.getElementById('apiDot').className = 'w-2 h-2 rounded-full bg-emerald-500 pulse-green';
+            document.getElementById('apiStatus').textContent = 'API connected — localhost:5050 (JWT authenticated)';
+            document.getElementById('apiStatus').className = 'text-xs font-medium text-emerald-600';
+            return true;
+        }
+        if (res.status === 401) { doLogout(); return false; }
+    } catch(e) {}
+    document.getElementById('apiDot').className = 'w-2 h-2 rounded-full bg-red-500';
+    document.getElementById('apiStatus').textContent = 'API offline — run: python3 api.py';
+    document.getElementById('apiStatus').className = 'text-xs font-medium text-red-600';
+    return false;
+}
+
+async function loadAccount() {
+    const acctNum = document.getElementById('accountSelect').value;
+    try {
+        const res = await fetch(`${API}/balance/${acctNum}`, { headers: authHeaders() });
+        if (res.status === 401) { doLogout(); return; }
+        const data = await res.json();
+        if (res.ok) {
+            document.getElementById('kpiAccount').textContent = data.account_number;
+            document.getElementById('kpiName').textContent = data.name;
+            document.getElementById('kpiType').textContent = data.account_type;
+            document.getElementById('kpiBalance').textContent = fmt(data.balance);
+            loadTransactions();
+        } else {
+            showResult('creditResult', data.error, true);
+        }
+    } catch(e) {
+        checkAPI();
+    }
+}
+
+async function doCredit() {
+    const acctNum = document.getElementById('accountSelect').value;
+    const amount = document.getElementById('creditAmount').value;
+    if (!amount || parseFloat(amount) <= 0) {
+        showResult('creditResult', 'Enter a positive amount.', true);
+        return;
+    }
+    try {
+        const res = await fetch(`${API}/credit`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ account_number: acctNum, amount: parseFloat(amount) }),
+        });
+        if (res.status === 401) { doLogout(); return; }
+        const data = await res.json();
+        if (res.ok) {
+            showResult('creditResult', `Credit applied. New balance: ${fmt(data.new_balance)}`, false);
+            document.getElementById('kpiBalance').textContent = fmt(data.new_balance);
+            document.getElementById('creditAmount').value = '';
+            loadTransactions();
+        } else {
+            showResult('creditResult', data.error, true);
+            loadTransactions();
+        }
+    } catch(e) {
+        checkAPI();
+    }
+}
+
+async function doDebit() {
+    const acctNum = document.getElementById('accountSelect').value;
+    const amount = document.getElementById('debitAmount').value;
+    if (!amount || parseFloat(amount) <= 0) {
+        showResult('debitResult', 'Enter a positive amount.', true);
+        return;
+    }
+    try {
+        const res = await fetch(`${API}/debit`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ account_number: acctNum, amount: parseFloat(amount) }),
+        });
+        if (res.status === 401) { doLogout(); return; }
+        const data = await res.json();
+        if (res.ok) {
+            showResult('debitResult', `Debit applied. New balance: ${fmt(data.new_balance)}`, false);
+            document.getElementById('kpiBalance').textContent = fmt(data.new_balance);
+            document.getElementById('debitAmount').value = '';
+            loadTransactions();
+        } else {
+            showResult('debitResult', data.error, true);
+            loadTransactions();
+        }
+    } catch(e) {
+        checkAPI();
+    }
+}
+
+async function loadTransactions() {
+    const acctNum = document.getElementById('accountSelect').value;
+    try {
+        const res = await fetch(`${API}/transactions/${acctNum}`, { headers: authHeaders() });
+        if (res.status === 401) { doLogout(); return; }
+        const data = await res.json();
+        if (res.ok && data.transactions) {
+            const typeMap = { 'C': 'CREDIT', 'D': 'DEBIT', 'I': 'INQUIRY' };
+            const resultMap = { 'OK': 'OK', 'FL': 'FAIL' };
+            const typeColors = {
+                'CREDIT': 'bg-emerald-100 text-emerald-700',
+                'DEBIT': 'bg-red-100 text-red-700',
+                'INQUIRY': 'bg-blue-100 text-blue-700',
+            };
+            const resultColors = { 'OK': 'text-emerald-600', 'FAIL': 'text-red-600 font-bold' };
+
+            const tbody = document.getElementById('logBody');
+            if (data.transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-400 text-xs">No transactions yet — use the controls above</td></tr>';
+                document.getElementById('logCount').textContent = '0 transactions';
+                return;
+            }
+
+            tbody.innerHTML = data.transactions.map(t => {
+                const type = typeMap[t.type] || t.type;
+                const result = resultMap[t.result] || t.result;
+                const time = new Date(t.timestamp).toLocaleTimeString();
+                const amt = parseFloat(t.amount);
+                return `<tr class="hover:bg-gray-50">
+                    <td class="px-6 py-2.5 text-gray-500 font-mono text-xs">${time}</td>
+                    <td class="px-6 py-2.5"><span class="px-2 py-0.5 rounded text-xs font-semibold ${typeColors[type] || ''}">${type}</span></td>
+                    <td class="px-6 py-2.5 text-right font-mono font-medium">${amt > 0 ? fmt(amt) : '—'}</td>
+                    <td class="px-6 py-2.5"><span class="${resultColors[result] || ''} font-semibold text-xs">${result}</span></td>
+                    <td class="px-6 py-2.5 text-right font-mono font-semibold">${fmt(t.new_balance)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('logCount').textContent = `${data.transactions.length} transaction${data.transactions.length !== 1 ? 's' : ''}`;
+        }
+    } catch(e) {}
+}
+
+// Enter key support
+document.getElementById('creditAmount').addEventListener('keydown', e => { if (e.key === 'Enter') doCredit(); });
+document.getElementById('debitAmount').addEventListener('keydown', e => { if (e.key === 'Enter') doDebit(); });
+
+// Init — login screen handles first load
+</script>
+
+</body>
+</html>

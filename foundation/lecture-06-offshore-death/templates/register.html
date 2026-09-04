@@ -18,6 +18,16 @@
         .btn { display: inline-block; padding: 0.5rem 1.5rem; background: #1e40af; color: white; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer; }
         .btn:hover { background: #1e3a8a; }
         .back { display: inline-block; margin-top: 1rem; color: #1e40af; text-decoration: none; font-size: 0.85rem; }
+        .hint { display: block; font-size: 0.75rem; color: #999; margin: -0.5rem 0 0.75rem 0; }
+        .strength-meter { height: 6px; background: #e5e7eb; border-radius: 3px; margin: -0.5rem 0 0.4rem 0; overflow: hidden; }
+        .strength-bar { height: 100%; width: 0; border-radius: 3px; transition: width 0.3s, background 0.3s; }
+        .strength-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .strength-label { font-size: 0.75rem; font-weight: 700; }
+        .pw-checks { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 1rem; margin-bottom: 1rem; }
+        .pw-checks li { font-size: 0.75rem; color: #999; padding-left: 1.2rem; position: relative; }
+        .pw-checks li::before { content: ''; position: absolute; left: 0; top: 4px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #d1d5db; }
+        .pw-checks li.pass { color: #16a34a; }
+        .pw-checks li.pass::before { border-color: #16a34a; background: #16a34a; }
     </style>
 </head>
 <body>
@@ -31,13 +41,78 @@
         <form method="POST">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" required>
+            <small class="hint">3-20 characters, letters and numbers only</small>
             <label for="email">Email</label>
             <input type="text" id="email" name="email" required>
+            <small class="hint">Must be a valid email address</small>
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required>
+            <div class="strength-meter">
+                <div class="strength-bar" id="strengthBar"></div>
+            </div>
+            <div class="strength-row">
+                <small class="hint" style="margin:0;">At least 8 characters with at least one number</small>
+                <small class="strength-label" id="strengthLabel"></small>
+            </div>
+            <ul class="pw-checks" id="pwChecks">
+                <li id="chkLen">8+ characters</li>
+                <li id="chkNum">Contains a number</li>
+                <li id="chkUpper">Contains uppercase</li>
+                <li id="chkSpecial">Contains special character</li>
+            </ul>
             <button type="submit" class="btn">Register</button>
         </form>
         <a href="/" class="back">&larr; Back to users</a>
     </div>
+<script>
+const pw = document.getElementById('password');
+const bar = document.getElementById('strengthBar');
+const label = document.getElementById('strengthLabel');
+const chkLen = document.getElementById('chkLen');
+const chkNum = document.getElementById('chkNum');
+const chkUpper = document.getElementById('chkUpper');
+const chkSpecial = document.getElementById('chkSpecial');
+
+const levels = [
+    { max: 1, width: '10%', color: '#ef4444', text: 'Very Weak', textColor: '#ef4444' },
+    { max: 2, width: '35%', color: '#f59e0b', text: 'Weak', textColor: '#f59e0b' },
+    { max: 3, width: '60%', color: '#eab308', text: 'Fair', textColor: '#ca8a04' },
+    { max: 4, width: '85%', color: '#22c55e', text: 'Strong', textColor: '#16a34a' },
+    { max: 5, width: '100%', color: '#16a34a', text: 'Very Strong', textColor: '#16a34a' },
+];
+
+pw.addEventListener('input', function() {
+    const v = this.value;
+    let score = 0;
+
+    const hasLen = v.length >= 8;
+    const hasNum = /\d/.test(v);
+    const hasUpper = /[A-Z]/.test(v);
+    const hasSpecial = /[^A-Za-z0-9]/.test(v);
+
+    if (hasLen) score++;
+    if (hasNum) score++;
+    if (hasUpper) score++;
+    if (hasSpecial) score++;
+    if (v.length >= 12) score++;
+
+    chkLen.className = hasLen ? 'pass' : '';
+    chkNum.className = hasNum ? 'pass' : '';
+    chkUpper.className = hasUpper ? 'pass' : '';
+    chkSpecial.className = hasSpecial ? 'pass' : '';
+
+    if (v.length === 0) {
+        bar.style.width = '0';
+        label.textContent = '';
+        return;
+    }
+
+    const lvl = levels[Math.min(score, levels.length) - 1] || levels[0];
+    bar.style.width = lvl.width;
+    bar.style.background = lvl.color;
+    label.textContent = lvl.text;
+    label.style.color = lvl.textColor;
+});
+</script>
 </body>
 </html>

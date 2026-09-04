@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Consolidation Roadmap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'Courier New', monospace; }
+        .phase-line { position: absolute; left: 24px; top: 40px; bottom: 0; width: 2px; }
+        .phase-dot { position: absolute; left: 17px; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px; z-index: 10; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<div class="max-w-6xl mx-auto px-6 py-10">
+
+    <div class="flex items-center gap-3 mb-1">
+        <div class="w-2 h-10 bg-gradient-to-b from-emerald-500 to-blue-600 rounded-full"></div>
+        <h1 class="text-3xl font-extrabold tracking-tight">SaaS Consolidation Roadmap</h1>
+    </div>
+    <p class="text-sm text-gray-500 ml-5 mb-8">CIO AI Curriculum — Lecture 07: From 25 tools to 16 — phased elimination plan</p>
+
+    <!-- Executive Summary -->
+    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8">
+        <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Executive Summary</h2>
+        <p class="text-gray-700 leading-relaxed">
+            This roadmap eliminates <strong>9 redundant or underutilized SaaS tools</strong> over 6 months across 4 phases,
+            reducing the portfolio from 25 to 16 tools. Each elimination has a named replacement that's already in the stack — no new purchases required.
+            Combined annual savings: <strong class="text-emerald-600">$562,400</strong>. Phased rollout minimizes disruption: quick wins first, then
+            progressively larger consolidations with migration support.
+        </p>
+    </div>
+
+    <!-- Before / After KPIs -->
+    <div class="grid grid-cols-5 gap-4 mb-8">
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm text-center">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Tools Today</p>
+            <p class="text-3xl font-extrabold text-gray-900">25</p>
+        </div>
+        <div class="bg-white border-2 border-emerald-200 rounded-xl p-5 shadow-sm text-center bg-emerald-50/30">
+            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Tools After</p>
+            <p class="text-3xl font-extrabold text-emerald-600">16</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm text-center">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Eliminated</p>
+            <p class="text-3xl font-extrabold text-red-600">9</p>
+        </div>
+        <div class="bg-white border-2 border-emerald-200 rounded-xl p-5 shadow-sm text-center bg-emerald-50/30">
+            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Annual Savings</p>
+            <p class="text-3xl font-extrabold text-emerald-600">$562K</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm text-center">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Users Affected</p>
+            <p class="text-3xl font-extrabold text-gray-900">~460</p>
+        </div>
+    </div>
+
+    <!-- Consolidation Map -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Consolidation Map</h2>
+        <p class="text-sm text-gray-500 mb-5">What gets eliminated (red) and what absorbs it (green). Savings shown per elimination.</p>
+        <div class="space-y-4" id="consolidationMap">
+            <!-- Rendered by JS -->
+        </div>
+    </div>
+
+    <!-- Phased Roadmap -->
+    <div class="mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-6">Phased Execution Plan</h2>
+
+        <!-- Phase 1 -->
+        <div class="relative pl-14 pb-10">
+            <div class="phase-line bg-red-200"></div>
+            <div class="phase-dot bg-red-500" style="top:2px; box-shadow-color: #fca5a5;"></div>
+            <div class="mb-4">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-red-700">Phase 1: Quick Kills</h3>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Month 1</span>
+                    <span class="text-sm text-gray-500">3 tools · $114,000 savings</span>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Zero-disruption eliminations. Tools with < 40% utilization or direct replacements already deployed.</p>
+            </div>
+
+            <div class="space-y-3">
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Miro Business</div>
+                            <div class="text-xs text-gray-500 mt-1">$18,000/yr · 30% utilized · 12 of 40 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">FigJam (Figma)</div>
+                            <div class="text-xs text-gray-500 mt-1">Already bundled with Figma Organization license</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Export boards to FigJam. One 30-min training session. Sporadic users won't notice.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$18,000/yr saved</span>
+                                <span class="text-xs text-gray-400">Risk: Very Low</span>
+                                <span class="text-xs text-gray-400">Effort: 1 day</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Google Workspace</div>
+                            <div class="text-xs text-gray-500 mt-1">$43,200/yr · 15% utilized · 45 of 300 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">Microsoft 365 E5</div>
+                            <div class="text-xs text-gray-500 mt-1">Already licensed for 300 users at 96% utilization</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Move 45 remaining users' Drive files to OneDrive/SharePoint. Redirect Gmail to Outlook. Legacy acquisition artifact — overdue.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$43,200/yr saved</span>
+                                <span class="text-xs text-gray-400">Risk: Low</span>
+                                <span class="text-xs text-gray-400">Effort: 2 weeks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Monday.com Enterprise</div>
+                            <div class="text-xs text-gray-500 mt-1">$62,400/yr · 47% utilized · 28 of 60 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">Jira Software Premium</div>
+                            <div class="text-xs text-gray-500 mt-1">Already used by Engineering. Ops team migrates in.</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Export Monday boards to CSV, rebuild as Jira projects. Train Ops team on Jira workflows. Shadow-purchased tool — never IT-approved.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$62,400/yr saved</span>
+                                <span class="text-xs text-gray-400">Risk: Low</span>
+                                <span class="text-xs text-gray-400">Effort: 1 week</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="relative pl-14 pb-10">
+            <div class="phase-line bg-amber-200"></div>
+            <div class="phase-dot bg-amber-500" style="top:2px;"></div>
+            <div class="mb-4">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-amber-700">Phase 2: Communication Stack</h3>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">Month 2</span>
+                    <span class="text-sm text-gray-500">2 tools · $98,400 savings</span>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Consolidate messaging and video to Microsoft Teams. Higher user impact — requires change management.</p>
+            </div>
+
+            <div class="space-y-3">
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Slack Business+</div>
+                            <div class="text-xs text-gray-500 mt-1">$64,800/yr · 88% utilized · 265 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">Microsoft Teams</div>
+                            <div class="text-xs text-gray-500 mt-1">Already included in M365 E5. No additional cost.</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Export Slack history. Set up Teams channels mirroring Slack workspace structure. This will be the most culturally resisted change — Slack users are loyal. Run 30-day parallel period.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$64,800/yr saved</span>
+                                <span class="text-xs text-amber-600">Risk: Medium</span>
+                                <span class="text-xs text-gray-400">Effort: 3 weeks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Zoom Business</div>
+                            <div class="text-xs text-gray-500 mt-1">$33,600/yr · 47% utilized · 142 of 300 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">Microsoft Teams</div>
+                            <div class="text-xs text-gray-500 mt-1">Teams meetings + webinars cover all Zoom use cases.</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Update calendar integrations. Migrate recurring meeting links. Only 47% of seats are active — many already use Teams. Easiest consolidation of the two.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$33,600/yr saved</span>
+                                <span class="text-xs text-gray-400">Risk: Low</span>
+                                <span class="text-xs text-gray-400">Effort: 1 week</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="relative pl-14 pb-10">
+            <div class="phase-line bg-blue-200"></div>
+            <div class="phase-dot bg-blue-500" style="top:2px;"></div>
+            <div class="mb-4">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-blue-700">Phase 3: Project Management & Monitoring</h3>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Months 3–4</span>
+                    <span class="text-sm text-gray-500">2 tools · $207,600 savings</span>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Consolidate PM tools to Jira. Eliminate Splunk in favor of Datadog. Engineering-led migrations.</p>
+            </div>
+
+            <div class="space-y-3">
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Asana Business</div>
+                            <div class="text-xs text-gray-500 mt-1">$39,600/yr · 44% utilized · 35 of 80 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">Jira Software Premium</div>
+                            <div class="text-xs text-gray-500 mt-1">Marketing team joins Eng on Jira. Add Jira Work Mgmt view.</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Export Asana projects via API. Create Jira project templates matching Marketing workflows. Jira Work Management provides a simpler board view for non-technical users. 2 training sessions.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$39,600/yr saved</span>
+                                <span class="text-xs text-amber-600">Risk: Medium</span>
+                                <span class="text-xs text-gray-400">Effort: 2 weeks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Splunk Cloud</div>
+                            <div class="text-xs text-gray-500 mt-1">$168,000/yr · 80% utilized · 12 of 15 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">Datadog Pro</div>
+                            <div class="text-xs text-gray-500 mt-1">Add Datadog SIEM module ($~20K). Still saves $148K.</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Migrate Splunk dashboards and alerts to Datadog. Replicate SIEM compliance reports in Datadog Security Monitoring. Eng team already prefers Datadog. Biggest single-tool savings in the roadmap.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$168,000/yr saved</span>
+                                <span class="text-xs text-amber-600">Risk: Medium</span>
+                                <span class="text-xs text-gray-400">Effort: 4 weeks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="relative pl-14 pb-4">
+            <div class="phase-dot bg-purple-500" style="top:2px;"></div>
+            <div class="mb-4">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-purple-700">Phase 4: Cloud & Infrastructure</h3>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">Months 5–6</span>
+                    <span class="text-sm text-gray-500">2 tools · $142,400 savings</span>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Consolidate to single cloud + right-size BI. Longest lead time — infrastructure migrations.</p>
+            </div>
+
+            <div class="space-y-3">
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Azure (secondary)</div>
+                            <div class="text-xs text-gray-500 mt-1">$192,000/yr · 60% utilized · 18 of 30 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">AWS (primary cloud)</div>
+                            <div class="text-xs text-gray-500 mt-1">Migrate legacy workloads. Single-cloud strategy.</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Inventory Azure workloads (VMs, databases, storage). Migrate in dependency order. Keep Azure AD for M365 integration only (free tier). Estimated 30% of Azure spend ($58K) moves to AWS; net savings $134K.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$134,000/yr saved</span>
+                                <span class="text-xs text-red-600">Risk: High</span>
+                                <span class="text-xs text-gray-400">Effort: 6 weeks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 items-center">
+                        <div class="col-span-3 p-4 bg-red-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Eliminate</div>
+                            <div class="font-bold text-gray-900">Tableau Creator</div>
+                            <div class="text-xs text-gray-500 mt-1">$84,000/yr · 63% utilized · 22 of 35 users</div>
+                        </div>
+                        <div class="col-span-1 flex items-center justify-center text-2xl text-gray-300">→</div>
+                        <div class="col-span-3 p-4 bg-emerald-50 border-r border-gray-200">
+                            <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Replace With</div>
+                            <div class="font-bold text-gray-900">Power BI (M365)</div>
+                            <div class="text-xs text-gray-500 mt-1">Already included in M365 E5 license. No cost.</div>
+                        </div>
+                        <div class="col-span-5 p-4">
+                            <div class="text-xs text-gray-500 mb-1"><strong>Migration:</strong> Convert Tableau workbooks to Power BI reports. Some users already have Power BI via M365. Rebuild data connections to Snowflake/warehouse. Longest learning curve of all migrations — budget 3 training sessions.</div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs font-bold text-emerald-600 mono">+$84,000/yr saved</span>
+                                <span class="text-xs text-amber-600">Risk: Medium</span>
+                                <span class="text-xs text-gray-400">Effort: 4 weeks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Savings Waterfall -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Cumulative Savings by Phase</h2>
+        <p class="text-sm text-gray-500 mb-4">Each phase adds to the total. Full run-rate savings achieved by Month 6.</p>
+        <div style="height: 300px;"><canvas id="waterfallChart"></canvas></div>
+    </div>
+
+    <!-- Surviving Stack -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">The Surviving Stack — 16 Tools</h2>
+        <p class="text-sm text-gray-500 mb-4">What remains after consolidation. Each tool has a clear purpose with no overlap.</p>
+        <div class="grid grid-cols-4 gap-3">
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Productivity</div>
+                <div class="font-semibold text-sm">Microsoft 365 E5</div>
+                <div class="text-xs text-gray-500 mt-0.5">Email, docs, Teams, Power BI</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">CRM</div>
+                <div class="font-semibold text-sm">Salesforce Enterprise</div>
+                <div class="text-xs text-gray-500 mt-0.5">Sales + Marketing automation</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Marketing</div>
+                <div class="font-semibold text-sm">HubSpot Marketing Hub</div>
+                <div class="text-xs text-gray-500 mt-0.5">Campaigns, lead gen, analytics</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Project Management</div>
+                <div class="font-semibold text-sm">Jira + Confluence</div>
+                <div class="text-xs text-gray-500 mt-0.5">All teams — Eng, Ops, Marketing</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Cloud</div>
+                <div class="font-semibold text-sm">AWS</div>
+                <div class="text-xs text-gray-500 mt-0.5">Primary cloud (single-cloud)</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Data Warehouse</div>
+                <div class="font-semibold text-sm">Snowflake</div>
+                <div class="text-xs text-gray-500 mt-0.5">Analytics data platform</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Monitoring</div>
+                <div class="font-semibold text-sm">Datadog Pro</div>
+                <div class="text-xs text-gray-500 mt-0.5">APM, logs, SIEM — all-in-one</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">ITSM</div>
+                <div class="font-semibold text-sm">ServiceNow</div>
+                <div class="text-xs text-gray-500 mt-0.5">Help desk, CMDB, workflows</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Support</div>
+                <div class="font-semibold text-sm">Zendesk Suite Pro</div>
+                <div class="text-xs text-gray-500 mt-0.5">Customer support ticketing</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">E-Signature</div>
+                <div class="font-semibold text-sm">DocuSign</div>
+                <div class="text-xs text-gray-500 mt-0.5">Right-sized to 40 seats</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Design</div>
+                <div class="font-semibold text-sm">Figma + Adobe CC</div>
+                <div class="text-xs text-gray-500 mt-0.5">UI/UX in Figma, print in Adobe</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Identity</div>
+                <div class="font-semibold text-sm">Okta</div>
+                <div class="text-xs text-gray-500 mt-0.5">SSO for all apps — critical</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Security</div>
+                <div class="font-semibold text-sm">CrowdStrike Falcon</div>
+                <div class="text-xs text-gray-500 mt-0.5">EDR — non-negotiable</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">HR/Payroll</div>
+                <div class="font-semibold text-sm">Workday HCM</div>
+                <div class="text-xs text-gray-500 mt-0.5">Core HRIS — no alternative</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Procurement</div>
+                <div class="font-semibold text-sm">Coupa</div>
+                <div class="text-xs text-gray-500 mt-0.5">Right-sized to 30 seats</div>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">BI/Analytics</div>
+                <div class="font-semibold text-sm">Power BI (M365)</div>
+                <div class="text-xs text-gray-500 mt-0.5">Included — replaces Tableau</div>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Lecture 07: SaaS Consolidation Roadmap</p>
+</div>
+
+<script>
+// Consolidation Map
+const consolidations = [
+    { kill: 'Miro', killCost: 18000, absorb: 'FigJam (Figma)', phase: 1, color: '#ef4444' },
+    { kill: 'Google Workspace', killCost: 43200, absorb: 'Microsoft 365', phase: 1, color: '#ef4444' },
+    { kill: 'Monday.com', killCost: 62400, absorb: 'Jira', phase: 1, color: '#ef4444' },
+    { kill: 'Slack', killCost: 64800, absorb: 'Microsoft Teams', phase: 2, color: '#f59e0b' },
+    { kill: 'Zoom', killCost: 33600, absorb: 'Microsoft Teams', phase: 2, color: '#f59e0b' },
+    { kill: 'Asana', killCost: 39600, absorb: 'Jira', phase: 3, color: '#3b82f6' },
+    { kill: 'Splunk', killCost: 168000, absorb: 'Datadog', phase: 3, color: '#3b82f6' },
+    { kill: 'Azure', killCost: 134000, absorb: 'AWS', phase: 4, color: '#8b5cf6' },
+    { kill: 'Tableau', killCost: 84000, absorb: 'Power BI (M365)', phase: 4, color: '#8b5cf6' },
+];
+
+const phaseLabels = { 1: 'Phase 1', 2: 'Phase 2', 3: 'Phase 3', 4: 'Phase 4' };
+const phaseColors = { 1: '#fef2f2', 2: '#fffbeb', 3: '#eff6ff', 4: '#f5f3ff' };
+const phaseBorders = { 1: '#fca5a5', 2: '#fcd34d', 3: '#93c5fd', 4: '#c4b5fd' };
+const maxCost = Math.max(...consolidations.map(c => c.killCost));
+
+const mapEl = document.getElementById('consolidationMap');
+// Group by absorber
+const absorbers = {};
+consolidations.forEach(c => {
+    if (!absorbers[c.absorb]) absorbers[c.absorb] = [];
+    absorbers[c.absorb].push(c);
+});
+
+Object.entries(absorbers).forEach(([absorb, items]) => {
+    const totalSaved = items.reduce((s, c) => s + c.killCost, 0);
+    const group = document.createElement('div');
+    group.className = 'rounded-xl border overflow-hidden';
+    group.style.borderColor = '#d1d5db';
+
+    const rows = items.map(c => {
+        const barWidth = Math.max(8, (c.killCost / maxCost) * 100);
+        return `<div class="flex items-center gap-3 px-4 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+            <span class="w-16 text-xs font-bold rounded-full text-center py-0.5" style="background:${phaseColors[c.phase]};border:1px solid ${phaseBorders[c.phase]};color:${c.color};">${phaseLabels[c.phase]}</span>
+            <span class="w-40 text-sm font-semibold text-red-700 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                ${c.kill}
+            </span>
+            <svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            <div class="flex-1">
+                <div class="h-5 rounded-full bg-gray-100 overflow-hidden">
+                    <div class="h-full rounded-full flex items-center pl-2" style="width:${barWidth}%;background:${c.color}20;border:1px solid ${c.color}40;">
+                        <span class="text-xs font-bold mono" style="color:${c.color};">$${(c.killCost/1000).toFixed(0)}K</span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    group.innerHTML = `
+        <div class="flex items-center justify-between px-4 py-3 bg-emerald-50 border-b border-emerald-200">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <span class="font-bold text-emerald-800">${absorb}</span>
+                <span class="text-xs text-emerald-600">absorbs ${items.length} tool${items.length > 1 ? 's' : ''}</span>
+            </div>
+            <span class="text-sm font-bold text-emerald-700 mono">+$${(totalSaved/1000).toFixed(0)}K/yr saved</span>
+        </div>
+        ${rows}
+    `;
+    mapEl.appendChild(group);
+});
+
+// Waterfall chart
+const ctx = document.getElementById('waterfallChart');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Current Spend', 'Phase 1:\nQuick Kills', 'Phase 2:\nComms Stack', 'Phase 3:\nPM & Monitoring', 'Phase 4:\nCloud & BI', 'New Total'],
+        datasets: [{
+            label: 'Remaining Spend',
+            data: [3022200, 3022200 - 123600, 3022200 - 123600 - 98400, 3022200 - 123600 - 98400 - 207600, null, 3022200 - 562400],
+            backgroundColor: ['#3b82f6', '#f59e0b', '#f59e0b', '#f59e0b', null, '#10b981'],
+            borderRadius: 4,
+        }, {
+            label: 'Savings',
+            data: [null, 123600, 98400, 207600, 142400, null],
+            backgroundColor: ['transparent', '#ef4444', '#ef4444', '#ef4444', '#ef4444', 'transparent'],
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => {
+                        if (ctx.raw === null) return '';
+                        return ctx.dataset.label + ': $' + ctx.raw.toLocaleString();
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { callback: v => '$' + (v/1000000).toFixed(1) + 'M' },
+                grid: { color: '#f3f4f6' },
+            },
+            x: {
+                grid: { display: false },
+                ticks: { font: { size: 10 } },
+            }
+        }
+    },
+    plugins: [{
+        afterDraw(chart) {
+            const { ctx } = chart;
+            const meta0 = chart.getDatasetMeta(0);
+            const meta1 = chart.getDatasetMeta(1);
+
+            // Label remaining spend bars
+            meta0.data.forEach((bar, i) => {
+                const val = chart.data.datasets[0].data[i];
+                if (val !== null) {
+                    ctx.save();
+                    ctx.font = 'bold 11px Inter';
+                    ctx.fillStyle = '#fff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('$' + (val/1000000).toFixed(1) + 'M', bar.x, bar.y + 18);
+                    ctx.restore();
+                }
+            });
+
+            // Label savings bars
+            meta1.data.forEach((bar, i) => {
+                const val = chart.data.datasets[1].data[i];
+                if (val !== null && val > 0) {
+                    ctx.save();
+                    ctx.font = 'bold 10px Inter';
+                    ctx.fillStyle = '#dc2626';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('-$' + (val/1000).toFixed(0) + 'K', bar.x, bar.y - 6);
+                    ctx.restore();
+                }
+            });
+        }
+    }]
+});
+</script>
+
+</body>
+</html>

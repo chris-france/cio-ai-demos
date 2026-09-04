@@ -446,6 +446,484 @@ ADVANCED_DEMOS = [
 ]
 
 
+SERVICE_MGMT_DEMOS = [
+    {
+        "num": "14",
+        "title": "The Help Desk is Broken",
+        "subtitle": "Build an analytics dashboard that reveals the real cost of your help desk",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "course-03-service-mgmt/lecture-01-helpdesk-broken",
+        "description": (
+            "Your workbook has 25 real support tickets. You paste one prompt. Claude Code "
+            "fetches the data, calculates cost per ticket, resolution time distributions, "
+            "category breakdowns, channel analysis, and builds a complete analytics dashboard "
+            "that exposes exactly where your help desk is failing — and how much it costs."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned",
+            "CIO AI Demos app running (for workbook data)",
+        ],
+        "steps": [
+            "Open http://localhost:18802 → Workbook tab → expand Lecture 14 to review ticket data",
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "CC fetches your ticket data and builds the analytics dashboard",
+            "Explore the charts and cost analysis",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "course-03-service-mgmt/lecture-01-helpdesk-broken.\n\n"
+            "Fetch my help desk ticket data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/14/helpdesk_tickets\n\n"
+            "Also fetch my baseline metrics:\n"
+            "curl -s http://localhost:18801/api/workbook/14/helpdesk_baseline\n\n"
+            "Build a Help Desk Analytics Dashboard as index.html using Tailwind CSS and "
+            "Chart.js from CDN (no build step):\n\n"
+            "1. KPI cards: Total Tickets, Avg Resolution Time, SLA Compliance Rate, "
+            "Cost Per Ticket (use $45/hour fully loaded IT staff rate), Open Tickets\n"
+            "2. Bar chart: Tickets by category (Hardware, Software, Network, Access, Email)\n"
+            "3. Pie chart: Tickets by channel (Slack, Teams, Email, Portal, Phone)\n"
+            "4. Line chart: Resolution time distribution (how many tickets resolved in "
+            "<15min, 15-60min, 1-4hr, 4-24hr, >24hr)\n"
+            "5. Bar chart: Tickets by department — who generates the most work?\n"
+            "6. Stacked bar: Charlotte vs Raleigh comparison\n"
+            "7. Cost analysis box: Annual support cost, cost per ticket, projected cost "
+            "of AI displacement (show 70% auto-resolution scenario)\n"
+            "8. Sortable table of all tickets with color-coded priority and status badges\n\n"
+            "White background, vibrant charts, executive-ready. Open in browser."
+        ),
+        "takeaway": (
+            "Your help desk is a cost center you've been ignoring. Now you can see exactly "
+            "where the money goes and which categories AI can displace. The 70% auto-resolution "
+            "scenario you just saw? That's real. We'll build it in the next demo."
+        ),
+        "followups": [
+            "Show me which tickets could have been auto-resolved by AI. Highlight them in the table with a green badge.",
+            "Generate a one-page executive summary I can email to the CIO showing the cost of the status quo vs. AI help desk",
+            "Add a recurring issues section — which problems keep coming back? What's the root cause?",
+        ],
+    },
+    {
+        "num": "15",
+        "title": "AI Triage — How Machines Read Tickets",
+        "subtitle": "Build a live ticket classifier that categorizes, prioritizes, and routes in real-time",
+        "tool": "Claude Code + Ollama",
+        "time": "~10 min",
+        "folder": "course-03-service-mgmt/lecture-02-ai-triage",
+        "description": (
+            "You paste one prompt. Claude Code builds a web app where you type a ticket "
+            "in plain English and watch AI classify it in real-time: category, priority, "
+            "confidence score, suggested routing, and recommended response. You see exactly "
+            "how AI reads and understands support tickets."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "Ollama installed with at least one model (llama3.2:3b)",
+            "cio-ai-demos repo cloned",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "CC builds the classifier app and launches it",
+            "Type sample tickets and watch AI classify them in real-time",
+            "Try edge cases — vague tickets, multi-issue tickets, urgent vs. routine",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "course-03-service-mgmt/lecture-02-ai-triage.\n\n"
+            "Build a live AI Ticket Classifier as a single-page web app (index.html + "
+            "a small Python backend). The student types a support ticket in a text box "
+            "and clicks 'Classify'. The AI returns:\n\n"
+            "1. Category (Hardware, Software, Network, Access, Email, Other)\n"
+            "2. Priority (Critical, High, Medium, Low) with reasoning\n"
+            "3. Confidence score (0-100%) shown as a colored progress bar\n"
+            "4. Suggested routing (which team or person should handle this)\n"
+            "5. Suggested first response (what to say back to the employee)\n"
+            "6. Keywords extracted from the ticket\n\n"
+            "Use Ollama with llama3.2:3b as the AI backend. The prompt should include "
+            "the classification taxonomy and examples. Parse the response as JSON.\n\n"
+            "Pre-load 5 sample tickets as clickable buttons so students can see instant "
+            "classifications:\n"
+            "- 'My laptop screen is cracked'\n"
+            "- 'VPN keeps disconnecting every 10 minutes'\n"
+            "- 'Need access to the new SharePoint site for the airport project'\n"
+            "- 'Outlook is sending duplicate emails to clients'\n"
+            "- 'The entire Raleigh office lost internet'\n\n"
+            "Professional UI with Tailwind CSS. Show the AI thinking process — display "
+            "the raw prompt and response so students understand what's happening. "
+            "Launch the backend on port 8850 and open the page in the browser."
+        ),
+        "takeaway": (
+            "The AI didn't study ITIL. It didn't take a certification. You gave it a "
+            "taxonomy and examples, and it classifies better than most L1 staff — in "
+            "200 milliseconds. That's the triage revolution."
+        ),
+        "followups": [
+            "Now send 10 tickets through the classifier at once (batch mode) and show me the results in a table",
+            "Add a 'confidence threshold' slider — below the threshold, the ticket auto-escalates to a human instead of auto-classifying",
+            "Compare classification quality between the small model (3b) and a larger model (8b). Which is more accurate? Is the speed tradeoff worth it?",
+        ],
+    },
+    {
+        "num": "16",
+        "title": "Auto-Resolution — The 70% Rule",
+        "subtitle": "Build a simulation showing which tickets AI resolves vs. escalates",
+        "tool": "Claude Code + Ollama",
+        "time": "~10 min",
+        "folder": "course-03-service-mgmt/lecture-03-auto-resolution",
+        "description": (
+            "Your workbook tickets flow through an auto-resolution pipeline. AI classifies "
+            "each one, checks confidence, and either resolves it autonomously (high confidence), "
+            "drafts a response for human review (medium), or escalates with full context (low). "
+            "You watch the 70% rule play out in real-time."
+        ),
+        "prerequisites": [
+            "Claude Code installed",
+            "Ollama installed with llama3.2:3b",
+            "CIO AI Demos app running (for workbook data)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "Watch CC build the pipeline and process all 25 tickets",
+            "See the dashboard showing auto-resolved vs. drafted vs. escalated",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "course-03-service-mgmt/lecture-03-auto-resolution.\n\n"
+            "Fetch ticket data: curl -s http://localhost:18801/api/workbook/14/helpdesk_tickets\n\n"
+            "Build an Auto-Resolution Pipeline Simulator:\n\n"
+            "1. For each ticket, use Ollama (llama3.2:3b) to:\n"
+            "   - Classify the ticket\n"
+            "   - Generate a confidence score (0-100)\n"
+            "   - Generate a suggested resolution\n"
+            "2. Apply the 70% rule:\n"
+            "   - Confidence > 90%: AUTO-RESOLVED (green) — AI sends the response\n"
+            "   - Confidence 60-90%: DRAFT FOR REVIEW (amber) — AI drafts, human approves\n"
+            "   - Confidence < 60%: ESCALATE (red) — routed to human with full context\n"
+            "3. Build a dashboard (index.html) showing:\n"
+            "   - Animated pipeline: tickets flow through classification → resolution\n"
+            "   - KPI cards: Total Processed, Auto-Resolved %, Drafted %, Escalated %\n"
+            "   - Donut chart: resolution breakdown\n"
+            "   - Table of all tickets with their AI decision, confidence, and suggested response\n"
+            "   - Time saved calculation: auto-resolved tickets × avg resolution time × hourly rate\n"
+            "   - Side-by-side comparison: 'Before AI' vs 'After AI' cost and staffing\n\n"
+            "If Ollama is not available, use a rule-based classifier with realistic confidence "
+            "scores as a fallback. The dashboard should still work without Ollama.\n\n"
+            "Tailwind CSS, professional look. Open in browser."
+        ),
+        "takeaway": (
+            "70% of your tickets just disappeared from the human queue. The remaining 30% "
+            "arrive with full context — the AI already did the research. Your L1 team didn't "
+            "lose their jobs; they got promoted to the interesting problems."
+        ),
+        "followups": [
+            "Show me the tickets that were escalated — what made them hard? What would it take for AI to handle those too?",
+            "Calculate the ROI: if we deploy this for real, what's the annual savings?",
+            "Add a 'replay' button that lets me adjust the confidence thresholds and see how the percentages change",
+        ],
+    },
+    {
+        "num": "17",
+        "title": "Knowledge Base That Builds Itself",
+        "subtitle": "Watch AI turn resolved tickets into searchable KB articles",
+        "tool": "Claude Code + Ollama",
+        "time": "~8 min",
+        "folder": "course-03-service-mgmt/lecture-04-knowledge-base",
+        "description": (
+            "You select a resolved ticket. AI reads the problem and solution, generates "
+            "a clean KB article with title, steps, related articles, and search keywords. "
+            "Then it builds a searchable knowledge base UI from all your resolved tickets."
+        ),
+        "prerequisites": [
+            "Claude Code installed",
+            "Ollama installed with llama3.2:3b",
+            "CIO AI Demos app running",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "CC processes resolved tickets and generates KB articles",
+            "Search the KB and see how it self-populates",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "course-03-service-mgmt/lecture-04-knowledge-base.\n\n"
+            "Fetch resolved tickets: curl -s http://localhost:18801/api/workbook/14/helpdesk_tickets\n\n"
+            "Build a Self-Generating Knowledge Base:\n\n"
+            "1. For each resolved ticket (status = Resolved), use Ollama to generate a KB article:\n"
+            "   - Title (clear, searchable)\n"
+            "   - Problem summary (1-2 sentences)\n"
+            "   - Step-by-step solution\n"
+            "   - Category and tags\n"
+            "   - Related article suggestions\n"
+            "2. Build a knowledge base web app (index.html):\n"
+            "   - Search bar at the top (filters articles by keyword)\n"
+            "   - Category filter sidebar\n"
+            "   - Article cards with title, summary, and 'View Solution' expand\n"
+            "   - A 'Generate from Ticket' demo: paste a ticket, click generate, see the article appear\n"
+            "   - Stats: total articles, most viewed categories, articles generated today\n"
+            "3. Include a before/after comparison:\n"
+            "   - Before: 'Our KB has 12 articles from 2019. Nobody updates it.'\n"
+            "   - After: 'Every resolved ticket automatically becomes a searchable article.'\n\n"
+            "If Ollama unavailable, generate articles using templates based on ticket data.\n"
+            "Tailwind CSS. Open in browser."
+        ),
+        "takeaway": (
+            "Your knowledge base just went from 12 stale articles to a living system that "
+            "grows with every resolved ticket. The next time someone has the same problem, "
+            "AI finds the article before they even finish typing."
+        ),
+        "followups": [
+            "Show me duplicate articles — tickets that generated the same KB article. How many tickets could have been self-served?",
+            "Add a 'Did this help?' button to each article. Track which articles are most useful.",
+            "Generate a monthly report: new articles created, most searched topics, gaps where articles are missing",
+        ],
+    },
+    {
+        "num": "18",
+        "title": "Escalation Intelligence",
+        "subtitle": "Build the 'talk to a human' flow with full context handoff",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "course-03-service-mgmt/lecture-05-escalation",
+        "description": (
+            "The 'Talk to a Human' button must always be visible. When clicked, AI hands off "
+            "to a person with full context — what the user tried, what AI already attempted, "
+            "relevant KB articles, and a suggested resolution. The human never asks the user "
+            "to repeat themselves."
+        ),
+        "prerequisites": [
+            "Claude Code installed",
+            "cio-ai-demos repo cloned",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "CC builds the escalation flow simulator",
+            "Walk through the experience as an employee submitting a ticket",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "course-03-service-mgmt/lecture-05-escalation.\n\n"
+            "Build a Smart Escalation Simulator (index.html) that shows the employee experience:\n\n"
+            "1. LEFT PANEL — Employee View:\n"
+            "   - Chat interface where the employee describes their problem\n"
+            "   - AI responds with suggestions (simulate a conversation)\n"
+            "   - Big green 'TALK TO A HUMAN' button — always visible, never hidden\n"
+            "   - When clicked: 'Connecting you with Marcus from IT. He has your full context.'\n\n"
+            "2. RIGHT PANEL — IT Staff View (what Marcus sees):\n"
+            "   - Employee name, department, location\n"
+            "   - Problem description\n"
+            "   - What AI already tried (with results)\n"
+            "   - Related KB articles\n"
+            "   - AI's suggested resolution\n"
+            "   - Priority and SLA countdown\n"
+            "   - Employee's ticket history (past issues)\n\n"
+            "3. BOTTOM — Metrics:\n"
+            "   - Average escalation context score (how much info the human gets)\n"
+            "   - Time saved vs. starting from scratch\n"
+            "   - Employee satisfaction comparison: escalation WITH context vs WITHOUT\n\n"
+            "Pre-load 3 scenarios the student can click through:\n"
+            "- Password reset that AI solved (no escalation needed)\n"
+            "- Projector issue that needs physical help (clean escalation)\n"
+            "- Complex Revit crash that AI can't diagnose (full context handoff)\n\n"
+            "Tailwind CSS. Split-screen layout. Open in browser."
+        ),
+        "takeaway": (
+            "The difference between good AI support and terrible AI support is one button. "
+            "The 'Talk to a Human' button must always be visible, never hidden, and when "
+            "clicked, the human gets everything — not a cold transfer to someone who asks "
+            "'can you describe the issue again?'"
+        ),
+        "followups": [
+            "Add a 'frustrated employee' scenario where the user types 'THIS IS RIDICULOUS JUST LET ME TALK TO SOMEONE' — show how AI detects frustration and immediately escalates",
+            "Show the same escalation WITHOUT context — the old way. How long does it take when the human starts from zero?",
+            "Build a dashboard showing escalation patterns — which categories escalate most? What time of day? Which AI gaps should we fix?",
+        ],
+    },
+    {
+        "num": "19",
+        "title": "SLA Prediction and Breach Prevention",
+        "subtitle": "Build a dashboard that predicts SLA breaches before they happen",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "course-03-service-mgmt/lecture-06-sla-prediction",
+        "description": (
+            "SLA targets: Critical=2hr, High=4hr, Medium=24hr, Low=48hr. AI monitors every "
+            "open ticket and predicts which ones will breach — before they do. Auto-reprioritizes "
+            "and alerts the team before the clock runs out."
+        ),
+        "prerequisites": [
+            "Claude Code installed",
+            "cio-ai-demos repo cloned",
+            "CIO AI Demos app running",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "CC builds the SLA prediction dashboard",
+            "Watch the countdown timers and breach predictions in real-time",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "course-03-service-mgmt/lecture-06-sla-prediction.\n\n"
+            "Fetch ticket data: curl -s http://localhost:18801/api/workbook/14/helpdesk_tickets\n\n"
+            "Build an SLA Prediction Dashboard (index.html):\n\n"
+            "SLA targets: Critical=2hr, High=4hr, Medium=24hr, Low=48hr\n\n"
+            "1. KPI cards: Open Tickets, At Risk (>75% of SLA elapsed), Breached, "
+            "On Track, SLA Compliance Rate\n"
+            "2. For each open/in-progress ticket, show:\n"
+            "   - Countdown timer (time remaining before SLA breach)\n"
+            "   - Risk score (green/amber/red based on elapsed %)\n"
+            "   - Predicted breach time based on category avg resolution\n"
+            "   - Auto-suggested action: reassign, escalate, or add resources\n"
+            "3. Timeline chart: show when each ticket was submitted vs. when SLA expires\n"
+            "4. Breach prediction: 'Based on current resolution patterns, 3 tickets will "
+            "breach in the next 2 hours'\n"
+            "5. Historical view: SLA compliance over the past 90 days by priority level\n"
+            "6. Auto-reprioritization demo: button that reshuffles the queue to minimize "
+            "total breaches\n\n"
+            "Use JavaScript timers to make countdowns animate in real-time.\n"
+            "Tailwind CSS. Open in browser."
+        ),
+        "takeaway": (
+            "Traditional help desks measure SLA breaches after they happen. You just built "
+            "a system that predicts them before they happen. The shift from reactive to "
+            "predictive is the entire point of AI in service management."
+        ),
+        "followups": [
+            "Add email/Slack alerts that fire when a ticket hits 80% of its SLA window",
+            "Show me which IT staff members have the best SLA compliance — who should get the critical tickets?",
+            "Build a 'what-if' simulator: if we add one more IT staff member, how does SLA compliance change?",
+        ],
+    },
+    {
+        "num": "20",
+        "title": "Integrating with Your Stack",
+        "subtitle": "Build a multi-channel ticket ingestion demo — Slack, Teams, email, and portal",
+        "tool": "Claude Code",
+        "time": "~7 min",
+        "folder": "course-03-service-mgmt/lecture-07-multichannel",
+        "description": (
+            "Employees don't care about your ticketing system. They care about getting help "
+            "where they already are — Slack, Teams, email, or a web portal. This demo shows "
+            "tickets arriving from all four channels, normalized into a single unified queue."
+        ),
+        "prerequisites": [
+            "Claude Code installed",
+            "cio-ai-demos repo cloned",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "CC builds the multi-channel ingestion simulator",
+            "Watch tickets arrive from different channels in real-time",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "course-03-service-mgmt/lecture-07-multichannel.\n\n"
+            "Build a Multi-Channel Ticket Ingestion Simulator (index.html):\n\n"
+            "1. Four columns representing channels: Slack, Teams, Email, Web Portal\n"
+            "   - Each column shows messages arriving in that channel's visual style\n"
+            "   - Slack: purple sidebar, message bubbles\n"
+            "   - Teams: blue header, conversation threads\n"
+            "   - Email: inbox format with subject lines\n"
+            "   - Portal: clean form submissions\n\n"
+            "2. Center: Unified Ticket Queue\n"
+            "   - All messages normalize into the same ticket format\n"
+            "   - Each ticket shows: source channel icon, subject, category, priority, timestamp\n"
+            "   - Sortable and filterable\n\n"
+            "3. Animation: every 3 seconds, a new ticket arrives in a random channel, "
+            "animates across to the unified queue, and gets classified\n\n"
+            "4. Stats bar: Tickets per channel, avg response time per channel, "
+            "which channel is fastest\n\n"
+            "5. Key insight callout: 'Employees submit tickets where they're comfortable. "
+            "AI meets them there. The system behind the scenes is the same regardless of channel.'\n\n"
+            "Use JavaScript setInterval for the animation. Pre-load 20 realistic tickets "
+            "from an AEC firm (mix of hardware, software, network, access issues).\n"
+            "Tailwind CSS, vibrant, animated. Open in browser."
+        ),
+        "takeaway": (
+            "The channel doesn't matter. What matters is that every message — whether it's "
+            "a Slack DM, a Teams chat, an email, or a portal form — becomes the same ticket "
+            "in the same queue with the same AI classification. Meet users where they are."
+        ),
+        "followups": [
+            "Add a 'natural language' channel — let me type a ticket as if I'm texting a friend and watch AI parse it into structured fields",
+            "Show me channel analytics: which departments prefer which channel? Is there a pattern?",
+            "Add a chatbot interface that responds in-channel: when someone messages in Slack, the AI replies in Slack — not a ticketing portal",
+        ],
+    },
+    {
+        "num": "21",
+        "title": "The Transition Plan",
+        "subtitle": "Build an interactive ROI calculator and 90-day implementation roadmap",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "course-03-service-mgmt/lecture-08-transition-plan",
+        "description": (
+            "The final demo: an interactive tool where you input your company's numbers — "
+            "employees, IT staff, ticket volume, current costs — and get a personalized ROI "
+            "projection plus a visual 90-day implementation roadmap. This is the tool you "
+            "use to build the business case for your CIO."
+        ),
+        "prerequisites": [
+            "Claude Code installed",
+            "cio-ai-demos repo cloned",
+            "CIO AI Demos app running (for workbook baseline data)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below",
+            "CC builds the ROI calculator and roadmap",
+            "Input your company's real numbers and see the projections",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "course-03-service-mgmt/lecture-08-transition-plan.\n\n"
+            "Fetch baseline data: curl -s http://localhost:18801/api/workbook/14/helpdesk_baseline\n\n"
+            "Build an AI Help Desk ROI Calculator & Transition Roadmap (index.html):\n\n"
+            "SECTION 1 — ROI Calculator:\n"
+            "- Input sliders: Company Size (100-5000), IT Support Staff (1-50), "
+            "Monthly Ticket Volume (50-2000), Avg IT Salary ($60K-$150K), "
+            "Current MSP Cost (if any)\n"
+            "- Auto-calculate: Current Annual Cost, AI Help Desk Cost, Annual Savings, "
+            "ROI %, Payback Period (months)\n"
+            "- Assumptions box: 70% auto-resolution, $45/hr loaded rate, 15-min avg AI resolution\n"
+            "- Chart: 3-year projection showing cumulative savings vs. investment\n"
+            "- Pre-populate with workbook baseline data\n\n"
+            "SECTION 2 — 90-Day Implementation Roadmap:\n"
+            "- Visual timeline with 3 phases:\n"
+            "  Week 1-2: Foundation (tool selection, data import, KB seed)\n"
+            "  Week 3-6: Pilot (1 department, 1 channel, measure auto-resolution rate)\n"
+            "  Week 7-12: Scale (all departments, all channels, SLA tracking)\n"
+            "- Each phase has: milestones, risks, success metrics\n"
+            "- Gantt-style chart with clickable phases that expand to show details\n\n"
+            "SECTION 3 — Executive Summary Generator:\n"
+            "- Button: 'Generate Board Memo'\n"
+            "- Takes the calculator inputs and generates a 1-page executive summary "
+            "with the ROI case, implementation timeline, and risk mitigation\n"
+            "- Copyable text that can be pasted into an email or document\n\n"
+            "Tailwind CSS, professional, executive-ready. Open in browser."
+        ),
+        "takeaway": (
+            "You now have everything you need to make the business case: the cost analysis, "
+            "the implementation plan, the risk mitigation, and the executive memo. You built "
+            "all of it with AI in 8 demos. That's the meta-lesson — the tools you built to "
+            "analyze your help desk were themselves built by AI."
+        ),
+        "followups": [
+            "Adjust the auto-resolution rate to 50% instead of 70%. How does the ROI change? What's the break-even rate?",
+            "Add a risk assessment section: what are the top 5 risks of deploying AI help desk, and what's the mitigation for each?",
+            "Generate a comparison table: current state vs. AI help desk vs. outsourced MSP. Three options for the board.",
+        ],
+    },
+]
+
+
 def get_demo_status(folder: str | None) -> str:
     """Return 'ready' if demo folder has real content."""
     if not folder:

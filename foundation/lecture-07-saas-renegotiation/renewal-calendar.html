@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Renewal Calendar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'Courier New', monospace; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<div class="max-w-6xl mx-auto px-6 py-10">
+
+    <div class="flex items-center gap-3 mb-1">
+        <div class="w-2 h-10 bg-gradient-to-b from-red-500 to-amber-500 rounded-full"></div>
+        <h1 class="text-3xl font-extrabold tracking-tight">SaaS Renewal Calendar</h1>
+    </div>
+    <p class="text-sm text-gray-500 ml-5 mb-8">CIO AI Curriculum — Lecture 07: Next 6 months — never miss a negotiation window again</p>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-4 gap-4 mb-8" id="kpiRow"></div>
+
+    <!-- Timeline -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-gray-900">Renewal Timeline</h2>
+                <p class="text-sm text-gray-500">Contracts expiring within 6 months. Notice deadlines shown in red.</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-gray-500">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-red-400 inline-block"></span> Today</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Expired / Urgent</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> &lt; 90 days</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> 90+ days</span>
+            </div>
+        </div>
+        <div id="timeline"></div>
+    </div>
+
+    <!-- Month-by-month cards -->
+    <div id="monthCards" class="space-y-6 mb-8"></div>
+
+    <!-- Action checklist -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl p-6 mb-8">
+        <h2 class="text-lg font-bold mb-4">Pre-Renewal Checklist</h2>
+        <div class="grid grid-cols-3 gap-4 text-sm">
+            <div class="bg-white/10 rounded-xl p-4">
+                <h3 class="font-bold mb-2">90 Days Before</h3>
+                <ul class="space-y-1.5 text-blue-100 text-xs">
+                    <li>Pull utilization data from admin console</li>
+                    <li>Identify overlapping tools in same category</li>
+                    <li>Research competitor pricing and alternatives</li>
+                    <li>Disable auto-renew if possible</li>
+                </ul>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4">
+                <h3 class="font-bold mb-2">60 Days Before</h3>
+                <ul class="space-y-1.5 text-blue-100 text-xs">
+                    <li>Send negotiation email to vendor AE</li>
+                    <li>Schedule renewal review call</li>
+                    <li>Prepare right-sizing proposal (seats, tier)</li>
+                    <li>Get CFO alignment on walk-away number</li>
+                </ul>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4">
+                <h3 class="font-bold mb-2">30 Days Before</h3>
+                <ul class="space-y-1.5 text-blue-100 text-xs">
+                    <li>Finalize negotiation — sign or cancel</li>
+                    <li>If canceling: begin migration to alternative</li>
+                    <li>Notify impacted users of changes</li>
+                    <li>Update SaaS inventory with new terms</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Lecture 07: SaaS Renewal Calendar</p>
+</div>
+
+<script>
+const TODAY = new Date('2026-03-17');
+const SIX_MONTHS = new Date(TODAY);
+SIX_MONTHS.setMonth(SIX_MONTHS.getMonth() + 6);
+
+const contracts = [
+    { name: "AWS", cost: 576000, category: "Cloud Infrastructure", end: "2025-06-30", autoRenew: false, utilization: 100, users: "45/45", action: "Negotiate reserved instances — 10% savings minimum" },
+    { name: "Monday.com Enterprise", cost: 62400, category: "Project Management", end: "2025-07-31", autoRenew: true, utilization: 47, users: "28/60", action: "CANCEL — consolidate to Jira. 60% seats unused." },
+    { name: "DocuSign Business Pro", cost: 21600, category: "E-Signature", end: "2025-07-31", autoRenew: true, utilization: 35, users: "35/100", action: "Right-size to 40 seats or switch to free tier + PandaDoc" },
+    { name: "Zoom Business", cost: 33600, category: "Video/Meetings", end: "2025-08-15", autoRenew: true, utilization: 47, users: "142/300", action: "CANCEL — consolidate to Microsoft Teams (already licensed)" },
+    { name: "Miro Business", cost: 18000, category: "Collaboration", end: "2025-08-31", autoRenew: true, utilization: 30, users: "12/40", action: "CANCEL — 30% utilization, use FigJam (bundled with Figma)" },
+    { name: "Google Workspace", cost: 43200, category: "Productivity", end: "2025-09-30", autoRenew: true, utilization: 15, users: "45/300", action: "CANCEL — 85% of users are on M365. Migrate remaining 45." },
+    { name: "Slack Business+", cost: 64800, category: "Messaging", end: "2025-09-30", autoRenew: true, utilization: 88, users: "265/300", action: "Negotiate 20% reduction or consolidate to Teams" },
+    { name: "Coupa Procurement", cost: 120000, category: "Procurement", end: "2025-09-30", autoRenew: true, utilization: 56, users: "28/50", action: "Right-size to 30 seats + 15% rate cut. Negotiation email sent." },
+    { name: "Asana Business", cost: 39600, category: "Project Management", end: "2025-10-31", autoRenew: true, utilization: 44, users: "35/80", action: "CANCEL — consolidate Marketing team to Jira" },
+    { name: "Adobe Creative Cloud", cost: 28800, category: "Design", end: "2025-10-31", autoRenew: true, utilization: 70, users: "14/20", action: "Right-size to 15 seats. Evaluate overlap with Figma." },
+    { name: "Figma Organization", cost: 28800, category: "Design", end: "2025-10-31", autoRenew: true, utilization: 93, users: "14/15", action: "Keep — high utilization. Negotiate multi-year for 10% discount." },
+    { name: "HubSpot Marketing Hub", cost: 72000, category: "Marketing/CRM", end: "2025-11-30", autoRenew: true, utilization: 55, users: "22/40", action: "Right-size to 25 seats. Evaluate if Salesforce Marketing Cloud replaces it." },
+    { name: "Zendesk Suite Pro", cost: 96000, category: "Customer Support", end: "2025-11-30", autoRenew: true, utilization: 80, users: "48/60", action: "Negotiate 15% reduction. Evaluate ServiceNow CSM module as replacement." },
+    { name: "Salesforce Enterprise", cost: 285000, category: "CRM", end: "2025-12-31", autoRenew: true, utilization: 72, users: "108/150", action: "Right-size to 120 seats. Negotiate volume discount on 3-year extension." },
+    { name: "Splunk Cloud", cost: 168000, category: "Monitoring/SIEM", end: "2025-12-31", autoRenew: true, utilization: 80, users: "12/15", action: "CANCEL or 40% cut — consolidate to Datadog. Negotiation email sent." },
+    { name: "Tableau Creator", cost: 84000, category: "BI/Analytics", end: "2025-12-31", autoRenew: true, utilization: 63, users: "22/35", action: "Right-size to 25 seats. Power BI (in M365) covers many users." },
+    { name: "Snowflake", cost: 240000, category: "Data Warehouse", end: "2026-01-31", autoRenew: false, utilization: 90, users: "18/20", action: "Shift to consumption model — 25-30% reduction. Negotiation email sent." },
+    { name: "Jira Software Premium", cost: 54000, category: "Project Management", end: "2026-01-31", autoRenew: true, utilization: 65, users: "98/150", action: "Keep — consolidation target. Right-size to 110 seats after PM consolidation." },
+    { name: "Azure", cost: 192000, category: "Cloud Infrastructure", end: "2026-02-28", autoRenew: false, utilization: 60, users: "18/30", action: "Migrate legacy workloads to AWS. Target full decommission by Q3." },
+    { name: "Datadog Pro", cost: 115200, category: "Monitoring", end: "2026-02-28", autoRenew: false, utilization: 88, users: "22/25", action: "Keep — primary monitoring. Negotiate 10% volume discount post-Splunk consolidation." },
+    { name: "Microsoft 365 E5", cost: 187200, category: "Productivity", end: "2026-03-15", autoRenew: true, utilization: 96, users: "289/300", action: "Downgrade non-security users to E3 — saves $43K/yr" },
+];
+
+// Filter to next 6 months from TODAY
+const upcoming = contracts.filter(c => {
+    const d = new Date(c.end);
+    return d <= SIX_MONTHS;
+}).sort((a, b) => new Date(a.end) - new Date(b.end));
+
+const expired = upcoming.filter(c => new Date(c.end) < TODAY);
+const urgent = upcoming.filter(c => { const d = new Date(c.end); const diff = (d - TODAY) / 86400000; return diff >= 0 && diff <= 90; });
+const totalAtRisk = upcoming.reduce((s, c) => s + c.cost, 0);
+const cancelTargets = upcoming.filter(c => c.action.startsWith('CANCEL'));
+const cancelSavings = cancelTargets.reduce((s, c) => s + c.cost, 0);
+
+// KPIs
+document.getElementById('kpiRow').innerHTML = `
+    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Renewals (6 mo)</p>
+        <p class="text-3xl font-extrabold text-gray-900">${upcoming.length}</p>
+        <p class="text-xs text-gray-400 mt-1">Contracts to review</p>
+    </div>
+    <div class="bg-white border-2 border-red-200 rounded-xl p-5 shadow-sm">
+        <p class="text-xs font-semibold text-red-500 uppercase tracking-wider mb-1">Expired / Urgent</p>
+        <p class="text-3xl font-extrabold text-red-600">${expired.length + urgent.length}</p>
+        <p class="text-xs text-gray-400 mt-1">${expired.length} expired, ${urgent.length} within 90 days</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Spend at Risk</p>
+        <p class="text-3xl font-extrabold text-gray-900">$${(totalAtRisk/1000000).toFixed(1)}M</p>
+        <p class="text-xs text-gray-400 mt-1">Total renewal value</p>
+    </div>
+    <div class="bg-white border-2 border-emerald-200 rounded-xl p-5 shadow-sm">
+        <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Cancel Targets</p>
+        <p class="text-3xl font-extrabold text-emerald-600">${cancelTargets.length}</p>
+        <p class="text-xs text-gray-400 mt-1">$${(cancelSavings/1000).toFixed(0)}K potential savings</p>
+    </div>
+`;
+
+// Timeline
+const timelineEl = document.getElementById('timeline');
+const startDate = new Date(Math.min(TODAY.getTime(), ...upcoming.map(c => new Date(c.end).getTime())));
+const totalDays = (SIX_MONTHS - startDate) / 86400000;
+
+// Month headers
+const monthBar = document.createElement('div');
+monthBar.className = 'relative h-7 mb-1';
+monthBar.style.marginLeft = '260px';
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+for (let d = new Date(startDate.getFullYear(), startDate.getMonth(), 1); d <= SIX_MONTHS; d.setMonth(d.getMonth() + 1)) {
+    const pct = ((d - startDate) / 86400000 / totalDays) * 100;
+    if (pct >= -2 && pct <= 102) {
+        const lbl = document.createElement('div');
+        lbl.className = 'absolute text-xs font-medium text-gray-400';
+        lbl.style.left = Math.max(0, pct) + '%';
+        lbl.textContent = monthNames[d.getMonth()] + " '" + String(d.getFullYear()).slice(2);
+        monthBar.appendChild(lbl);
+    }
+}
+timelineEl.appendChild(monthBar);
+
+// Contract rows
+upcoming.forEach(c => {
+    const endDate = new Date(c.end);
+    const daysToEnd = Math.round((endDate - TODAY) / 86400000);
+    const isExpired = daysToEnd < 0;
+    const isUrgent = daysToEnd >= 0 && daysToEnd <= 90;
+    const isCancel = c.action.startsWith('CANCEL');
+    const endPct = Math.min(100, Math.max(0, ((endDate - startDate) / 86400000 / totalDays) * 100));
+    const todayPct = Math.min(100, Math.max(0, ((TODAY - startDate) / 86400000 / totalDays) * 100));
+
+    // Notice deadline (60 days before)
+    const noticeDate = new Date(endDate);
+    noticeDate.setDate(noticeDate.getDate() - 60);
+    const noticePct = Math.min(100, Math.max(0, ((noticeDate - startDate) / 86400000 / totalDays) * 100));
+    const noticePassed = noticeDate < TODAY;
+
+    const dotColor = isExpired ? 'bg-red-600' : isUrgent ? 'bg-amber-500' : 'bg-blue-500';
+    const barColor = isCancel ? 'bg-red-100 border-red-300' : isExpired ? 'bg-red-100 border-red-200' : isUrgent ? 'bg-amber-100 border-amber-200' : 'bg-blue-50 border-blue-200';
+
+    const row = document.createElement('div');
+    row.className = 'flex items-center mb-2.5 group';
+
+    row.innerHTML = `
+        <div class="w-64 flex-shrink-0 pr-4">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${dotColor} flex-shrink-0"></span>
+                <span class="text-sm font-semibold text-gray-800 truncate">${c.name}</span>
+            </div>
+            <div class="text-xs text-gray-400 ml-4 flex items-center gap-2">
+                <span class="mono">$${(c.cost/1000).toFixed(0)}K</span>
+                ${isCancel ? '<span class="px-1.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-600" style="font-size:9px;">CANCEL</span>' : ''}
+                ${isExpired ? '<span class="px-1.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-600" style="font-size:9px;">EXPIRED</span>' : ''}
+            </div>
+        </div>
+        <div class="flex-1 relative h-9">
+            <div class="absolute inset-y-2.5 left-0 right-0 bg-gray-50 rounded-full"></div>
+            <div class="absolute w-px h-full bg-red-300 z-10" style="left:${todayPct}%"></div>
+            <div class="absolute inset-y-2.5 rounded-full ${barColor} border" style="left:0;width:${endPct}%"></div>
+            ${noticePct > 0 && noticePct < 100 ? `
+                <div class="absolute z-20 flex flex-col items-center" style="left:${noticePct}%;top:0;transform:translateX(-50%);">
+                    <div class="w-px h-9 ${noticePassed ? 'bg-red-400' : 'bg-gray-300'}"></div>
+                    <div class="text-xs mt-0.5 whitespace-nowrap ${noticePassed ? 'text-red-500 font-bold' : 'text-gray-400'}" style="font-size:9px;">${noticePassed ? 'NOTICE PASSED' : 'Notice'}</div>
+                </div>` : ''}
+            <div class="absolute z-20 flex flex-col items-center" style="left:${endPct}%;top:0;transform:translateX(-50%);">
+                <div class="w-3 h-3 rounded-full ${dotColor} border-2 border-white shadow-sm" style="margin-top:4px;"></div>
+                <div class="text-xs font-semibold ${isExpired ? 'text-red-600' : isUrgent ? 'text-amber-600' : 'text-blue-600'} mt-0.5 whitespace-nowrap" style="font-size:10px;">
+                    ${endDate.toLocaleDateString('en-US', {month:'short', day:'numeric'})}
+                    <span class="font-normal text-gray-400">(${isExpired ? Math.abs(daysToEnd) + 'd ago' : daysToEnd + 'd'})</span>
+                </div>
+            </div>
+        </div>
+    `;
+    timelineEl.appendChild(row);
+});
+
+// Month-by-month breakdown cards
+const byMonth = {};
+upcoming.forEach(c => {
+    const d = new Date(c.end);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if (!byMonth[key]) byMonth[key] = [];
+    byMonth[key].push(c);
+});
+
+const cardsEl = document.getElementById('monthCards');
+Object.keys(byMonth).sort().forEach(key => {
+    const items = byMonth[key];
+    const [y, m] = key.split('-');
+    const monthLabel = new Date(y, m-1).toLocaleDateString('en-US', {month:'long', year:'numeric'});
+    const monthSpend = items.reduce((s, c) => s + c.cost, 0);
+    const isPast = new Date(y, m-1, 28) < TODAY;
+
+    const card = document.createElement('div');
+    card.className = `bg-white border ${isPast ? 'border-red-200' : 'border-gray-200'} rounded-xl shadow-sm overflow-hidden`;
+    card.innerHTML = `
+        <div class="px-5 py-3 border-b ${isPast ? 'border-red-100 bg-red-50' : 'border-gray-100 bg-gray-50'} flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-base font-bold ${isPast ? 'text-red-700' : 'text-gray-900'}">${monthLabel}</span>
+                ${isPast ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-600">PAST DUE</span>' : ''}
+            </div>
+            <div class="text-sm text-gray-500">${items.length} contract${items.length > 1 ? 's' : ''} · <span class="font-bold mono">$${(monthSpend/1000).toFixed(0)}K</span> at risk</div>
+        </div>
+        <table class="w-full text-sm">
+            <thead class="text-xs text-gray-500 uppercase tracking-wider">
+                <tr>
+                    <th class="px-5 py-2 text-left">Tool</th>
+                    <th class="px-5 py-2 text-left">Category</th>
+                    <th class="px-5 py-2 text-right">Annual Cost</th>
+                    <th class="px-5 py-2 text-right">Utilization</th>
+                    <th class="px-5 py-2 text-center">Auto-Renew</th>
+                    <th class="px-5 py-2 text-left">Expiry</th>
+                    <th class="px-5 py-2 text-left">Recommended Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                ${items.map(c => {
+                    const isCancel = c.action.startsWith('CANCEL');
+                    const utilColor = c.utilization < 40 ? 'text-red-600 font-bold' : c.utilization < 70 ? 'text-amber-600' : 'text-emerald-600';
+                    return `<tr class="${isCancel ? 'bg-red-50/40' : ''} hover:bg-gray-50">
+                        <td class="px-5 py-2.5 font-semibold">${c.name}</td>
+                        <td class="px-5 py-2.5 text-gray-500 text-xs">${c.category}</td>
+                        <td class="px-5 py-2.5 text-right mono font-semibold">$${c.cost.toLocaleString()}</td>
+                        <td class="px-5 py-2.5 text-right ${utilColor}">${c.utilization}% <span class="text-gray-400 font-normal">(${c.users})</span></td>
+                        <td class="px-5 py-2.5 text-center">${c.autoRenew ? '<span class="text-amber-600 font-semibold">Yes</span>' : 'No'}</td>
+                        <td class="px-5 py-2.5 text-xs">${c.end}</td>
+                        <td class="px-5 py-2.5 text-xs text-gray-600 leading-relaxed">${c.action}</td>
+                    </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
+    cardsEl.appendChild(card);
+});
+</script>
+
+</body>
+</html>
