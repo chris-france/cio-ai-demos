@@ -1,5 +1,60 @@
+import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import WorkbookCard from './WorkbookCard'
 import { useWorkbookSchemas, useWorkbookProgress } from '../hooks/useWorkbook'
+
+const WORKBOOK_COURSES = [
+  { label: 'Foundation Workbook', badge: 'FOUNDATION', badgeColor: 'bg-france-blue', range: [1, 7], defaultOpen: false },
+  { label: 'Advanced Workbook', badge: 'ADVANCED', badgeColor: 'bg-france-cyan', range: [8, 15], defaultOpen: false },
+  { label: 'Service Management Workbook', badge: 'SERVICE MGMT', badgeColor: 'bg-emerald-600', range: [16, 23], defaultOpen: false },
+]
+
+function WorkbookCourseSection({ course, entries, progress }) {
+  const [open, setOpen] = useState(course.defaultOpen)
+  const [min, max] = course.range
+  const sectionEntries = entries.filter(e => e.num >= min && e.num <= max)
+  const startedCount = sectionEntries.filter(e => progress.completed.includes(e.num)).length
+
+  if (sectionEntries.length === 0) return null
+
+  return (
+    <section className="mb-6">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full max-w-2xl text-left group"
+      >
+        <div className="flex items-center gap-3 mb-1">
+          <h2 className="text-xl font-bold text-gray-900 group-hover:text-france-blue transition-colors">
+            {course.label}
+          </h2>
+          <span className="text-xs text-gray-400 ml-auto">{startedCount}/{sectionEntries.length} started</span>
+          <ChevronDown
+            size={18}
+            className={`text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          />
+        </div>
+        <div className="flex items-center gap-3 mb-2">
+          <span className={`${course.badgeColor} text-white text-[11px] font-bold px-3 py-0.5 rounded-full tracking-wide`}>
+            {course.badge}
+          </span>
+        </div>
+      </button>
+
+      {open && (
+        <div className="grid grid-cols-1 gap-4 max-w-2xl mt-4 animate-in fade-in duration-200">
+          {sectionEntries.map(e => (
+            <WorkbookCard
+              key={e.num}
+              lectureNum={e.num}
+              schema={e.schema}
+              isComplete={progress.completed.includes(e.num)}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
 
 export default function WorkbookView() {
   const { schemas, loading } = useWorkbookSchemas()
@@ -13,11 +68,6 @@ export default function WorkbookView() {
     num: parseInt(num),
     schema,
   }))
-  const foundation = entries.filter(e => e.num <= 7)
-  const advanced = entries.filter(e => e.num > 7)
-
-  const foundationDone = foundation.filter(e => progress.completed.includes(e.num)).length
-  const advancedDone = advanced.filter(e => progress.completed.includes(e.num)).length
 
   return (
     <div>
@@ -54,57 +104,14 @@ export default function WorkbookView() {
         </p>
       </div>
 
-      {/* Foundation */}
-      <section className="mb-12">
-        <div className="flex items-center gap-3 mb-2">
-          <h2 className="text-xl font-bold text-gray-900">Foundation Workbook</h2>
-          <span className="text-sm text-gray-500">&mdash; Lectures 1-7</span>
-        </div>
-        <div className="flex items-center gap-3 mb-6">
-          <span className="bg-france-blue text-white text-[11px] font-bold px-3 py-0.5 rounded-full tracking-wide">
-            FOUNDATION
-          </span>
-          <span className="text-sm text-gray-600">
-            {foundationDone} of {foundation.length} started
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-4 max-w-2xl">
-          {foundation.map(e => (
-            <WorkbookCard
-              key={e.num}
-              lectureNum={e.num}
-              schema={e.schema}
-              isComplete={progress.completed.includes(e.num)}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Advanced */}
-      <section className="mb-12">
-        <div className="flex items-center gap-3 mb-2">
-          <h2 className="text-xl font-bold text-gray-900">Advanced Workbook</h2>
-          <span className="text-sm text-gray-500">&mdash; Lectures 8-15</span>
-        </div>
-        <div className="flex items-center gap-3 mb-6">
-          <span className="bg-france-cyan text-white text-[11px] font-bold px-3 py-0.5 rounded-full tracking-wide">
-            ADVANCED
-          </span>
-          <span className="text-sm text-gray-600">
-            {advancedDone} of {advanced.length} started
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-4 max-w-2xl">
-          {advanced.map(e => (
-            <WorkbookCard
-              key={e.num}
-              lectureNum={e.num}
-              schema={e.schema}
-              isComplete={progress.completed.includes(e.num)}
-            />
-          ))}
-        </div>
-      </section>
+      {WORKBOOK_COURSES.map(course => (
+        <WorkbookCourseSection
+          key={course.label}
+          course={course}
+          entries={entries}
+          progress={progress}
+        />
+      ))}
     </div>
   )
 }

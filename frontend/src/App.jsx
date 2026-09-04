@@ -30,8 +30,18 @@ export default function App() {
     )
   }
 
-  const foundationReady = demos?.foundation?.demos?.filter(d => d.status === 'ready').length || 0
-  const advancedReady = demos?.advanced?.demos?.filter(d => d.status === 'ready').length || 0
+  const COURSE_CONFIG = [
+    { key: 'foundation', badge: 'FOUNDATION', badgeColor: 'bg-france-blue', defaultOpen: false },
+    { key: 'advanced', badge: 'ADVANCED', badgeColor: 'bg-france-cyan', defaultOpen: false },
+    { key: 'service_mgmt', badge: 'SERVICE MGMT', badgeColor: 'bg-emerald-600', defaultOpen: false },
+  ]
+
+  const totalDemos = COURSE_CONFIG.reduce(
+    (sum, c) => sum + (demos?.[c.key]?.demos?.length || 0), 0
+  )
+  const totalReady = COURSE_CONFIG.reduce(
+    (sum, c) => sum + (demos?.[c.key]?.demos?.filter(d => d.status === 'ready').length || 0), 0
+  )
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -82,11 +92,11 @@ export default function App() {
             {/* Stats */}
             <div className="flex justify-start gap-6 mb-10">
               <div className="bg-white rounded-lg border border-gray-200 px-5 py-3 text-center shadow-sm">
-                <div className="text-2xl font-bold text-france-blue">15</div>
+                <div className="text-2xl font-bold text-france-blue">{totalDemos}</div>
                 <div className="text-xs text-gray-500">Demos</div>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 px-5 py-3 text-center shadow-sm">
-                <div className="text-2xl font-bold text-green-600">{foundationReady + advancedReady}</div>
+                <div className="text-2xl font-bold text-green-600">{totalReady}</div>
                 <div className="text-xs text-gray-500">Ready</div>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 px-5 py-3 text-center shadow-sm">
@@ -95,22 +105,16 @@ export default function App() {
               </div>
             </div>
 
-            {/* Foundation */}
-            {demos?.foundation && (
-              <CourseSection
-                course={demos.foundation}
-                badge="FOUNDATION"
-                badgeColor="bg-france-blue"
-              />
-            )}
-
-            {/* Advanced */}
-            {demos?.advanced && (
-              <CourseSection
-                course={demos.advanced}
-                badge="ADVANCED"
-                badgeColor="bg-france-cyan"
-              />
+            {COURSE_CONFIG.map(({ key, badge, badgeColor, defaultOpen }) =>
+              demos?.[key] && (
+                <CourseSection
+                  key={key}
+                  course={demos[key]}
+                  badge={badge}
+                  badgeColor={badgeColor}
+                  defaultOpen={defaultOpen}
+                />
+              )
             )}
           </>
         )}
