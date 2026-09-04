@@ -1,0 +1,32 @@
+MERIDIAN HEALTH SYSTEMS — CORPORATE MISSION STATEMENT
+
+Mission:
+Meridian Health Systems exists to deliver exceptional, patient-centered healthcare
+that is accessible, affordable, and innovative. We leverage cutting-edge technology
+and evidence-based practices to improve health outcomes across every community we serve.
+
+Vision:
+To be the most trusted healthcare network in the region by 2030, recognized for
+clinical excellence, digital innovation, and equitable access to care.
+
+Core Values:
+1. Patient First — Every decision starts with the patient experience
+2. Innovation — We embrace technology that improves outcomes and reduces cost
+3. Integrity — Transparent operations, ethical practices, honest communication
+4. Collaboration — Cross-functional teams, shared knowledge, no silos
+5. Equity — Equal access to quality care regardless of background or geography
+
+Strategic Priorities (Board-Approved, FY2026):
+- ACCELERATE digital transformation across all 12 hospital campuses
+- REDUCE operational costs by 15% through automation and process improvement
+- EXPAND telehealth services to reach 50,000 additional rural patients
+- STRENGTHEN cybersecurity posture to meet evolving HIPAA requirements
+- ATTRACT and retain top clinical and technical talent in a competitive market
+- INTEGRATE AI-assisted diagnostics into radiology, pathology, and emergency triage
+- MODERNIZE legacy EHR systems to improve clinician workflow and reduce burnout
+
+Annual Revenue: $2.8B
+IT Budget: $112M (4% of revenue)
+Employees: 18,500
+Locations: 12 hospitals, 45 outpatient clinics, 3 data centers
+Current IT Staff: 340 FTEs

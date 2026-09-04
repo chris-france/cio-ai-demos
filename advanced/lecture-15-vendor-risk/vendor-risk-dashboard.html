@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 15 — AI Vendor Risk Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .tab-active { border-bottom: 3px solid #dc2626; color: #dc2626; font-weight: 600; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
+        .tab-inactive:hover { color: #334155; border-bottom-color: #cbd5e1; }
+        .fade-in { animation: fadeIn 0.4s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .risk-card { transition: all 0.2s; }
+        .risk-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { danger: '#dc2626', warning: '#f59e0b', safe: '#16a34a' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-red-700 via-red-600 to-orange-600 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-white/20 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide">Lecture 15</span>
+                <span class="text-red-200 text-sm">CIO AI Advanced Course</span>
+            </div>
+            <h1 class="text-3xl font-bold mb-2">AI Vendor Risk Dashboard</h1>
+            <p class="text-red-100 text-lg max-w-2xl">Evaluate dependency, lock-in, and switching costs across your AI vendor portfolio. Plan for the scenarios nobody wants to talk about.</p>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white border-b sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 flex gap-1 overflow-x-auto">
+            <button onclick="showTab('comparison')" id="tab-comparison" class="tab-active px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Vendor Comparison</button>
+            <button onclick="showTab('radar')" id="tab-radar" class="tab-inactive px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Radar Charts</button>
+            <button onclick="showTab('scenarios')" id="tab-scenarios" class="tab-inactive px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Risk Scenarios</button>
+            <button onclick="showTab('clauses')" id="tab-clauses" class="tab-inactive px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Contract Clauses</button>
+            <button onclick="showTab('diversify')" id="tab-diversify" class="tab-inactive px-5 py-4 text-sm whitespace-nowrap cursor-pointer">Diversification</button>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- ============ COMPARISON TAB ============ -->
+        <div id="panel-comparison" class="fade-in">
+            <h2 class="text-xl font-bold mb-6">Vendor Comparison &amp; Risk Ranking</h2>
+
+            <!-- Overall Risk Ranking -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                <!-- Snowflake - Lowest Risk -->
+                <div class="risk-card bg-white rounded-xl border-2 border-green-300 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">LOW RISK</span>
+                        <span class="text-2xl font-bold text-green-600">3.8</span>
+                    </div>
+                    <div class="font-bold text-lg">Snowflake</div>
+                    <div class="text-xs text-gray-500">Data Cloud</div>
+                    <div class="text-sm text-gray-600 mt-2">$240K/yr &middot; 20 users</div>
+                    <div class="mt-3 w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width:76%"></div>
+                    </div>
+                </div>
+
+                <!-- OpenAI -->
+                <div class="risk-card bg-white rounded-xl border-2 border-green-200 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">LOW RISK</span>
+                        <span class="text-2xl font-bold text-green-600">3.4</span>
+                    </div>
+                    <div class="font-bold text-lg">OpenAI</div>
+                    <div class="text-xs text-gray-500">ChatGPT Enterprise</div>
+                    <div class="text-sm text-gray-600 mt-2">$96K/yr &middot; 45 users</div>
+                    <div class="mt-3 w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-green-400 h-2 rounded-full" style="width:68%"></div>
+                    </div>
+                </div>
+
+                <!-- ServiceNow -->
+                <div class="risk-card bg-white rounded-xl border-2 border-yellow-300 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">MEDIUM RISK</span>
+                        <span class="text-2xl font-bold text-amber-600">3.0</span>
+                    </div>
+                    <div class="font-bold text-lg">ServiceNow</div>
+                    <div class="text-xs text-gray-500">ITSM</div>
+                    <div class="text-sm text-gray-600 mt-2">$96K/yr &middot; 300 users</div>
+                    <div class="mt-3 w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-amber-400 h-2 rounded-full" style="width:60%"></div>
+                    </div>
+                </div>
+
+                <!-- Microsoft -->
+                <div class="risk-card bg-white rounded-xl border-2 border-orange-300 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">MEDIUM-HIGH</span>
+                        <span class="text-2xl font-bold text-orange-600">2.6</span>
+                    </div>
+                    <div class="font-bold text-lg">Microsoft</div>
+                    <div class="text-xs text-gray-500">Azure OpenAI</div>
+                    <div class="text-sm text-gray-600 mt-2">$144K/yr &middot; 30 users</div>
+                    <div class="mt-3 w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-orange-400 h-2 rounded-full" style="width:52%"></div>
+                    </div>
+                </div>
+
+                <!-- Salesforce - Highest Risk -->
+                <div class="risk-card bg-white rounded-xl border-2 border-red-300 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">HIGH RISK</span>
+                        <span class="text-2xl font-bold text-red-600">1.8</span>
+                    </div>
+                    <div class="font-bold text-lg">Salesforce</div>
+                    <div class="text-xs text-gray-500">Einstein AI + CRM</div>
+                    <div class="text-sm text-gray-600 mt-2">$285K/yr &middot; 150 users</div>
+                    <div class="mt-3 w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-red-400 h-2 rounded-full" style="width:36%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Table -->
+            <div class="bg-white rounded-xl border overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b">
+                    <h3 class="font-semibold">Detailed Scoring (1 = High Risk, 5 = Low Risk)</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-600">
+                            <tr>
+                                <th class="text-left px-4 py-3 font-medium">Vendor</th>
+                                <th class="text-center px-4 py-3 font-medium">Lock-in<br><span class="text-xs text-gray-400 font-normal">Ecosystem trap</span></th>
+                                <th class="text-center px-4 py-3 font-medium">Data Portability<br><span class="text-xs text-gray-400 font-normal">Can you leave?</span></th>
+                                <th class="text-center px-4 py-3 font-medium">Pricing Risk<br><span class="text-xs text-gray-400 font-normal">Cost stability</span></th>
+                                <th class="text-center px-4 py-3 font-medium">Capability<br><span class="text-xs text-gray-400 font-normal">Technical depth</span></th>
+                                <th class="text-center px-4 py-3 font-medium">Support<br><span class="text-xs text-gray-400 font-normal">Help quality</span></th>
+                                <th class="text-center px-4 py-3 font-medium">Overall</th>
+                                <th class="text-center px-4 py-3 font-medium">Switching $</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium">OpenAI</td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-green-100 text-green-700 font-bold">5</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center font-bold text-green-600">3.4</td>
+                                <td class="px-4 py-3 text-center text-gray-600">$45K</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium">Microsoft</td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-red-100 text-red-700 font-bold">2</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-red-100 text-red-700 font-bold">2</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-green-100 text-green-700 font-bold">4</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-red-100 text-red-700 font-bold">2</span></td>
+                                <td class="px-4 py-3 text-center font-bold text-orange-600">2.6</td>
+                                <td class="px-4 py-3 text-center text-gray-600">$180K</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium">Salesforce</td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-red-100 text-red-700 font-bold">1</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-red-100 text-red-700 font-bold">1</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-red-100 text-red-700 font-bold">1</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-green-100 text-green-700 font-bold">4</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-red-100 text-red-700 font-bold">2</span></td>
+                                <td class="px-4 py-3 text-center font-bold text-red-600">1.8</td>
+                                <td class="px-4 py-3 text-center text-red-600 font-bold">$950K</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium">ServiceNow</td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-red-100 text-red-700 font-bold">2</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-green-100 text-green-700 font-bold">4</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center font-bold text-amber-600">3.0</td>
+                                <td class="px-4 py-3 text-center text-gray-600">$280K</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium">Snowflake</td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-green-100 text-green-700 font-bold">4</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-green-100 text-green-700 font-bold">5</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-green-100 text-green-700 font-bold">4</span></td>
+                                <td class="px-4 py-3 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">3</span></td>
+                                <td class="px-4 py-3 text-center font-bold text-green-600">3.8</td>
+                                <td class="px-4 py-3 text-center text-gray-600">$120K</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ RADAR TAB ============ -->
+        <div id="panel-radar" class="hidden fade-in">
+            <h2 class="text-xl font-bold mb-6">Vendor Risk Radar Charts</h2>
+            <p class="text-gray-500 mb-6">Pentagon radar charts showing 5 risk dimensions per vendor. Higher = better (lower risk). Ideal vendor fills the entire pentagon.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white rounded-xl border p-4">
+                    <h3 class="font-semibold text-center mb-2">OpenAI</h3>
+                    <canvas id="radar-openai" width="300" height="300"></canvas>
+                </div>
+                <div class="bg-white rounded-xl border p-4">
+                    <h3 class="font-semibold text-center mb-2">Microsoft Azure</h3>
+                    <canvas id="radar-microsoft" width="300" height="300"></canvas>
+                </div>
+                <div class="bg-white rounded-xl border p-4">
+                    <h3 class="font-semibold text-center mb-2">Salesforce</h3>
+                    <canvas id="radar-salesforce" width="300" height="300"></canvas>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl border p-4">
+                    <h3 class="font-semibold text-center mb-2">ServiceNow</h3>
+                    <canvas id="radar-servicenow" width="300" height="300"></canvas>
+                </div>
+                <div class="bg-white rounded-xl border p-4">
+                    <h3 class="font-semibold text-center mb-2">Snowflake</h3>
+                    <canvas id="radar-snowflake" width="300" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- All-in-one overlay -->
+            <div class="bg-white rounded-xl border p-6 mt-6">
+                <h3 class="font-semibold text-center mb-2">All Vendors Overlay</h3>
+                <div class="max-w-lg mx-auto">
+                    <canvas id="radar-all" width="500" height="500"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SCENARIOS TAB ============ -->
+        <div id="panel-scenarios" class="hidden fade-in">
+            <h2 class="text-xl font-bold mb-6">Risk Scenarios</h2>
+
+            <!-- Scenario 1: Vendor Down -->
+            <div class="bg-white rounded-xl border mb-6 overflow-hidden">
+                <div class="bg-red-600 text-white px-6 py-4">
+                    <h3 class="font-bold text-lg">Scenario 1: "What if Claude/OpenAI goes offline tomorrow?"</h3>
+                    <p class="text-red-100 text-sm mt-1">Vendor-down impact assessment for each AI tool</p>
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="text-gray-600">
+                                <tr class="border-b">
+                                    <th class="text-left px-3 py-3 font-medium">Vendor</th>
+                                    <th class="text-center px-3 py-3 font-medium">Impact Level</th>
+                                    <th class="text-left px-3 py-3 font-medium">What Breaks</th>
+                                    <th class="text-center px-3 py-3 font-medium">Time to Migrate</th>
+                                    <th class="text-center px-3 py-3 font-medium">Switching Cost</th>
+                                    <th class="text-left px-3 py-3 font-medium">Best Alternative</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-4 font-medium">OpenAI</td>
+                                    <td class="px-3 py-4 text-center"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">MEDIUM</span></td>
+                                    <td class="px-3 py-4">AI assistants, content generation, code completion. No data loss &mdash; prompts/outputs are ephemeral.</td>
+                                    <td class="px-3 py-4 text-center font-medium">2-4 weeks</td>
+                                    <td class="px-3 py-4 text-center">$45K</td>
+                                    <td class="px-3 py-4"><span class="font-medium text-blue-600">Anthropic Claude</span> (comparable capability, easy API swap)</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-4 font-medium">Microsoft Azure</td>
+                                    <td class="px-3 py-4 text-center"><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold">HIGH</span></td>
+                                    <td class="px-3 py-4">AI models + Entra ID SSO + compliance logging. Deep ecosystem dependency across identity, compute, and AI.</td>
+                                    <td class="px-3 py-4 text-center font-medium">3-6 months</td>
+                                    <td class="px-3 py-4 text-center">$180K</td>
+                                    <td class="px-3 py-4"><span class="font-medium text-blue-600">AWS Bedrock</span> (AI models) + <span class="font-medium text-blue-600">Okta</span> (identity)</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-4 font-medium">Salesforce</td>
+                                    <td class="px-3 py-4 text-center"><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold">CRITICAL</span></td>
+                                    <td class="px-3 py-4">20 years of CRM data, 150 users, all sales workflows, custom automation, integrations. Business stops.</td>
+                                    <td class="px-3 py-4 text-center font-medium text-red-600">12-18 months</td>
+                                    <td class="px-3 py-4 text-center text-red-600 font-bold">$950K</td>
+                                    <td class="px-3 py-4"><span class="font-medium text-blue-600">HubSpot Enterprise</span> (lighter) or <span class="font-medium text-blue-600">Microsoft Dynamics</span> (heavier)</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-4 font-medium">ServiceNow</td>
+                                    <td class="px-3 py-4 text-center"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">HIGH</span></td>
+                                    <td class="px-3 py-4">All IT service management, CMDB, change management, 300 users, custom workflows.</td>
+                                    <td class="px-3 py-4 text-center font-medium">6-9 months</td>
+                                    <td class="px-3 py-4 text-center">$280K</td>
+                                    <td class="px-3 py-4"><span class="font-medium text-blue-600">Jira Service Management</span> or <span class="font-medium text-blue-600">Freshservice</span></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-4 font-medium">Snowflake</td>
+                                    <td class="px-3 py-4 text-center"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">MEDIUM</span></td>
+                                    <td class="px-3 py-4">Data warehouse, analytics, 2.8TB data. Good export tools but stored procedures need rewriting.</td>
+                                    <td class="px-3 py-4 text-center font-medium">4-8 weeks</td>
+                                    <td class="px-3 py-4 text-center">$120K</td>
+                                    <td class="px-3 py-4"><span class="font-medium text-blue-600">Databricks</span> or <span class="font-medium text-blue-600">BigQuery</span> (Parquet export makes it feasible)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario 2: Price Hike -->
+            <div class="bg-white rounded-xl border mb-6 overflow-hidden">
+                <div class="bg-amber-500 text-white px-6 py-4">
+                    <h3 class="font-bold text-lg">Scenario 2: "What if GPT-4 doubles its price?"</h3>
+                    <p class="text-amber-100 text-sm mt-1">Budget impact analysis if each vendor increases pricing by 2x</p>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div class="border rounded-xl p-4">
+                            <div class="font-bold text-sm mb-2">OpenAI 2x</div>
+                            <div class="text-2xl font-bold text-red-600">+$96K</div>
+                            <div class="text-xs text-gray-500 mt-1">$96K &rarr; $192K/yr</div>
+                            <div class="mt-3 text-xs text-gray-600">
+                                <strong>Response:</strong> Shift 50% of workloads to Claude or Llama. Keep GPT-4 for complex tasks only. Net impact: +$30K (not $96K).
+                            </div>
+                            <div class="mt-2 bg-green-50 rounded p-2">
+                                <div class="text-xs text-green-700 font-medium">Alternatives exist. Manageable.</div>
+                            </div>
+                        </div>
+                        <div class="border rounded-xl p-4">
+                            <div class="font-bold text-sm mb-2">Microsoft 2x</div>
+                            <div class="text-2xl font-bold text-red-600">+$144K</div>
+                            <div class="text-xs text-gray-500 mt-1">$144K &rarr; $288K/yr</div>
+                            <div class="mt-3 text-xs text-gray-600">
+                                <strong>Response:</strong> Negotiate enterprise agreement. Threaten AWS migration. Microsoft usually offers 15-20% discount under pressure.
+                            </div>
+                            <div class="mt-2 bg-amber-50 rounded p-2">
+                                <div class="text-xs text-amber-700 font-medium">Negotiable. Leverage exists.</div>
+                            </div>
+                        </div>
+                        <div class="border rounded-xl p-4">
+                            <div class="font-bold text-sm mb-2">Salesforce 2x</div>
+                            <div class="text-2xl font-bold text-red-600">+$285K</div>
+                            <div class="text-xs text-gray-500 mt-1">$285K &rarr; $570K/yr</div>
+                            <div class="mt-3 text-xs text-gray-600">
+                                <strong>Response:</strong> Limited leverage. Switching cost ($950K) makes threats hollow. Begin 18-month migration plan immediately.
+                            </div>
+                            <div class="mt-2 bg-red-50 rounded p-2">
+                                <div class="text-xs text-red-700 font-medium">Trapped. Must absorb or migrate.</div>
+                            </div>
+                        </div>
+                        <div class="border rounded-xl p-4">
+                            <div class="font-bold text-sm mb-2">ServiceNow 2x</div>
+                            <div class="text-2xl font-bold text-red-600">+$96K</div>
+                            <div class="text-xs text-gray-500 mt-1">$96K &rarr; $192K/yr</div>
+                            <div class="mt-3 text-xs text-gray-600">
+                                <strong>Response:</strong> Credible Jira SM alternative. Negotiate with migration timeline in hand. Usually results in 10-15% concession.
+                            </div>
+                            <div class="mt-2 bg-amber-50 rounded p-2">
+                                <div class="text-xs text-amber-700 font-medium">Negotiate-able with credible threat.</div>
+                            </div>
+                        </div>
+                        <div class="border rounded-xl p-4">
+                            <div class="font-bold text-sm mb-2">Snowflake 2x</div>
+                            <div class="text-2xl font-bold text-red-600">+$240K</div>
+                            <div class="text-xs text-gray-500 mt-1">$240K &rarr; $480K/yr</div>
+                            <div class="mt-3 text-xs text-gray-600">
+                                <strong>Response:</strong> Strong position. Good portability, Databricks actively recruiting. Migration feasible in 6-8 weeks.
+                            </div>
+                            <div class="mt-2 bg-green-50 rounded p-2">
+                                <div class="text-xs text-green-700 font-medium">Best position. Real alternatives.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insight -->
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6">
+                <h3 class="font-bold text-indigo-800 mb-2">The CIO Lesson</h3>
+                <p class="text-sm text-indigo-700">Your negotiating power is directly proportional to your ability to leave. Salesforce knows you can't leave &mdash; so they have all the leverage. Snowflake knows you can leave &mdash; so they compete on value. <strong>Before signing any AI vendor contract, answer this: "How hard is it to leave in 12 months?"</strong> If the answer is "very hard," negotiate harder on pricing caps and exit terms now.</p>
+            </div>
+        </div>
+
+        <!-- ============ CONTRACT CLAUSES TAB ============ -->
+        <div id="panel-clauses" class="hidden fade-in">
+            <h2 class="text-xl font-bold mb-6">Contract Clause Recommendations</h2>
+            <p class="text-gray-500 mb-6">Essential clauses to negotiate into every AI vendor contract. Print this page and hand it to your legal team.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Data Portability -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <span class="text-blue-700 font-bold">1</span>
+                        </div>
+                        <h3 class="font-bold text-lg">Data Portability</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-blue-50 rounded-lg p-3">
+                            <p class="font-medium text-blue-800">Required Clause:</p>
+                            <p class="text-blue-700 mt-1 italic">"Vendor shall provide complete export of all customer data, including configurations, customizations, workflow definitions, and historical logs, in industry-standard open formats (JSON, CSV, Parquet, or SQL dump) within 30 days of written request, at no additional charge."</p>
+                        </div>
+                        <div class="text-gray-600">
+                            <p><strong>Why it matters:</strong> Without this, vendors can hold your data hostage. Salesforce's CSV export loses relationships between objects. Make sure "all data" includes metadata, audit logs, and AI training data you contributed.</p>
+                        </div>
+                        <div class="bg-red-50 rounded-lg p-3">
+                            <p class="font-medium text-red-700">Red flag:</p>
+                            <p class="text-red-600 text-xs">"Data export available via API" &mdash; this means rate-limited, partial, and you're doing all the work. Reject this.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing Caps -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <span class="text-green-700 font-bold">2</span>
+                        </div>
+                        <h3 class="font-bold text-lg">Pricing Caps</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-green-50 rounded-lg p-3">
+                            <p class="font-medium text-green-800">Required Clause:</p>
+                            <p class="text-green-700 mt-1 italic">"Annual price increases shall not exceed 5% or CPI, whichever is lower, for the duration of the agreement including renewals. Usage-based pricing shall include a monthly spend cap with 30-day advance notice before any overage charges."</p>
+                        </div>
+                        <div class="text-gray-600">
+                            <p><strong>Why it matters:</strong> AI vendors are still figuring out pricing. OpenAI has changed pricing 4+ times. Without caps, your budget is at their mercy. Usage-based (Snowflake) is especially dangerous without guardrails.</p>
+                        </div>
+                        <div class="bg-red-50 rounded-lg p-3">
+                            <p class="font-medium text-red-700">Red flag:</p>
+                            <p class="text-red-600 text-xs">"Pricing subject to change with 30 days notice" &mdash; this is a blank check. Always negotiate firm caps.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exit Terms -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <span class="text-purple-700 font-bold">3</span>
+                        </div>
+                        <h3 class="font-bold text-lg">Exit Terms</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-purple-50 rounded-lg p-3">
+                            <p class="font-medium text-purple-800">Required Clause:</p>
+                            <p class="text-purple-700 mt-1 italic">"Either party may terminate with 90 days written notice. Upon termination, vendor shall provide a 6-month transition period at current pricing, during which full data export, API access, and technical support shall remain available. No early termination fees."</p>
+                        </div>
+                        <div class="text-gray-600">
+                            <p><strong>Why it matters:</strong> Most vendors auto-renew and require 120-180 days notice. Miss the window, you're locked for another year. The transition period is critical &mdash; you need time to migrate, not a cliff edge.</p>
+                        </div>
+                        <div class="bg-red-50 rounded-lg p-3">
+                            <p class="font-medium text-red-700">Red flag:</p>
+                            <p class="text-red-600 text-xs">"Early termination fee of remaining contract value" &mdash; this makes leaving economically impossible. Never accept.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLA Requirements -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <span class="text-amber-700 font-bold">4</span>
+                        </div>
+                        <h3 class="font-bold text-lg">SLA Requirements</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-amber-50 rounded-lg p-3">
+                            <p class="font-medium text-amber-800">Required Clause:</p>
+                            <p class="text-amber-700 mt-1 italic">"Vendor guarantees 99.9% uptime measured monthly. Each 0.1% below SLA triggers a 10% credit on monthly charges. Three consecutive months below 99.5% shall constitute a material breach, entitling customer to terminate without penalty."</p>
+                        </div>
+                        <div class="text-gray-600">
+                            <p><strong>Why it matters:</strong> AI services have outages more frequently than traditional SaaS. OpenAI has had multiple multi-hour outages. Credits with teeth force vendors to invest in reliability.</p>
+                        </div>
+                        <div class="bg-red-50 rounded-lg p-3">
+                            <p class="font-medium text-red-700">Red flag:</p>
+                            <p class="text-red-600 text-xs">"Best efforts uptime" or SLA credits capped at 5% of monthly fee &mdash; this means the SLA is decorative, not contractual.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI-Specific: Model Changes -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                            <span class="text-red-700 font-bold">5</span>
+                        </div>
+                        <h3 class="font-bold text-lg">AI Model Stability</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-red-50 rounded-lg p-3">
+                            <p class="font-medium text-red-800">Required Clause (AI-Specific):</p>
+                            <p class="text-red-700 mt-1 italic">"Vendor shall maintain access to the specific model version in use at contract signing for a minimum of 12 months. Any model deprecation shall include 6 months advance notice, parallel availability of old and new models, and documented migration guide."</p>
+                        </div>
+                        <div class="text-gray-600">
+                            <p><strong>Why it matters:</strong> AI vendors regularly deprecate models (GPT-3.5 &rarr; GPT-4, etc.). If your workflows depend on specific model behavior, a surprise deprecation can break production systems. This is unique to AI contracts.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI-Specific: Data Usage -->
+                <div class="bg-white rounded-xl border p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                            <span class="text-teal-700 font-bold">6</span>
+                        </div>
+                        <h3 class="font-bold text-lg">Data Usage & Training</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-teal-50 rounded-lg p-3">
+                            <p class="font-medium text-teal-800">Required Clause (AI-Specific):</p>
+                            <p class="text-teal-700 mt-1 italic">"Vendor shall NOT use customer data, prompts, outputs, or any derivative thereof, for training, fine-tuning, or improving vendor models without explicit written consent. Customer retains all rights to outputs generated using their data."</p>
+                        </div>
+                        <div class="text-gray-600">
+                            <p><strong>Why it matters:</strong> Many AI vendors train on your data by default. This means your proprietary information could appear in competitors' outputs. Enterprise agreements typically opt out, but verify &mdash; and get it in writing.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ DIVERSIFICATION TAB ============ -->
+        <div id="panel-diversify" class="hidden fade-in">
+            <h2 class="text-xl font-bold mb-6">Diversification Strategy</h2>
+            <p class="text-gray-500 mb-6">Recommended primary + secondary vendor for each use case. Never be single-threaded on any capability.</p>
+
+            <div class="bg-white rounded-xl border overflow-hidden mb-8">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-600">
+                            <tr>
+                                <th class="text-left px-5 py-4 font-medium">Use Case</th>
+                                <th class="text-left px-5 py-4 font-medium">Primary Vendor</th>
+                                <th class="text-left px-5 py-4 font-medium">Secondary Vendor</th>
+                                <th class="text-left px-5 py-4 font-medium">Rationale</th>
+                                <th class="text-center px-5 py-4 font-medium">Split</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-5 py-4 font-medium">General AI Assistant</td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-indigo-700">OpenAI (GPT-4)</div>
+                                    <div class="text-xs text-gray-400">Broadest capability, best ecosystem</div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-blue-700">Anthropic (Claude)</div>
+                                    <div class="text-xs text-gray-400">Comparable quality, better for long docs</div>
+                                </td>
+                                <td class="px-5 py-4 text-xs text-gray-600">API-compatible. Swap requires minimal code changes. Both improve rapidly.</td>
+                                <td class="px-5 py-4 text-center"><span class="font-bold">70/30</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-5 py-4 font-medium">Code Generation</td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-indigo-700">GitHub Copilot (Microsoft)</div>
+                                    <div class="text-xs text-gray-400">Best IDE integration</div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-blue-700">Anthropic Claude Code</div>
+                                    <div class="text-xs text-gray-400">Strongest reasoning for complex tasks</div>
+                                </td>
+                                <td class="px-5 py-4 text-xs text-gray-600">Different strengths. Copilot for inline, Claude for architecture and refactoring.</td>
+                                <td class="px-5 py-4 text-center"><span class="font-bold">60/40</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-5 py-4 font-medium">CRM & Sales AI</td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-indigo-700">Salesforce Einstein</div>
+                                    <div class="text-xs text-gray-400">Locked in (existing data)</div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-blue-700">HubSpot AI</div>
+                                    <div class="text-xs text-gray-400">Migration target (3-year plan)</div>
+                                </td>
+                                <td class="px-5 py-4 text-xs text-gray-600">Begin parallel evaluation. Move new teams to HubSpot. Gradual migration reduces risk.</td>
+                                <td class="px-5 py-4 text-center"><span class="font-bold text-red-600">100/0*</span><br><span class="text-xs text-gray-400">*Migrate over 3 years</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-5 py-4 font-medium">IT Service Management</td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-indigo-700">ServiceNow</div>
+                                    <div class="text-xs text-gray-400">CMDB depth, enterprise workflows</div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-blue-700">Jira Service Management</div>
+                                    <div class="text-xs text-gray-400">Lighter, cheaper, API-first</div>
+                                </td>
+                                <td class="px-5 py-4 text-xs text-gray-600">Run Jira SM for dev teams now. Gives leverage in ServiceNow negotiations + fallback option.</td>
+                                <td class="px-5 py-4 text-center"><span class="font-bold">80/20</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-5 py-4 font-medium">Data Platform</td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-indigo-700">Snowflake</div>
+                                    <div class="text-xs text-gray-400">Strong portability, good ecosystem</div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-blue-700">Databricks</div>
+                                    <div class="text-xs text-gray-400">Better for ML workloads, open formats</div>
+                                </td>
+                                <td class="px-5 py-4 text-xs text-gray-600">Both support open formats (Parquet, Delta). Data lakehouse strategy makes migration straightforward.</td>
+                                <td class="px-5 py-4 text-center"><span class="font-bold">70/30</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-5 py-4 font-medium">Cloud AI Infrastructure</td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-indigo-700">Azure OpenAI</div>
+                                    <div class="text-xs text-gray-400">Enterprise compliance, Entra integration</div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <div class="font-medium text-blue-700">AWS Bedrock</div>
+                                    <div class="text-xs text-gray-400">Multi-model, less lock-in</div>
+                                </td>
+                                <td class="px-5 py-4 text-xs text-gray-600">AWS Bedrock provides access to Claude, Llama, Mistral in one API. True multi-vendor without multi-contract.</td>
+                                <td class="px-5 py-4 text-center"><span class="font-bold">60/40</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Strategy Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-green-50 border border-green-200 rounded-xl p-5">
+                    <h3 class="font-bold text-green-800 mb-2">Rule 1: No Single Points of Failure</h3>
+                    <p class="text-sm text-green-700">Every critical capability must have a tested secondary vendor. Not just identified &mdash; tested. Run a quarterly "fire drill" where you process real workloads through the backup vendor.</p>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                    <h3 class="font-bold text-blue-800 mb-2">Rule 2: API Abstraction Layer</h3>
+                    <p class="text-sm text-blue-700">Build an internal abstraction layer between your apps and AI vendor APIs. One interface, multiple backends. Switching vendors becomes a config change, not a rewrite. Cost: ~2 weeks of engineering. Value: priceless in a crisis.</p>
+                </div>
+                <div class="bg-purple-50 border border-purple-200 rounded-xl p-5">
+                    <h3 class="font-bold text-purple-800 mb-2">Rule 3: Annual Exit Rehearsal</h3>
+                    <p class="text-sm text-purple-700">Once a year, actually export all data from each vendor and verify it's usable. Many "export" features produce incomplete or unusable data. Better to discover this during a drill than during a crisis.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-100 border-t mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-6 text-center text-xs text-gray-400">
+            CIO AI Advanced Course &mdash; Lecture 15: AI Tools, Dependency, and Vendor Risk &mdash; Demo Dashboard
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function showTab(tab) {
+            document.querySelectorAll('[id^="panel-"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('[id^="tab-"]').forEach(el => {
+                el.classList.remove('tab-active');
+                el.classList.add('tab-inactive');
+            });
+            document.getElementById('panel-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.remove('tab-inactive');
+            document.getElementById('tab-' + tab).classList.add('tab-active');
+
+            // Initialize radar charts when tab is shown
+            if (tab === 'radar' && !window.radarInitialized) {
+                initRadarCharts();
+                window.radarInitialized = true;
+            }
+        }
+
+        // Radar chart configuration
+        const radarLabels = ['Lock-in\n(Low=Bad)', 'Data\nPortability', 'Pricing\nStability', 'Capability', 'Support'];
+        const radarOptions = {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 5,
+                    min: 0,
+                    ticks: { stepSize: 1, font: { size: 10 } },
+                    pointLabels: { font: { size: 11, weight: '500' } },
+                    grid: { color: 'rgba(0,0,0,0.08)' },
+                    angleLines: { color: 'rgba(0,0,0,0.08)' }
+                }
+            }
+        };
+
+        const vendorData = {
+            openai:      { data: [3,3,3,5,3], color: 'rgba(16,185,129,0.3)', border: 'rgb(16,185,129)' },
+            microsoft:   { data: [2,3,2,4,2], color: 'rgba(249,115,22,0.3)', border: 'rgb(249,115,22)' },
+            salesforce:  { data: [1,1,1,4,2], color: 'rgba(239,68,68,0.3)',  border: 'rgb(239,68,68)' },
+            servicenow:  { data: [2,3,3,4,3], color: 'rgba(245,158,11,0.3)', border: 'rgb(245,158,11)' },
+            snowflake:   { data: [4,5,3,4,3], color: 'rgba(59,130,246,0.3)', border: 'rgb(59,130,246)' },
+        };
+
+        function initRadarCharts() {
+            // Individual charts
+            Object.keys(vendorData).forEach(key => {
+                const ctx = document.getElementById('radar-' + key);
+                if (!ctx) return;
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: radarLabels,
+                        datasets: [{
+                            data: vendorData[key].data,
+                            backgroundColor: vendorData[key].color,
+                            borderColor: vendorData[key].border,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: vendorData[key].border,
+                        }]
+                    },
+                    options: radarOptions
+                });
+            });
+
+            // Overlay chart
+            const allCtx = document.getElementById('radar-all');
+            const allDatasets = [
+                { label: 'OpenAI', data: vendorData.openai.data, backgroundColor: 'rgba(16,185,129,0.1)', borderColor: 'rgb(16,185,129)', borderWidth: 2, pointRadius: 3 },
+                { label: 'Microsoft', data: vendorData.microsoft.data, backgroundColor: 'rgba(249,115,22,0.1)', borderColor: 'rgb(249,115,22)', borderWidth: 2, pointRadius: 3 },
+                { label: 'Salesforce', data: vendorData.salesforce.data, backgroundColor: 'rgba(239,68,68,0.1)', borderColor: 'rgb(239,68,68)', borderWidth: 2, pointRadius: 3 },
+                { label: 'ServiceNow', data: vendorData.servicenow.data, backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgb(245,158,11)', borderWidth: 2, pointRadius: 3 },
+                { label: 'Snowflake', data: vendorData.snowflake.data, backgroundColor: 'rgba(59,130,246,0.1)', borderColor: 'rgb(59,130,246)', borderWidth: 2, pointRadius: 3 },
+            ];
+            new Chart(allCtx, {
+                type: 'radar',
+                data: { labels: radarLabels, datasets: allDatasets },
+                options: {
+                    ...radarOptions,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'circle', padding: 16 }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

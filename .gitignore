@@ -15,3 +15,5 @@ workbook.db
 
 # OS
 .DS_Store
+*.bak
+.env

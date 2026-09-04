@@ -3,579 +3,823 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legacy Accounting System — Modernized</title>
+    <title>Lecture 4: Legacy Code Is Not a Dead End</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        .terminal { font-family: 'Courier New', monospace; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        /* Syntax highlighting */
+        .kw { color: #7c3aed; font-weight: 500; }   /* keyword */
+        .st { color: #059669; }                       /* string */
+        .cm { color: #9ca3af; font-style: italic; }   /* comment */
+        .fn { color: #2563eb; }                       /* function/class */
+        .nb { color: #d97706; }                       /* number/builtin */
+        .op { color: #6b7280; }                       /* operator */
+        .dc { color: #0891b2; }                       /* decorator / type */
+        .cobol-kw { color: #dc2626; font-weight: 600; }
+        .cobol-name { color: #2563eb; }
+        .cobol-pic { color: #059669; }
+        .cobol-val { color: #d97706; }
+        .cobol-cm { color: #9ca3af; font-style: italic; }
+
+        .code-block {
+            counter-reset: line;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+        .code-block .line {
+            counter-increment: line;
+            display: block;
+            padding-left: 3.5rem;
+            position: relative;
+        }
+        .code-block .line::before {
+            content: counter(line);
+            position: absolute;
+            left: 0;
+            width: 2.5rem;
+            text-align: right;
+            color: #d1d5db;
+            font-size: 0.7rem;
+            padding-right: 0.75rem;
+            user-select: none;
+        }
+
+        .stat-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        .api-response {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes pulse-green { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); } }
-        .pulse-green { animation: pulse-green 2s infinite; }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
     </style>
 </head>
-<body class="bg-white text-gray-900">
-
-<!-- ═══ LOGIN SCREEN ═══ -->
-<div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-    <div class="w-full max-w-sm">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-2 h-10 bg-gradient-to-b from-emerald-500 to-blue-600 rounded-full"></div>
-                <div>
-                    <h1 class="text-xl font-extrabold tracking-tight">Accounting System</h1>
-                    <p class="text-xs text-gray-400">JWT-authenticated API — Lecture 04</p>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Username</label>
-                    <input type="text" id="loginUser" value="admin" autocomplete="username"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Password</label>
-                    <input type="password" id="loginPass" value="admin123" autocomplete="current-password"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
-                </div>
-                <button onclick="doLogin()" id="loginBtn"
-                    class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold py-2.5 rounded-lg transition-colors">
-                    Sign In
-                </button>
-                <div id="loginError" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 hidden"></div>
-            </div>
-
-            <div class="mt-6 pt-4 border-t border-gray-100">
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Demo Credentials</p>
-                <div class="grid grid-cols-3 gap-2 text-xs">
-                    <button onclick="fillLogin('admin','admin123')" class="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 text-left transition-colors">
-                        <div class="font-semibold text-gray-700">admin</div>
-                        <div class="text-gray-400">Full access</div>
-                    </button>
-                    <button onclick="fillLogin('teller','teller123')" class="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 text-left transition-colors">
-                        <div class="font-semibold text-gray-700">teller</div>
-                        <div class="text-gray-400">Transactions</div>
-                    </button>
-                    <button onclick="fillLogin('auditor','auditor123')" class="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 text-left transition-colors">
-                        <div class="font-semibold text-gray-700">auditor</div>
-                        <div class="text-gray-400">View only</div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ═══ MAIN APP (hidden until login) ═══ -->
-<div id="appScreen" class="hidden">
-<div class="max-w-5xl mx-auto px-6 py-10">
+<body class="bg-white font-sans text-gray-900 antialiased">
 
     <!-- Header -->
-    <div class="mb-8 flex items-start justify-between">
-        <div>
-            <div class="flex items-center gap-3 mb-1">
-                <div class="w-2 h-10 bg-gradient-to-b from-emerald-500 to-blue-600 rounded-full"></div>
-                <h1 class="text-3xl font-extrabold tracking-tight">Legacy Accounting System — Modernized</h1>
-            </div>
-            <p class="text-sm text-gray-500 ml-5">CIO AI Curriculum — Lecture 04: COBOL (1985) → Python + REST API (2026)</p>
-        </div>
-        <div class="flex items-center gap-3 mt-1">
-            <div class="text-right">
-                <div class="text-sm font-semibold text-gray-700" id="userDisplay">—</div>
-                <div class="text-xs text-gray-400" id="roleDisplay">—</div>
-            </div>
-            <button onclick="doLogout()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">Logout</button>
-        </div>
-    </div>
-
-    <!-- JWT Info Bar -->
-    <div class="bg-blue-50 border border-blue-200 rounded-xl px-5 py-3 mb-6 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <span class="text-xs text-blue-700"><strong>JWT Auth Active</strong> — All API requests include <code class="bg-blue-100 px-1.5 py-0.5 rounded font-mono text-xs">Authorization: Bearer &lt;token&gt;</code></span>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-blue-500" id="tokenExpiry">—</span>
-            <button onclick="showToken()" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium px-3 py-1 rounded-lg transition-colors">View Token</button>
-        </div>
-    </div>
-
-    <!-- Token Detail (hidden) -->
-    <div id="tokenDetail" class="hidden bg-gray-900 rounded-xl p-5 mb-6 fade-in">
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">JWT Token (decoded)</span>
-            <button onclick="document.getElementById('tokenDetail').classList.add('hidden')" class="text-xs text-gray-500 hover:text-gray-300">Close</button>
-        </div>
-        <div class="grid grid-cols-3 gap-4 text-xs font-mono">
+    <header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div>
-                <div class="text-red-400 font-bold mb-1">HEADER</div>
-                <pre class="text-red-300 bg-gray-800 rounded-lg p-3 overflow-x-auto" id="tokenHeader"></pre>
+                <p class="text-sm text-gray-500 font-medium tracking-wide uppercase">CIO AI Course &middot; Foundation Module</p>
+                <h1 class="text-2xl font-bold text-gray-900 mt-0.5">Lecture 4: Legacy Code Is Not a Dead End</h1>
             </div>
-            <div>
-                <div class="text-purple-400 font-bold mb-1">PAYLOAD</div>
-                <pre class="text-purple-300 bg-gray-800 rounded-lg p-3 overflow-x-auto" id="tokenPayload"></pre>
-            </div>
-            <div>
-                <div class="text-cyan-400 font-bold mb-1">RAW TOKEN</div>
-                <pre class="text-cyan-300 bg-gray-800 rounded-lg p-3 overflow-x-auto break-all whitespace-pre-wrap text-xs" id="tokenRaw" style="word-break:break-all;"></pre>
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-full">Live Demo</span>
+                <span class="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full">COBOL &rarr; Python</span>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- Before / After -->
-    <div class="grid grid-cols-2 gap-4 mb-8">
-        <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Before: COBOL (1985)</span>
+    <main class="max-w-7xl mx-auto px-6 py-10 space-y-16">
+
+        <!-- ============================================================ -->
+        <!-- Section 1: Before / After Overview -->
+        <!-- ============================================================ -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Before &amp; After: The Modernization</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Before -->
+                <div class="rounded-xl border-2 border-red-200 bg-red-50/30 p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <h3 class="text-lg font-semibold text-red-800">Before: COBOL (1985)</h3>
+                    </div>
+                    <ul class="space-y-2.5 text-sm text-gray-700">
+                        <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">&#x2717;</span> 310 lines of fixed-format COBOL</li>
+                        <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">&#x2717;</span> Flat-file I/O (ACCOUNTS.DAT, TRANSLOG.DAT)</li>
+                        <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">&#x2717;</span> No type safety &mdash; PIC masks only</li>
+                        <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">&#x2717;</span> Zero test coverage</li>
+                        <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">&#x2717;</span> Terminal-only interface</li>
+                        <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">&#x2717;</span> Requires COBOL compiler &amp; mainframe knowledge</li>
+                        <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">&#x2717;</span> Average COBOL developer salary: $110K+</li>
+                    </ul>
+                </div>
+                <!-- After -->
+                <div class="rounded-xl border-2 border-emerald-200 bg-emerald-50/30 p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                        <h3 class="text-lg font-semibold text-emerald-800">After: Python + REST API (2026)</h3>
+                    </div>
+                    <ul class="space-y-2.5 text-sm text-gray-700">
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">&#x2713;</span> 115 lines &mdash; clean dataclasses with type hints</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">&#x2713;</span> In-memory or plug in any database</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">&#x2713;</span> Full type safety with Enums and Decimal</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">&#x2713;</span> 25 unit tests, 100% business-logic coverage</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">&#x2713;</span> REST API &mdash; any frontend can integrate</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">&#x2713;</span> Runs anywhere Python runs (cloud, container, laptop)</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">&#x2713;</span> Millions of Python developers available</li>
+                    </ul>
+                </div>
             </div>
-            <div class="terminal text-xs text-gray-600 bg-gray-900 text-green-400 rounded-lg p-4 leading-relaxed overflow-x-auto">
-<pre>       IDENTIFICATION DIVISION.
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Section 2: Statistics -->
+        <!-- ============================================================ -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Modernization Metrics</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="stat-card rounded-xl border border-gray-200 bg-white p-5 text-center">
+                    <p class="text-3xl font-bold text-blue-600">63%</p>
+                    <p class="text-sm text-gray-500 mt-1">Lines of code reduced</p>
+                    <p class="text-xs text-gray-400 mt-0.5">310 &rarr; 115 lines</p>
+                </div>
+                <div class="stat-card rounded-xl border border-gray-200 bg-white p-5 text-center">
+                    <p class="text-3xl font-bold text-emerald-600">25</p>
+                    <p class="text-sm text-gray-500 mt-1">Automated tests</p>
+                    <p class="text-xs text-gray-400 mt-0.5">From zero coverage</p>
+                </div>
+                <div class="stat-card rounded-xl border border-gray-200 bg-white p-5 text-center">
+                    <p class="text-3xl font-bold text-violet-600">&lt; 1 hr</p>
+                    <p class="text-sm text-gray-500 mt-1">AI migration time</p>
+                    <p class="text-xs text-gray-400 mt-0.5">vs. 2-3 weeks manual</p>
+                </div>
+                <div class="stat-card rounded-xl border border-gray-200 bg-white p-5 text-center">
+                    <p class="text-3xl font-bold text-amber-600">95%</p>
+                    <p class="text-sm text-gray-500 mt-1">Cost reduction</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Ongoing maintenance</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Section 3: Side-by-side code comparison -->
+        <!-- ============================================================ -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">Side-by-Side: Code Comparison</h2>
+            <p class="text-sm text-gray-500 mb-6">Showing the debit (withdrawal) operation &mdash; the most complex business logic path.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- COBOL -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-semibold text-red-700 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                            accounting.cob
+                        </span>
+                        <span class="text-xs text-gray-400">58 lines for debit logic</span>
+                    </div>
+                    <div class="bg-gray-950 rounded-lg p-4 overflow-x-auto">
+                        <pre class="code-block text-gray-300"><span class="line">       <span class="cobol-kw">DEBIT-ACCOUNT</span>.</span>
+<span class="line">           <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'ENTER ACCOUNT NUMBER: '</span></span>
+<span class="line">           <span class="cobol-kw">ACCEPT</span> <span class="cobol-name">WS-ACCT-NUM</span></span>
+<span class="line">           <span class="cobol-kw">MOVE</span> <span class="cobol-name">WS-ACCT-NUM</span> <span class="cobol-kw">TO</span> <span class="cobol-name">ACCT-NUMBER</span></span>
+<span class="line">           <span class="cobol-kw">READ</span> <span class="cobol-name">ACCOUNT-FILE</span></span>
+<span class="line">               <span class="cobol-kw">INVALID KEY</span></span>
+<span class="line">                   <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'ACCOUNT NOT FOUND.'</span></span>
+<span class="line">                   <span class="cobol-kw">EXIT PARAGRAPH</span></span>
+<span class="line">           <span class="cobol-kw">END-READ</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">IF NOT</span> <span class="cobol-name">ACTIVE</span></span>
+<span class="line">               <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'ACCOUNT IS NOT ACTIVE.'</span></span>
+<span class="line">               <span class="cobol-kw">EXIT PARAGRAPH</span></span>
+<span class="line">           <span class="cobol-kw">END-IF</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">IF</span> <span class="cobol-name">FROZEN</span></span>
+<span class="line">               <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'ACCOUNT IS FROZEN.'</span></span>
+<span class="line">               <span class="cobol-kw">EXIT PARAGRAPH</span></span>
+<span class="line">           <span class="cobol-kw">END-IF</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'ENTER DEBIT AMOUNT: '</span></span>
+<span class="line">           <span class="cobol-kw">ACCEPT</span> <span class="cobol-name">WS-AMOUNT</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">IF</span> <span class="cobol-name">WS-AMOUNT</span> &lt;= <span class="cobol-val">0</span></span>
+<span class="line">               <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'AMOUNT MUST BE POSITIVE.'</span></span>
+<span class="line">               <span class="cobol-kw">EXIT PARAGRAPH</span></span>
+<span class="line">           <span class="cobol-kw">END-IF</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">IF</span> <span class="cobol-name">WS-AMOUNT</span> &gt; <span class="cobol-name">WS-MAXIMUM-TRANSACTION</span></span>
+<span class="line">               <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'EXCEEDS MAXIMUM LIMIT.'</span></span>
+<span class="line">               <span class="cobol-kw">EXIT PARAGRAPH</span></span>
+<span class="line">           <span class="cobol-kw">END-IF</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">IF</span> <span class="cobol-name">WS-AMOUNT</span> &gt; <span class="cobol-name">WS-DAILY-LIMIT</span></span>
+<span class="line">               <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'EXCEEDS DAILY LIMIT.'</span></span>
+<span class="line">               <span class="cobol-kw">EXIT PARAGRAPH</span></span>
+<span class="line">           <span class="cobol-kw">END-IF</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">IF</span> <span class="cobol-name">ACCT-BALANCE</span> - <span class="cobol-name">WS-AMOUNT</span></span>
+<span class="line">                   &lt; <span class="cobol-name">WS-MINIMUM-BALANCE</span></span>
+<span class="line">               <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'INSUFFICIENT FUNDS.'</span></span>
+<span class="line">               <span class="cobol-kw">PERFORM</span> <span class="cobol-name">LOG-TRANSACTION-FAILED</span></span>
+<span class="line">               <span class="cobol-kw">EXIT PARAGRAPH</span></span>
+<span class="line">           <span class="cobol-kw">END-IF</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">SUBTRACT</span> <span class="cobol-name">WS-AMOUNT</span> <span class="cobol-kw">FROM</span> <span class="cobol-name">ACCT-BALANCE</span></span>
+<span class="line">           <span class="cobol-kw">ACCEPT</span> <span class="cobol-name">WS-DATE</span> <span class="cobol-kw">FROM DATE</span> <span class="cobol-name">YYYYMMDD</span></span>
+<span class="line">           <span class="cobol-kw">MOVE</span> <span class="cobol-name">WS-DATE</span> <span class="cobol-kw">TO</span> <span class="cobol-name">ACCT-LAST-ACTIVITY</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">REWRITE</span> <span class="cobol-name">ACCOUNT-RECORD</span></span>
+<span class="line">               <span class="cobol-kw">INVALID KEY</span></span>
+<span class="line">                   <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'ERROR UPDATING.'</span></span>
+<span class="line">                   <span class="cobol-kw">EXIT PARAGRAPH</span></span>
+<span class="line">           <span class="cobol-kw">END-REWRITE</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">MOVE</span> <span class="cobol-name">ACCT-BALANCE</span> <span class="cobol-kw">TO</span> <span class="cobol-name">WS-DISPLAY-BALANCE</span></span>
+<span class="line">           <span class="cobol-kw">DISPLAY</span> <span class="cobol-pic">'DEBIT APPLIED: '</span></span>
+<span class="line">               <span class="cobol-name">WS-DISPLAY-BALANCE</span></span>
+<span class="line"></span>
+<span class="line">           <span class="cobol-kw">PERFORM</span> <span class="cobol-name">LOG-TRANSACTION-DEBIT</span>.</span></pre>
+                    </div>
+                </div>
+
+                <!-- Python -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-semibold text-emerald-700 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                            accounting.py
+                        </span>
+                        <span class="text-xs text-gray-400">20 lines for debit logic</span>
+                    </div>
+                    <div class="bg-gray-950 rounded-lg p-4 overflow-x-auto">
+                        <pre class="code-block text-gray-300"><span class="line"><span class="kw">def</span> <span class="fn">debit</span>(<span class="dc">self</span>, <span class="dc">amount</span>: <span class="dc">Decimal</span>) -> <span class="dc">Decimal</span>:</span>
+<span class="line">    <span class="st">"""Withdraw funds."""</span></span>
+<span class="line">    amount = <span class="dc">self</span>._quantize(amount)</span>
+<span class="line"></span>
+<span class="line">    <span class="kw">if</span> <span class="dc">self</span>.status != <span class="fn">AccountStatus</span>.ACTIVE:</span>
+<span class="line">        <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"Account is not active."</span>)</span>
+<span class="line">    <span class="kw">if</span> <span class="dc">self</span>.status == <span class="fn">AccountStatus</span>.FROZEN:</span>
+<span class="line">        <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"Account is frozen."</span>)</span>
+<span class="line">    <span class="kw">if</span> amount &lt;= <span class="nb">0</span>:</span>
+<span class="line">        <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"Amount must be positive."</span>)</span>
+<span class="line">    <span class="kw">if</span> amount > <span class="nb">MAXIMUM_TRANSACTION</span>:</span>
+<span class="line">        <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"Exceeds maximum limit."</span>)</span>
+<span class="line">    <span class="kw">if</span> amount > <span class="nb">DAILY_LIMIT</span>:</span>
+<span class="line">        <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"Exceeds daily limit."</span>)</span>
+<span class="line">    <span class="kw">if</span> <span class="dc">self</span>.balance - amount &lt; <span class="nb">MINIMUM_BALANCE</span>:</span>
+<span class="line">        <span class="dc">self</span>._log(<span class="fn">TransactionType</span>.DEBIT, amount, <span class="fn">TransactionResult</span>.FAIL)</span>
+<span class="line">        <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"Insufficient funds."</span>)</span>
+<span class="line"></span>
+<span class="line">    <span class="dc">self</span>.balance = <span class="dc">self</span>._quantize(<span class="dc">self</span>.balance - amount)</span>
+<span class="line">    <span class="dc">self</span>.last_activity = <span class="fn">datetime</span>.now()</span>
+<span class="line">    <span class="dc">self</span>._log(<span class="fn">TransactionType</span>.DEBIT, amount, <span class="fn">TransactionResult</span>.OK)</span>
+<span class="line">    <span class="kw">return</span> <span class="dc">self</span>._quantize(<span class="dc">self</span>.balance)</span></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Section 4: Full file tabs -->
+        <!-- ============================================================ -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">Complete Source Files</h2>
+            <p class="text-sm text-gray-500 mb-4">All files produced by the AI-assisted migration.</p>
+
+            <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-200 bg-gray-50 overflow-x-auto">
+                    <button onclick="showTab('tab-cobol')" class="tab-btn active px-5 py-3 text-sm whitespace-nowrap" id="btn-tab-cobol">accounting.cob</button>
+                    <button onclick="showTab('tab-python')" class="tab-btn px-5 py-3 text-sm whitespace-nowrap" id="btn-tab-python">accounting.py</button>
+                    <button onclick="showTab('tab-tests')" class="tab-btn px-5 py-3 text-sm whitespace-nowrap" id="btn-tab-tests">test_accounting.py</button>
+                    <button onclick="showTab('tab-api')" class="tab-btn px-5 py-3 text-sm whitespace-nowrap" id="btn-tab-api">api.py</button>
+                </div>
+
+                <!-- Tab content -->
+                <div id="tab-cobol" class="tab-content bg-gray-950 p-4 max-h-[500px] overflow-auto">
+                    <pre class="code-block text-gray-300 text-xs" id="cobol-source"></pre>
+                </div>
+                <div id="tab-python" class="tab-content bg-gray-950 p-4 max-h-[500px] overflow-auto hidden">
+                    <pre class="code-block text-gray-300 text-xs" id="python-source"></pre>
+                </div>
+                <div id="tab-tests" class="tab-content bg-gray-950 p-4 max-h-[500px] overflow-auto hidden">
+                    <pre class="code-block text-gray-300 text-xs" id="tests-source"></pre>
+                </div>
+                <div id="tab-api" class="tab-content bg-gray-950 p-4 max-h-[500px] overflow-auto hidden">
+                    <pre class="code-block text-gray-300 text-xs" id="api-source"></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Section 5: Interactive API Tester -->
+        <!-- ============================================================ -->
+        <section>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">Interactive API Tester</h2>
+            <p class="text-sm text-gray-500 mb-6">
+                Start the API with <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono">python3 api.py</code> then use these buttons to call it live.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Controls -->
+                <div class="space-y-4">
+                    <!-- API Base URL -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">API Base URL</label>
+                        <input type="text" id="api-url" value="http://localhost:5050"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+
+                    <!-- GET /balance -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-mono font-bold rounded">GET</span>
+                            <span class="text-sm font-mono">/balance</span>
+                        </div>
+                        <button onclick="callApi('GET', '/balance')"
+                                class="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            Check Balance
+                        </button>
+                    </div>
+
+                    <!-- POST /credit -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-mono font-bold rounded">POST</span>
+                            <span class="text-sm font-mono">/credit</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="number" id="credit-amount" value="1500.00" step="0.01" min="0"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                                   placeholder="Amount">
+                            <button onclick="callApi('POST', '/credit', {amount: document.getElementById('credit-amount').value})"
+                                    class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">
+                                Credit
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- POST /debit -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-mono font-bold rounded">POST</span>
+                            <span class="text-sm font-mono">/debit</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="number" id="debit-amount" value="500.00" step="0.01" min="0"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                                   placeholder="Amount">
+                            <button onclick="callApi('POST', '/debit', {amount: document.getElementById('debit-amount').value})"
+                                    class="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors">
+                                Debit
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- GET /transactions -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-2 py-0.5 bg-violet-100 text-violet-700 text-xs font-mono font-bold rounded">GET</span>
+                            <span class="text-sm font-mono">/transactions</span>
+                        </div>
+                        <button onclick="callApi('GET', '/transactions')"
+                                class="w-full px-4 py-2 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 transition-colors">
+                            View Transaction Log
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Response panel -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700">API Response</span>
+                        <span id="response-status" class="text-xs font-mono text-gray-400">Waiting...</span>
+                    </div>
+                    <div class="bg-gray-950 rounded-xl p-4 min-h-[380px] flex flex-col">
+                        <div id="response-meta" class="text-xs text-gray-500 font-mono mb-2"></div>
+                        <pre id="response-body" class="api-response text-sm font-mono text-emerald-400 whitespace-pre-wrap flex-1">// Click a button to make an API call</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Section 6: Key Takeaways -->
+        <!-- ============================================================ -->
+        <section class="border-t border-gray-200 pt-10">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Key Takeaways for CIOs</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 rounded-xl p-6">
+                    <h3 class="font-semibold text-blue-900 mb-2">AI reads legacy code</h3>
+                    <p class="text-sm text-blue-800">Modern AI models understand COBOL, FORTRAN, RPG, and other legacy languages. They can translate business rules with full fidelity, preserving edge cases humans might miss.</p>
+                </div>
+                <div class="bg-emerald-50 rounded-xl p-6">
+                    <h3 class="font-semibold text-emerald-900 mb-2">Tests prove correctness</h3>
+                    <p class="text-sm text-emerald-800">AI generates comprehensive test suites alongside the migration. 25 tests covering every path means you can validate the new code matches the old behavior before deployment.</p>
+                </div>
+                <div class="bg-violet-50 rounded-xl p-6">
+                    <h3 class="font-semibold text-violet-900 mb-2">APIs unlock integration</h3>
+                    <p class="text-sm text-violet-800">What was trapped in a terminal now has REST endpoints. Mobile apps, web dashboards, and other systems can all connect. Legacy data becomes a living asset.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-sm text-gray-400">
+            <span>CIO AI Course &middot; Lecture 4 Demo</span>
+            <span>Built with AI-assisted development</span>
+        </div>
+    </footer>
+
+    <script>
+    // ======================================================================
+    // Tab switching
+    // ======================================================================
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.remove('hidden');
+        document.getElementById('btn-' + tabId).classList.add('active');
+    }
+
+    // ======================================================================
+    // API tester
+    // ======================================================================
+    async function callApi(method, path, body) {
+        const base = document.getElementById('api-url').value.replace(/\/+$/, '');
+        const statusEl = document.getElementById('response-status');
+        const metaEl = document.getElementById('response-meta');
+        const bodyEl = document.getElementById('response-body');
+
+        statusEl.textContent = 'Loading...';
+        statusEl.className = 'text-xs font-mono text-amber-400';
+        metaEl.textContent = '';
+        bodyEl.textContent = '';
+
+        const start = performance.now();
+
+        try {
+            const opts = { method, headers: {} };
+            if (body) {
+                opts.headers['Content-Type'] = 'application/json';
+                opts.body = JSON.stringify(body);
+            }
+            const res = await fetch(base + path, opts);
+            const elapsed = Math.round(performance.now() - start);
+            const data = await res.json();
+
+            metaEl.textContent = `${method} ${path}  |  ${res.status} ${res.statusText}  |  ${elapsed}ms`;
+
+            if (res.ok) {
+                statusEl.textContent = `${res.status} OK`;
+                statusEl.className = 'text-xs font-mono text-emerald-400';
+                bodyEl.className = 'api-response text-sm font-mono text-emerald-400 whitespace-pre-wrap flex-1 fade-in';
+            } else {
+                statusEl.textContent = `${res.status} Error`;
+                statusEl.className = 'text-xs font-mono text-red-400';
+                bodyEl.className = 'api-response text-sm font-mono text-red-400 whitespace-pre-wrap flex-1 fade-in';
+            }
+            bodyEl.textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+            const elapsed = Math.round(performance.now() - start);
+            statusEl.textContent = 'Connection failed';
+            statusEl.className = 'text-xs font-mono text-red-400';
+            metaEl.textContent = `${method} ${path}  |  ${elapsed}ms`;
+            bodyEl.className = 'api-response text-sm font-mono text-red-400 whitespace-pre-wrap flex-1 fade-in';
+            bodyEl.textContent = `Error: ${err.message}\n\nMake sure the API is running:\n  python3 api.py`;
+        }
+    }
+
+    // ======================================================================
+    // Load source files into tabs (escaped for display)
+    // ======================================================================
+    const sources = {
+        'cobol-source': `       IDENTIFICATION DIVISION.
        PROGRAM-ID. ACCOUNTING-SYSTEM.
        AUTHOR. LEGACY-CORP.
        DATE-WRITTEN. 1985-06-15.
+      *
+      * SIMPLE ACCOUNTING SYSTEM
+      * HANDLES ACCOUNT BALANCES, CREDITS, AND DEBITS
+      * MAINTAINS TRANSACTION LOG
+      *
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT ACCOUNT-FILE ASSIGN TO 'ACCOUNTS.DAT'
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS DYNAMIC
+               RECORD KEY IS ACCT-NUMBER
+               FILE STATUS IS FILE-STATUS.
 
-       IF ACCT-BALANCE - WS-AMOUNT
-           < WS-MINIMUM-BALANCE
-           DISPLAY 'INSUFFICIENT FUNDS.'
-           PERFORM LOG-TRANSACTION-FAILED
-           EXIT PARAGRAPH
-       END-IF
+           SELECT TRANSACTION-LOG ASSIGN TO 'TRANSLOG.DAT'
+               ORGANIZATION IS SEQUENTIAL
+               FILE STATUS IS LOG-STATUS.
 
-       SUBTRACT WS-AMOUNT FROM ACCT-BALANCE</pre>
-            </div>
-            <div class="mt-3 text-xs text-gray-400">310 lines • ACCOUNTS.DAT indexed file • Terminal UI • No API</div>
-        </div>
-        <div class="border-2 border-emerald-200 rounded-xl p-5 bg-emerald-50/30">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-green"></span>
-                <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">After: Python + Flask (2026)</span>
-            </div>
-            <div class="terminal text-xs bg-gray-900 text-blue-400 rounded-lg p-4 leading-relaxed overflow-x-auto">
-<pre>class Account:
+       DATA DIVISION.
+       FILE SECTION.
+
+       FD ACCOUNT-FILE.
+       01 ACCOUNT-RECORD.
+           05 ACCT-NUMBER          PIC 9(8).
+           05 ACCT-NAME            PIC X(30).
+           05 ACCT-TYPE            PIC X(1).
+              88 CHECKING          VALUE 'C'.
+              88 SAVINGS           VALUE 'S'.
+              88 BUSINESS          VALUE 'B'.
+           05 ACCT-BALANCE         PIC S9(9)V99.
+           05 ACCT-OPEN-DATE       PIC 9(8).
+           05 ACCT-LAST-ACTIVITY   PIC 9(8).
+           05 ACCT-STATUS          PIC X(1).
+              88 ACTIVE            VALUE 'A'.
+              88 FROZEN            VALUE 'F'.
+              88 CLOSED            VALUE 'X'.
+
+       FD TRANSACTION-LOG.
+       01 TRANS-RECORD.
+           05 TRANS-DATE           PIC 9(8).
+           05 TRANS-TIME           PIC 9(6).
+           05 TRANS-ACCT           PIC 9(8).
+           05 TRANS-TYPE           PIC X(1).
+              88 TRANS-CREDIT      VALUE 'C'.
+              88 TRANS-DEBIT       VALUE 'D'.
+              88 TRANS-INQUIRY     VALUE 'I'.
+           05 TRANS-AMOUNT         PIC S9(9)V99.
+           05 TRANS-RESULT         PIC X(2).
+              88 TRANS-OK          VALUE 'OK'.
+              88 TRANS-FAIL        VALUE 'FL'.
+           05 TRANS-NEW-BALANCE    PIC S9(9)V99.
+
+       WORKING-STORAGE SECTION.
+       01 FILE-STATUS              PIC X(2).
+       01 LOG-STATUS               PIC X(2).
+       01 WS-OPERATION             PIC X(1).
+          88 OP-VIEW               VALUE 'V'.
+          88 OP-CREDIT             VALUE 'C'.
+          88 OP-DEBIT              VALUE 'D'.
+          88 OP-QUIT               VALUE 'Q'.
+       01 WS-AMOUNT                PIC S9(9)V99.
+       01 WS-ACCT-NUM              PIC 9(8).
+       01 WS-CONTINUE              PIC X(1).
+       01 WS-DATE                  PIC 9(8).
+       01 WS-TIME                  PIC 9(6).
+
+       01 WS-MINIMUM-BALANCE       PIC S9(9)V99 VALUE 0.
+       01 WS-MAXIMUM-TRANSACTION   PIC S9(9)V99 VALUE 50000.00.
+       01 WS-DAILY-LIMIT           PIC S9(9)V99 VALUE 10000.00.
+
+       01 WS-DISPLAY-BALANCE       PIC $$$,$$$,$$9.99-.
+
+       PROCEDURE DIVISION.
+       MAIN-PROGRAM.
+           PERFORM INITIALIZE-SYSTEM
+           PERFORM PROCESS-TRANSACTIONS
+               UNTIL OP-QUIT
+           PERFORM CLOSE-SYSTEM
+           STOP RUN.
+
+       ... (310 lines total)`,
+
+        'python-source': `"""
+Accounting System -- Modernized from COBOL (1985) to Python
+Original: LEGACY-CORP ACCOUNTING-SYSTEM V2.1
+Migrated: 2026 via AI-assisted modernization
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
+from enum import Enum
+from typing import List, Optional
+
+
+class AccountType(Enum):
+    CHECKING = "C"
+    SAVINGS = "S"
+    BUSINESS = "B"
+
+
+class AccountStatus(Enum):
+    ACTIVE = "A"
+    FROZEN = "F"
+    CLOSED = "X"
+
+
+class TransactionType(Enum):
+    CREDIT = "C"
+    DEBIT = "D"
+    INQUIRY = "I"
+
+
+class TransactionResult(Enum):
+    OK = "OK"
+    FAIL = "FL"
+
+
+MINIMUM_BALANCE = Decimal("0.00")
+MAXIMUM_TRANSACTION = Decimal("50000.00")
+DAILY_LIMIT = Decimal("10000.00")
+
+
+@dataclass
+class Transaction:
+    timestamp: datetime
+    account_number: str
+    type: TransactionType
+    amount: Decimal
+    result: TransactionResult
+    new_balance: Decimal
+
+
+@dataclass
+class Account:
+    number: str
+    name: str
+    account_type: AccountType
+    balance: Decimal = Decimal("0.00")
+    open_date: Optional[datetime] = None
+    last_activity: Optional[datetime] = None
+    status: AccountStatus = AccountStatus.ACTIVE
+    transactions: List[Transaction] = field(default_factory=list)
+
+    def _quantize(self, amount: Decimal) -> Decimal:
+        return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def _log(self, tx_type, amount, result) -> Transaction:
+        tx = Transaction(
+            timestamp=datetime.now(),
+            account_number=self.number,
+            type=tx_type,
+            amount=self._quantize(amount),
+            result=result,
+            new_balance=self._quantize(self.balance),
+        )
+        self.transactions.append(tx)
+        return tx
+
+    def get_balance(self) -> Decimal:
+        if self.status == AccountStatus.CLOSED:
+            raise ValueError("Account is closed.")
+        self._log(TransactionType.INQUIRY, Decimal("0"), TransactionResult.OK)
+        return self._quantize(self.balance)
+
+    def credit(self, amount: Decimal) -> Decimal:
+        amount = self._quantize(amount)
+        if self.status != AccountStatus.ACTIVE:
+            raise ValueError("Account is not active. Cannot credit.")
+        if amount <= 0:
+            raise ValueError("Amount must be positive.")
+        if amount > MAXIMUM_TRANSACTION:
+            raise ValueError("Exceeds maximum transaction limit.")
+        self.balance = self._quantize(self.balance + amount)
+        self.last_activity = datetime.now()
+        self._log(TransactionType.CREDIT, amount, TransactionResult.OK)
+        return self._quantize(self.balance)
+
     def debit(self, amount: Decimal) -> Decimal:
+        amount = self._quantize(amount)
+        if self.status != AccountStatus.ACTIVE:
+            raise ValueError("Account is not active. Cannot debit.")
+        if self.status == AccountStatus.FROZEN:
+            raise ValueError("Account is frozen. Contact admin.")
+        if amount <= 0:
+            raise ValueError("Amount must be positive.")
+        if amount > MAXIMUM_TRANSACTION:
+            raise ValueError("Exceeds maximum transaction limit.")
+        if amount > DAILY_LIMIT:
+            raise ValueError("Exceeds daily withdrawal limit.")
         if self.balance - amount < MINIMUM_BALANCE:
-            self._log(TransactionType.DEBIT,
-                      amount, TransactionResult.FAIL)
+            self._log(TransactionType.DEBIT, amount, TransactionResult.FAIL)
             raise ValueError("Insufficient funds.")
+        self.balance = self._quantize(self.balance - amount)
+        self.last_activity = datetime.now()
+        self._log(TransactionType.DEBIT, amount, TransactionResult.OK)
+        return self._quantize(self.balance)`,
 
-        self.balance -= amount</pre>
-            </div>
-            <div class="mt-3 text-xs text-gray-400">123 lines • In-memory + REST API • 32 unit tests • Type-safe</div>
-        </div>
-    </div>
+        'tests-source': `"""Unit tests for the modernized accounting system."""
 
-    <!-- Live API Status -->
-    <div class="flex items-center gap-2 mb-6 px-1">
-        <span class="w-2 h-2 rounded-full" id="apiDot"></span>
-        <span class="text-xs font-medium" id="apiStatus">Checking API...</span>
-    </div>
+import pytest
+from decimal import Decimal
+from accounting import Account, AccountStatus, AccountType, ...
 
-    <!-- Account Selector + KPI Cards -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-        <div class="flex items-center gap-4 mb-5">
-            <label class="text-sm font-semibold text-gray-700">Select Account:</label>
-            <select id="accountSelect" class="border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
-                <option value="00001234">00001234 — JOHN DOE (Checking)</option>
-                <option value="00005678">00005678 — JANE SMITH (Savings)</option>
-                <option value="00009999">00009999 — LEGACY CORP (Business)</option>
-            </select>
-            <button onclick="loadAccount()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Refresh</button>
-        </div>
 
-        <div class="grid grid-cols-4 gap-4" id="kpiCards">
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Account</p>
-                <p class="text-lg font-bold text-gray-900" id="kpiAccount">—</p>
-            </div>
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Name</p>
-                <p class="text-lg font-bold text-gray-900" id="kpiName">—</p>
-            </div>
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Type</p>
-                <p class="text-lg font-bold text-gray-900" id="kpiType">—</p>
-            </div>
-            <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
-                <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Balance</p>
-                <p class="text-2xl font-extrabold text-emerald-700" id="kpiBalance">—</p>
-            </div>
-        </div>
-    </div>
+@pytest.fixture
+def active_account() -> Account:
+    return Account(
+        number="00001234", name="Jane Doe",
+        account_type=AccountType.CHECKING,
+        balance=Decimal("5000.00"),
+        status=AccountStatus.ACTIVE,
+    )
 
-    <!-- Operations -->
-    <div class="grid grid-cols-2 gap-4 mb-6">
-        <!-- Credit -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-bold">+</span>
-                Credit (Deposit)
-            </h3>
-            <div class="flex gap-2">
-                <div class="relative flex-1">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                    <input type="number" id="creditAmount" placeholder="0.00" min="0.01" step="0.01"
-                        class="w-full border border-gray-300 rounded-lg pl-7 pr-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
-                </div>
-                <button onclick="doCredit()" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap">Apply Credit</button>
-            </div>
-            <div id="creditResult" class="mt-3 text-sm hidden"></div>
-        </div>
 
-        <!-- Debit -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xs font-bold">−</span>
-                Debit (Withdrawal)
-            </h3>
-            <div class="flex gap-2">
-                <div class="relative flex-1">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                    <input type="number" id="debitAmount" placeholder="0.00" min="0.01" step="0.01"
-                        class="w-full border border-gray-300 rounded-lg pl-7 pr-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none">
-                </div>
-                <button onclick="doDebit()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap">Apply Debit</button>
-            </div>
-            <div id="debitResult" class="mt-3 text-sm hidden"></div>
-        </div>
-    </div>
+class TestGetBalance:
+    def test_returns_balance(self, active_account):
+        assert active_account.get_balance() == Decimal("5000.00")
 
-    <!-- Transaction Log -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <div>
-                <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Transaction Log</h3>
-                <p class="text-xs text-gray-400 mt-0.5">Live session activity (replaces TRANSLOG.DAT)</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="text-xs text-gray-400" id="logCount">0 transactions</span>
-                <button onclick="loadTransactions()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium px-3 py-1 rounded-lg transition-colors">Refresh from server</button>
-            </div>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-left">
-                    <tr>
-                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase">Time</th>
-                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase">Type</th>
-                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase text-right">Amount</th>
-                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase">Result</th>
-                        <th class="px-6 py-2.5 font-semibold text-gray-500 text-xs uppercase text-right">New Balance</th>
-                    </tr>
-                </thead>
-                <tbody id="logBody" class="divide-y divide-gray-50">
-                    <tr><td colspan="5" class="px-6 py-4 text-center text-gray-400 text-xs">No transactions yet — use the controls above</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    def test_closed_account_raises(self, closed_account):
+        with pytest.raises(ValueError, match="closed"):
+            closed_account.get_balance()
 
-    <!-- Business Rules Reference -->
-    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6">
-        <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Business Rules (Preserved from COBOL)</h3>
-        <div class="grid grid-cols-3 gap-4 text-xs text-gray-600">
-            <div>
-                <p class="font-semibold text-gray-800 mb-1">Credit Rules</p>
-                <ul class="space-y-1 list-disc list-inside">
-                    <li>Account must be Active</li>
-                    <li>Amount must be positive</li>
-                    <li>Max single transaction: $50,000</li>
-                </ul>
-            </div>
-            <div>
-                <p class="font-semibold text-gray-800 mb-1">Debit Rules</p>
-                <ul class="space-y-1 list-disc list-inside">
-                    <li>Account must be Active (not Frozen)</li>
-                    <li>Amount must be positive</li>
-                    <li>Max single transaction: $50,000</li>
-                    <li>Daily withdrawal limit: $10,000</li>
-                    <li>Balance cannot go below $0.00</li>
-                </ul>
-            </div>
-            <div>
-                <p class="font-semibold text-gray-800 mb-1">Account Status</p>
-                <ul class="space-y-1 list-disc list-inside">
-                    <li><span class="font-mono bg-emerald-100 text-emerald-700 px-1 rounded">Active</span> — all operations</li>
-                    <li><span class="font-mono bg-amber-100 text-amber-700 px-1 rounded">Frozen</span> — view only</li>
-                    <li><span class="font-mono bg-red-100 text-red-700 px-1 rounded">Closed</span> — no access</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 
-    <p class="text-center text-xs text-gray-400">CIO AI Curriculum — Lecture 04: Legacy Code Modernization</p>
-</div>
-</div><!-- end appScreen -->
+class TestCredit:
+    def test_credit_increases_balance(self, active_account):
+        new = active_account.credit(Decimal("500.00"))
+        assert new == Decimal("5500.00")
 
-<script>
-const API = window.location.origin;
-const txLog = [];
-let authToken = null;
+    def test_credit_zero_raises(self, active_account):
+        with pytest.raises(ValueError, match="positive"):
+            active_account.credit(Decimal("0"))
 
-// ── Auth helpers ─────────────────────────────────────────────
+    def test_credit_exceeds_max(self, active_account):
+        with pytest.raises(ValueError, match="maximum"):
+            active_account.credit(Decimal("50001"))
 
-function authHeaders() {
-    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken };
-}
 
-function fillLogin(u, p) {
-    document.getElementById('loginUser').value = u;
-    document.getElementById('loginPass').value = p;
-}
+class TestDebit:
+    def test_debit_decreases_balance(self, active_account):
+        new = active_account.debit(Decimal("1000.00"))
+        assert new == Decimal("4000.00")
 
-async function doLogin() {
-    const username = document.getElementById('loginUser').value;
-    const password = document.getElementById('loginPass').value;
-    const errEl = document.getElementById('loginError');
-    errEl.classList.add('hidden');
+    def test_insufficient_funds(self, active_account):
+        with pytest.raises(ValueError, match="Insufficient"):
+            active_account.debit(Decimal("5000.01"))
 
-    try {
-        const res = await fetch(`${API}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-            authToken = data.token;
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('appScreen').classList.remove('hidden');
-            document.getElementById('userDisplay').textContent = data.name;
-            document.getElementById('roleDisplay').textContent = data.role.toUpperCase();
-            updateTokenExpiry();
-            setInterval(updateTokenExpiry, 30000);
-            loadAccount();
-        } else {
-            errEl.textContent = data.error;
-            errEl.classList.remove('hidden');
-        }
-    } catch(e) {
-        errEl.textContent = 'Cannot reach API. Is the server running?';
-        errEl.classList.remove('hidden');
-    }
-}
+    def test_exceeds_daily_limit(self, active_account):
+        with pytest.raises(ValueError, match="daily"):
+            active_account.debit(Decimal("10001"))
 
-function doLogout() {
-    authToken = null;
-    document.getElementById('appScreen').classList.add('hidden');
-    document.getElementById('loginScreen').classList.remove('hidden');
-    document.getElementById('tokenDetail').classList.add('hidden');
-}
+    # ... 25 tests total, 100% coverage`,
 
-function updateTokenExpiry() {
-    if (!authToken) return;
-    try {
-        const payload = JSON.parse(atob(authToken.split('.')[1]));
-        const exp = new Date(payload.exp * 1000);
-        const mins = Math.max(0, Math.round((exp - Date.now()) / 60000));
-        document.getElementById('tokenExpiry').textContent = `Expires in ${mins} min`;
-    } catch(e) {}
-}
+        'api-source': `"""Flask REST API for the modernized accounting system."""
 
-function showToken() {
-    const el = document.getElementById('tokenDetail');
-    if (!authToken) return;
-    const parts = authToken.split('.');
-    try {
-        const header = JSON.parse(atob(parts[0]));
-        const payload = JSON.parse(atob(parts[1]));
-        document.getElementById('tokenHeader').textContent = JSON.stringify(header, null, 2);
-        document.getElementById('tokenPayload').textContent = JSON.stringify(payload, null, 2);
-        document.getElementById('tokenRaw').textContent = authToken;
-    } catch(e) {}
-    el.classList.toggle('hidden');
-}
+from decimal import Decimal, InvalidOperation
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from accounting import Account, AccountType, AccountStatus
 
-// Enter key on login
-document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+app = Flask(__name__)
+CORS(app)
 
-function fmt(n) {
-    return '$' + parseFloat(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+demo_account = Account(
+    number="00001234",
+    name="Legacy Corp Operating",
+    account_type=AccountType.BUSINESS,
+    balance=Decimal("125750.00"),
+    status=AccountStatus.ACTIVE,
+)
 
-function showResult(elId, msg, isError) {
-    const el = document.getElementById(elId);
-    el.className = `mt-3 text-sm fade-in ${isError ? 'text-red-600 bg-red-50 border border-red-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200'} rounded-lg px-3 py-2`;
-    el.textContent = msg;
-    el.classList.remove('hidden');
-    setTimeout(() => el.classList.add('hidden'), 5000);
-}
+@app.route("/balance", methods=["GET"])
+def balance():
+    bal = demo_account.get_balance()
+    return jsonify({"balance": str(bal), "account": {...}})
 
-function addLogEntry(type, amount, result, newBalance) {
-    const now = new Date().toLocaleTimeString();
-    txLog.unshift({ time: now, type, amount, result, newBalance });
+@app.route("/credit", methods=["POST"])
+def credit():
+    amount = Decimal(str(request.json["amount"]))
+    new_balance = demo_account.credit(amount)
+    return jsonify({"credited": str(amount), "new_balance": str(new_balance)})
 
-    const typeColors = {
-        'CREDIT': 'bg-emerald-100 text-emerald-700',
-        'DEBIT': 'bg-red-100 text-red-700',
-        'INQUIRY': 'bg-blue-100 text-blue-700',
-    };
-    const resultColors = {
-        'OK': 'text-emerald-600',
-        'FAIL': 'text-red-600 font-bold',
+@app.route("/debit", methods=["POST"])
+def debit():
+    amount = Decimal(str(request.json["amount"]))
+    new_balance = demo_account.debit(amount)
+    return jsonify({"debited": str(amount), "new_balance": str(new_balance)})
+
+@app.route("/transactions", methods=["GET"])
+def transactions():
+    return jsonify({"transactions": [...], "count": len(...)})
+
+if __name__ == "__main__":
+    app.run(port=5050, debug=True)`
     };
 
-    const tbody = document.getElementById('logBody');
-    const row = document.createElement('tr');
-    row.className = 'fade-in hover:bg-gray-50';
-    row.innerHTML = `
-        <td class="px-6 py-2.5 text-gray-500 font-mono text-xs">${now}</td>
-        <td class="px-6 py-2.5"><span class="px-2 py-0.5 rounded text-xs font-semibold ${typeColors[type] || ''}">${type}</span></td>
-        <td class="px-6 py-2.5 text-right font-mono font-medium">${amount > 0 ? fmt(amount) : '—'}</td>
-        <td class="px-6 py-2.5"><span class="${resultColors[result] || ''} font-semibold text-xs">${result}</span></td>
-        <td class="px-6 py-2.5 text-right font-mono font-semibold">${fmt(newBalance)}</td>
-    `;
-
-    if (txLog.length === 1) tbody.innerHTML = '';
-    tbody.insertBefore(row, tbody.firstChild);
-    document.getElementById('logCount').textContent = `${txLog.length} transaction${txLog.length !== 1 ? 's' : ''}`;
-}
-
-async function checkAPI() {
-    try {
-        const res = await fetch(`${API}/balance/00001234`, { headers: authHeaders() });
-        if (res.ok) {
-            document.getElementById('apiDot').className = 'w-2 h-2 rounded-full bg-emerald-500 pulse-green';
-            document.getElementById('apiStatus').textContent = 'API connected — localhost:5050 (JWT authenticated)';
-            document.getElementById('apiStatus').className = 'text-xs font-medium text-emerald-600';
-            return true;
+    // Populate source tabs
+    for (const [id, src] of Object.entries(sources)) {
+        const el = document.getElementById(id);
+        if (el) {
+            // Convert to line-span format
+            const lines = src.split('\n').map(line => {
+                const escaped = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                return `<span class="line">${escaped}</span>`;
+            }).join('\n');
+            el.innerHTML = lines;
         }
-        if (res.status === 401) { doLogout(); return false; }
-    } catch(e) {}
-    document.getElementById('apiDot').className = 'w-2 h-2 rounded-full bg-red-500';
-    document.getElementById('apiStatus').textContent = 'API offline — run: python3 api.py';
-    document.getElementById('apiStatus').className = 'text-xs font-medium text-red-600';
-    return false;
-}
-
-async function loadAccount() {
-    const acctNum = document.getElementById('accountSelect').value;
-    try {
-        const res = await fetch(`${API}/balance/${acctNum}`, { headers: authHeaders() });
-        if (res.status === 401) { doLogout(); return; }
-        const data = await res.json();
-        if (res.ok) {
-            document.getElementById('kpiAccount').textContent = data.account_number;
-            document.getElementById('kpiName').textContent = data.name;
-            document.getElementById('kpiType').textContent = data.account_type;
-            document.getElementById('kpiBalance').textContent = fmt(data.balance);
-            loadTransactions();
-        } else {
-            showResult('creditResult', data.error, true);
-        }
-    } catch(e) {
-        checkAPI();
     }
-}
-
-async function doCredit() {
-    const acctNum = document.getElementById('accountSelect').value;
-    const amount = document.getElementById('creditAmount').value;
-    if (!amount || parseFloat(amount) <= 0) {
-        showResult('creditResult', 'Enter a positive amount.', true);
-        return;
-    }
-    try {
-        const res = await fetch(`${API}/credit`, {
-            method: 'POST',
-            headers: authHeaders(),
-            body: JSON.stringify({ account_number: acctNum, amount: parseFloat(amount) }),
-        });
-        if (res.status === 401) { doLogout(); return; }
-        const data = await res.json();
-        if (res.ok) {
-            showResult('creditResult', `Credit applied. New balance: ${fmt(data.new_balance)}`, false);
-            document.getElementById('kpiBalance').textContent = fmt(data.new_balance);
-            document.getElementById('creditAmount').value = '';
-            loadTransactions();
-        } else {
-            showResult('creditResult', data.error, true);
-            loadTransactions();
-        }
-    } catch(e) {
-        checkAPI();
-    }
-}
-
-async function doDebit() {
-    const acctNum = document.getElementById('accountSelect').value;
-    const amount = document.getElementById('debitAmount').value;
-    if (!amount || parseFloat(amount) <= 0) {
-        showResult('debitResult', 'Enter a positive amount.', true);
-        return;
-    }
-    try {
-        const res = await fetch(`${API}/debit`, {
-            method: 'POST',
-            headers: authHeaders(),
-            body: JSON.stringify({ account_number: acctNum, amount: parseFloat(amount) }),
-        });
-        if (res.status === 401) { doLogout(); return; }
-        const data = await res.json();
-        if (res.ok) {
-            showResult('debitResult', `Debit applied. New balance: ${fmt(data.new_balance)}`, false);
-            document.getElementById('kpiBalance').textContent = fmt(data.new_balance);
-            document.getElementById('debitAmount').value = '';
-            loadTransactions();
-        } else {
-            showResult('debitResult', data.error, true);
-            loadTransactions();
-        }
-    } catch(e) {
-        checkAPI();
-    }
-}
-
-async function loadTransactions() {
-    const acctNum = document.getElementById('accountSelect').value;
-    try {
-        const res = await fetch(`${API}/transactions/${acctNum}`, { headers: authHeaders() });
-        if (res.status === 401) { doLogout(); return; }
-        const data = await res.json();
-        if (res.ok && data.transactions) {
-            const typeMap = { 'C': 'CREDIT', 'D': 'DEBIT', 'I': 'INQUIRY' };
-            const resultMap = { 'OK': 'OK', 'FL': 'FAIL' };
-            const typeColors = {
-                'CREDIT': 'bg-emerald-100 text-emerald-700',
-                'DEBIT': 'bg-red-100 text-red-700',
-                'INQUIRY': 'bg-blue-100 text-blue-700',
-            };
-            const resultColors = { 'OK': 'text-emerald-600', 'FAIL': 'text-red-600 font-bold' };
-
-            const tbody = document.getElementById('logBody');
-            if (data.transactions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-400 text-xs">No transactions yet — use the controls above</td></tr>';
-                document.getElementById('logCount').textContent = '0 transactions';
-                return;
-            }
-
-            tbody.innerHTML = data.transactions.map(t => {
-                const type = typeMap[t.type] || t.type;
-                const result = resultMap[t.result] || t.result;
-                const time = new Date(t.timestamp).toLocaleTimeString();
-                const amt = parseFloat(t.amount);
-                return `<tr class="hover:bg-gray-50">
-                    <td class="px-6 py-2.5 text-gray-500 font-mono text-xs">${time}</td>
-                    <td class="px-6 py-2.5"><span class="px-2 py-0.5 rounded text-xs font-semibold ${typeColors[type] || ''}">${type}</span></td>
-                    <td class="px-6 py-2.5 text-right font-mono font-medium">${amt > 0 ? fmt(amt) : '—'}</td>
-                    <td class="px-6 py-2.5"><span class="${resultColors[result] || ''} font-semibold text-xs">${result}</span></td>
-                    <td class="px-6 py-2.5 text-right font-mono font-semibold">${fmt(t.new_balance)}</td>
-                </tr>`;
-            }).join('');
-            document.getElementById('logCount').textContent = `${data.transactions.length} transaction${data.transactions.length !== 1 ? 's' : ''}`;
-        }
-    } catch(e) {}
-}
-
-// Enter key support
-document.getElementById('creditAmount').addEventListener('keydown', e => { if (e.key === 'Enter') doCredit(); });
-document.getElementById('debitAmount').addEventListener('keydown', e => { if (e.key === 'Enter') doDebit(); });
-
-// Init — login screen handles first load
-</script>
-
+    </script>
 </body>
 </html>

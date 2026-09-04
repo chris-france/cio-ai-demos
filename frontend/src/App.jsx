@@ -82,7 +82,7 @@ export default function App() {
             {/* Stats */}
             <div className="flex justify-start gap-6 mb-10">
               <div className="bg-white rounded-lg border border-gray-200 px-5 py-3 text-center shadow-sm">
-                <div className="text-2xl font-bold text-france-blue">13</div>
+                <div className="text-2xl font-bold text-france-blue">15</div>
                 <div className="text-xs text-gray-500">Demos</div>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 px-5 py-3 text-center shadow-sm">

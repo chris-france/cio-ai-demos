@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 6 — The Death of Offshore Labor Arbitrage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .diff-add { background: #dcfce7; color: #166534; }
+        .diff-remove { background: #fee2e2; color: #991b1b; }
+        .diff-context { background: #f9fafb; color: #6b7280; }
+        .diff-header { background: #eff6ff; color: #1e40af; }
+        pre { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-12">
+        <div class="max-w-6xl mx-auto px-6">
+            <p class="text-sm font-medium text-blue-400 uppercase tracking-wider mb-2">CIO AI Foundation Course &mdash; Lecture 6</p>
+            <h1 class="text-4xl font-800 mb-3">The Death of Offshore Labor Arbitrage</h1>
+            <p class="text-lg text-slate-300 max-w-3xl">A side-by-side demonstration: the same sprint ticket completed by an offshore team vs. AI-assisted development. Same quality. Fraction of the time and cost.</p>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 py-10 space-y-10">
+
+        <!-- Sprint Ticket -->
+        <section class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-3">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white text-xs font-bold">T</span>
+                <div>
+                    <span class="text-xs text-slate-500 font-medium">DEMO-042</span>
+                    <h2 class="text-lg font-semibold">Add Input Validation to User Registration</h2>
+                </div>
+                <span class="ml-auto px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">DONE</span>
+            </div>
+            <div class="px-6 py-5 text-sm text-slate-700 space-y-2">
+                <p><strong>Description:</strong> The /register endpoint currently accepts any input with no validation. Add the following rules:</p>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li>Email must be valid format (contains @ and a domain with a dot)</li>
+                    <li>Password must be 8+ characters with at least one number</li>
+                    <li>Username must be 3&ndash;20 characters, alphanumeric only</li>
+                    <li>Return clear, user-facing error messages for each rule</li>
+                </ul>
+                <p><strong>Acceptance criteria:</strong> All existing tests pass + new validation tests cover every rule.</p>
+            </div>
+        </section>
+
+        <!-- Cost Comparison -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Offshore -->
+            <div class="border border-slate-200 rounded-xl p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <h3 class="text-lg font-semibold text-slate-800">Offshore Team</h3>
+                </div>
+                <div class="space-y-4 text-sm">
+                    <div class="flex justify-between border-b border-slate-100 pb-2">
+                        <span class="text-slate-500">Time to complete</span>
+                        <span class="font-semibold">~2 hours</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 pb-2">
+                        <span class="text-slate-500">Hourly rate</span>
+                        <span class="font-semibold">$40/hr</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 pb-2">
+                        <span class="text-slate-500">Total cost</span>
+                        <span class="font-bold text-red-600 text-lg">$80.00</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 pb-2">
+                        <span class="text-slate-500">Communication overhead</span>
+                        <span class="font-semibold">30&ndash;60 min (Jira, Slack, timezone gaps)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Turnaround</span>
+                        <span class="font-semibold">12&ndash;24 hours (timezone handoff)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI -->
+            <div class="border-2 border-blue-500 rounded-xl p-6 bg-blue-50/30">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-3 h-3 rounded-full bg-blue-600"></div>
+                    <h3 class="text-lg font-semibold text-slate-800">AI-Assisted (Claude Code)</h3>
+                </div>
+                <div class="space-y-4 text-sm">
+                    <div class="flex justify-between border-b border-blue-100 pb-2">
+                        <span class="text-slate-500">Time to complete</span>
+                        <span class="font-semibold">~90 seconds</span>
+                    </div>
+                    <div class="flex justify-between border-b border-blue-100 pb-2">
+                        <span class="text-slate-500">Token cost</span>
+                        <span class="font-semibold">~$0.15</span>
+                    </div>
+                    <div class="flex justify-between border-b border-blue-100 pb-2">
+                        <span class="text-slate-500">Total cost</span>
+                        <span class="font-bold text-blue-600 text-lg">$0.15</span>
+                    </div>
+                    <div class="flex justify-between border-b border-blue-100 pb-2">
+                        <span class="text-slate-500">Communication overhead</span>
+                        <span class="font-semibold">0 min (prompt is the spec)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Turnaround</span>
+                        <span class="font-semibold">Immediate</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Savings callout -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white text-center">
+            <p class="text-sm font-medium uppercase tracking-wider mb-1 text-blue-200">Cost Reduction</p>
+            <p class="text-5xl font-800">99.8%</p>
+            <p class="text-blue-200 mt-2">$80.00 &rarr; $0.15 &mdash; same output, same quality, tests included</p>
+        </div>
+
+        <!-- Code Diff -->
+        <section>
+            <h2 class="text-xl font-bold mb-4">Code Changes: Before &rarr; After</h2>
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-800 text-slate-300 text-xs px-4 py-2 font-mono">app.py</div>
+                <pre class="text-xs leading-relaxed overflow-x-auto"><code><span class="diff-header block px-4 py-1">@@ -1,7 +1,10 @@</span>
+<span class="diff-remove block px-4">- """Simple Flask user registration app — the sprint ticket target.</span>
+<span class="diff-remove block px-4">-</span>
+<span class="diff-remove block px-4">- Students will ask Claude Code to add input validation.</span>
+<span class="diff-remove block px-4">- This deliberately has NO validation — that's the feature request.</span>
+<span class="diff-remove block px-4">- """</span>
+<span class="diff-add block px-4">+ """Simple Flask user registration app — the sprint ticket target.</span>
+<span class="diff-add block px-4">+</span>
+<span class="diff-add block px-4">+ Input validation added per sprint ticket DEMO-042:</span>
+<span class="diff-add block px-4">+ - Email: must contain @ and a valid domain</span>
+<span class="diff-add block px-4">+ - Password: 8+ characters with at least one number</span>
+<span class="diff-add block px-4">+ - Username: 3-20 characters, alphanumeric only</span>
+<span class="diff-add block px-4">+ """</span>
+<span class="diff-context block px-4">  </span>
+<span class="diff-add block px-4">+ import re</span>
+<span class="diff-context block px-4">  from flask import Flask, render_template, request, ...</span>
+<span class="diff-header block px-4 py-1 mt-2">@@ added: validate_registration()</span>
+<span class="diff-add block px-4">+ def validate_registration(username, email, password):</span>
+<span class="diff-add block px-4">+     """Validate registration fields. Returns list of error messages."""</span>
+<span class="diff-add block px-4">+     errors = []</span>
+<span class="diff-add block px-4">+</span>
+<span class="diff-add block px-4">+     # Username: 3-20 characters, alphanumeric only</span>
+<span class="diff-add block px-4">+     if not username:</span>
+<span class="diff-add block px-4">+         errors.append("Username is required.")</span>
+<span class="diff-add block px-4">+     elif not re.match(r'^[a-zA-Z0-9]{3,20}$', username):</span>
+<span class="diff-add block px-4">+         errors.append("Username must be 3-20 characters...")</span>
+<span class="diff-add block px-4">+</span>
+<span class="diff-add block px-4">+     # Email: must contain @ with a domain</span>
+<span class="diff-add block px-4">+     if not email:</span>
+<span class="diff-add block px-4">+         errors.append("Email is required.")</span>
+<span class="diff-add block px-4">+     elif '@' not in email or '.' not in email.split('@')[-1]:</span>
+<span class="diff-add block px-4">+         errors.append("Please enter a valid email address...")</span>
+<span class="diff-add block px-4">+</span>
+<span class="diff-add block px-4">+     # Password: 8+ characters with at least one number</span>
+<span class="diff-add block px-4">+     if not password:</span>
+<span class="diff-add block px-4">+         errors.append("Password is required.")</span>
+<span class="diff-add block px-4">+     elif len(password) &lt; 8:</span>
+<span class="diff-add block px-4">+         errors.append("Password must be at least 8 characters...")</span>
+<span class="diff-add block px-4">+     elif not re.search(r'\d', password):</span>
+<span class="diff-add block px-4">+         errors.append("Password must contain at least one number.")</span>
+<span class="diff-add block px-4">+</span>
+<span class="diff-add block px-4">+     return errors</span>
+<span class="diff-header block px-4 py-1 mt-2">@@ modified: register()</span>
+<span class="diff-remove block px-4">-         # NO VALIDATION — this is the sprint ticket</span>
+<span class="diff-add block px-4">+         errors = validate_registration(username, email, password)</span>
+<span class="diff-add block px-4">+         if errors:</span>
+<span class="diff-add block px-4">+             for error in errors:</span>
+<span class="diff-add block px-4">+                 flash(error, "error")</span>
+<span class="diff-add block px-4">+             return render_template("register.html")</span></code></pre>
+            </div>
+        </section>
+
+        <!-- Test Results -->
+        <section>
+            <h2 class="text-xl font-bold mb-4">Test Results</h2>
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-green-600 text-white px-6 py-3 flex items-center justify-between">
+                    <span class="font-semibold">18 passed in 0.33s</span>
+                    <span class="text-sm bg-green-700 px-3 py-1 rounded-full">ALL PASSING</span>
+                </div>
+                <div class="divide-y divide-slate-100">
+                    <div class="px-6 py-2 text-sm font-medium text-slate-600 bg-slate-50">Page Load Tests</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_index_page</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_register_page</div>
+
+                    <div class="px-6 py-2 text-sm font-medium text-slate-600 bg-slate-50">Registration Tests</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_register_valid_user</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_user_appears_in_list</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_duplicate_user</div>
+
+                    <div class="px-6 py-2 text-sm font-medium text-slate-600 bg-slate-50">Username Validation</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_username_too_short</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_username_too_long</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_username_special_chars</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_username_empty</div>
+
+                    <div class="px-6 py-2 text-sm font-medium text-slate-600 bg-slate-50">Email Validation</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_email_no_at_sign</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_email_no_domain</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_email_no_dot_in_domain</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_email_empty</div>
+
+                    <div class="px-6 py-2 text-sm font-medium text-slate-600 bg-slate-50">Password Validation</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_password_too_short</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_password_no_number</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_password_empty</div>
+
+                    <div class="px-6 py-2 text-sm font-medium text-slate-600 bg-slate-50">Unit Tests</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_validate_all_valid</div>
+                    <div class="px-6 py-2 text-sm flex items-center gap-2"><span class="text-green-600 font-bold">PASS</span> test_validate_multiple_errors</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Takeaway -->
+        <section class="bg-slate-50 rounded-xl p-8 border border-slate-200">
+            <h2 class="text-xl font-bold mb-3">The CIO Takeaway</h2>
+            <div class="space-y-3 text-sm text-slate-700">
+                <p>This is not a cherry-picked example. Input validation is one of the most common sprint tickets in any backlog. Multiply this across your portfolio:</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-white rounded-lg p-4 border border-slate-200 text-center">
+                        <p class="text-3xl font-bold text-slate-900">250</p>
+                        <p class="text-xs text-slate-500 mt-1">Typical offshore tickets/month</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-slate-200 text-center">
+                        <p class="text-3xl font-bold text-slate-900">$20K</p>
+                        <p class="text-xs text-slate-500 mt-1">Monthly offshore cost (at $80/ticket avg)</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-slate-200 text-center">
+                        <p class="text-3xl font-bold text-blue-600">$37.50</p>
+                        <p class="text-xs text-slate-500 mt-1">Same work with AI ($0.15/ticket)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-slate-200 py-6 mt-10">
+        <p class="text-center text-xs text-slate-400">CIO AI Foundation Course &mdash; Lecture 6 Demo Output</p>
+    </div>
+
+</body>
+</html>

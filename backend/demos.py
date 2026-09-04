@@ -155,8 +155,10 @@ FOUNDATION_DEMOS = [
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
             "foundation/lecture-03-250k-moment.\n\n"
-            "First, fetch my vendor invoice data from the course workbook API:\n"
-            "curl -s http://localhost:18801/api/workbook/3/vendor_invoices\n\n"
+            "First, try to fetch my vendor invoice data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/3/vendor_invoices\n"
+            "If the API is not running or returns an error, fall back to the CSV file "
+            "in this folder: vendor-invoices.csv\n\n"
             "Use this data to "
             "Build a Four-Zone Cost Displacement Dashboard as a single index.html file "
             "using Tailwind CSS and Chart.js from CDN (no build step):\n\n"
@@ -373,8 +375,10 @@ FOUNDATION_DEMOS = [
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
             "foundation/lecture-07-saas-renegotiation.\n\n"
-            "Fetch my SaaS inventory from the course workbook API:\n"
-            "curl -s http://localhost:18801/api/workbook/7/saas_audit\n\n"
+            "Try to fetch my SaaS inventory from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/7/saas_audit\n"
+            "If the API is not running or returns an error, fall back to the CSV file "
+            "in this folder: saas-inventory.csv\n\n"
             "Use this data to build a complete SaaS audit tool:\n"
             "1. Calculate cost per user per month for every tool\n"
             "2. Flag tools over $50/user/month as 'overpriced'\n"
@@ -403,52 +407,391 @@ FOUNDATION_DEMOS = [
 ADVANCED_DEMOS = [
     {
         "num": "8",
-        "title": "Build vs Buy Just Changed",
-        "subtitle": "Build a production AI app from scratch with Claude Code",
-        "tool": "Claude Code + Ollama",
-        "time": "~10 min",
+        "title": "From Mission to IT Strategy",
+        "subtitle": "Build a strategy cascade from your company mission to IT projects",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "advanced/lecture-08-mission-strategy",
+        "description": (
+            "You paste one prompt. Claude Code reads a company mission statement, "
+            "identifies actionable verbs, maps them to strategic pillars, generates IT "
+            "project suggestions, shows IT spend benchmarks, and creates a Run/Grow/Transform "
+            "portfolio visualization — all in a single interactive HTML file."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC does everything else",
+            "Watch CC read the mission statement and IT portfolio data",
+            "CC builds a Strategy Cascade dashboard and opens it in your browser",
+            "Paste follow-up prompts to add benchmarks and gap analysis",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "advanced/lecture-08-mission-strategy. Read sample-mission.txt (a company "
+            "mission statement).\n\n"
+            "Try to fetch the IT portfolio data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/8\n"
+            "If the API is not running or returns an error, fall back to the CSV file "
+            "in this folder: sample-it-portfolio.csv\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build a Strategy Cascade tool as a single index.html — "
+            "parse the mission, identify actionable verbs, map to strategic pillars, "
+            "generate IT project suggestions, show IT spend benchmarks, create a "
+            "Run/Grow/Transform portfolio visualization using the workbook data. "
+            "Open in browser."
+        ),
+        "takeaway": (
+            "You built a strategic IT portfolio from a mission statement in 8 minutes. "
+            "Do this with YOUR mission statement this week."
+        ),
+        "followups": [
+            "Show me how IT spend compares to industry benchmarks for healthcare (typically 4-6% of revenue)",
+            "Add a gap analysis — which strategic pillars have no IT projects supporting them?",
+            "Generate a one-page executive summary I can present to the board",
+        ],
     },
     {
         "num": "9",
+        "title": "The CIO as Communicator",
+        "subtitle": "AI rewrites your technical updates into board-ready language",
+        "tool": "Claude Code",
+        "time": "~6 min",
+        "folder": "advanced/lecture-09-communicator",
+        "description": (
+            "You paste one prompt. Claude Code reads a jargon-heavy IT status report, "
+            "rewrites it three ways (for the board, the CFO, and your team), then takes "
+            "typical board questions and expands each into the technical audit checklist "
+            "it implies. AI translates in both directions — tech to business, business to tech."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC does everything else",
+            "Watch CC read the technical report and rewrite it for three audiences",
+            "CC builds a Communication Toolkit dashboard and opens it in your browser",
+            "Paste follow-up prompts to create board talking points and Slack messages",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "advanced/lecture-09-communicator. Read technical-update.txt (a jargon-heavy "
+            "IT status report). Rewrite it three ways: (1) for the board of directors, "
+            "(2) for the CFO, (3) for your team. Show before/after side by side. Then "
+            "take board-questions.txt and expand each question into the technical audit "
+            "checklist it implies. Generate a communication-toolkit.html dashboard. "
+            "Open in browser."
+        ),
+        "takeaway": (
+            "AI can translate in both directions — tech to business, business to tech. "
+            "The skill is knowing which direction to translate for which audience."
+        ),
+        "followups": [
+            "Write talking points for a 5-minute board presentation covering the top 3 items",
+            "Draft a Slack message to engineering about the database incident — direct but not blaming",
+            "Create a one-page visual status report with red/amber/green indicators",
+        ],
+    },
+    {
+        "num": "10",
+        "title": "Build vs Buy Just Changed",
+        "subtitle": "AI analyzes your SaaS stack and shows what you could build yourself",
+        "tool": "Claude Code",
+        "time": "~10 min",
+        "folder": "advanced/lecture-10-build-vs-buy",
+        "description": (
+            "You paste one prompt. Claude Code reads a SaaS evaluation spreadsheet, "
+            "runs a build-vs-buy analysis for each tool — estimating AI build cost, "
+            "time, maintenance burden, and data control benefits — then generates "
+            "a decision matrix dashboard with cost comparison charts and recommendations."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC does everything else",
+            "Watch CC analyze 5 SaaS tools and run build-vs-buy math on each",
+            "CC builds a Build vs Buy Dashboard and opens it in your browser",
+            "Paste follow-up prompts to calculate 3-year TCO and draft CFO emails",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "advanced/lecture-10-build-vs-buy.\n\n"
+            "Try to fetch the SaaS evaluation data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/10\n"
+            "If the API is not running or returns an error, fall back to the CSV file "
+            "in this folder: saas-evaluation.csv\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "For each tool, run a build-vs-buy "
+            "analysis: estimate what it would cost to build with AI, time to build, "
+            "maintenance burden, data control benefits. Generate a "
+            "build-vs-buy-dashboard.html with a decision matrix, cost comparison "
+            "charts, and recommendations. Open in browser."
+        ),
+        "takeaway": (
+            "The build-vs-buy math just changed permanently. When AI can build a "
+            "prototype in a day, paying $96K/year for 18 out of 42 features is a "
+            "different conversation."
+        ),
+        "followups": [
+            "For the tool with the strongest 'build' recommendation, create a project plan with milestones",
+            "Calculate the 3-year TCO for build vs buy for each tool, including maintenance and opportunity cost",
+            "Draft an email to the CFO explaining why we should build one of these tools in-house",
+        ],
+    },
+    {
+        "num": "11",
         "title": "Leading Teams Through AI Disruption",
         "subtitle": "Build a skills gap analyzer for your team",
         "tool": "Claude Code",
         "time": "~7 min",
-    },
-    {
-        "num": "10",
-        "title": "AI Governance and IP Protection",
-        "subtitle": "Scan an LLM for security vulnerabilities with Model Security Scanner",
-        "tool": "Model Security Scanner",
-        "time": "~8 min",
-    },
-    {
-        "num": "11",
-        "title": "Your 90-Day AI Leadership Roadmap",
-        "subtitle": "Build a visual 90-day plan with Claude Code",
-        "tool": "Claude Code",
-        "time": "~8 min",
+        "folder": "advanced/lecture-11-team-disruption",
+        "description": (
+            "You paste one prompt. Claude Code reads a team roster with roles, skills, "
+            "and experience, then builds a Skills Gap Analyzer — identifying which skills "
+            "are AI-era critical, which are becoming obsolete, and recommending personalized "
+            "90-day development plans with a heatmap visualization."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC does everything else",
+            "Watch CC analyze 12 team members and assess each person's AI readiness",
+            "CC builds a Skills Gap Report with heatmap and opens it in your browser",
+            "Paste follow-up prompts to rank team members and estimate training costs",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "advanced/lecture-11-team-disruption.\n\n"
+            "Try to fetch the team roster data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/11\n"
+            "If the API is not running or returns an error, fall back to the CSV file "
+            "in this folder: team-roster.csv\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build a Skills "
+            "Gap Analyzer — for each person, identify which skills are AI-era critical, "
+            "which are becoming obsolete, and recommend a personalized 90-day development "
+            "plan. Generate skills-gap-report.html with a heatmap visualization. "
+            "Open in browser."
+        ),
+        "takeaway": (
+            "Your job isn't to replace your team — it's to transform them. This tool "
+            "shows you exactly where to invest."
+        ),
+        "followups": [
+            "Which team members are best positioned for AI-augmented roles? Rank them.",
+            "Create a training budget estimate — what would it cost to upskill the whole team?",
+            "Draft individual development plan emails for the 3 people most at risk of role displacement",
+        ],
     },
     {
         "num": "12",
-        "title": "Building Your AI-Era IT Team",
-        "subtitle": "Build an AI-powered triage agent with local models",
-        "tool": "Claude Code + Ollama",
+        "title": "AI Governance and IP Protection",
+        "subtitle": "Build a governance dashboard that surfaces shadow AI risk",
+        "tool": "Claude Code",
         "time": "~8 min",
+        "folder": "advanced/lecture-12-governance",
+        "description": (
+            "You paste one prompt. Claude Code reads an inventory of AI tools across "
+            "the organization, classifies each by risk level and data exposure, surfaces "
+            "shadow AI usage, generates a model card for the highest-risk tool, and "
+            "builds a governance dashboard with a risk heatmap and compliance tracker."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC does everything else",
+            "Watch CC classify 10 AI tools by risk, data exposure, and approval status",
+            "CC builds a Governance Dashboard and opens it in your browser",
+            "Paste follow-up prompts to draft policies and approval workflows",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "advanced/lecture-12-governance.\n\n"
+            "Try to fetch the AI tools inventory from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/12\n"
+            "If the API is not running or returns an error, fall back to the CSV file "
+            "in this folder: ai-tools-inventory.csv\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build an AI Governance Dashboard — "
+            "classify each tool by risk level, data exposure, compliance status. Generate "
+            "a model card for the highest-risk tool. Create governance-dashboard.html "
+            "with a risk heatmap, compliance checklist progress tracker, and recommended "
+            "policies. Open in browser."
+        ),
+        "takeaway": (
+            "Shadow AI is the new shadow IT. If you don't govern it, your data is "
+            "already in someone else's model."
+        ),
+        "followups": [
+            "Draft an AI Acceptable Use Policy for the organization based on the risks identified",
+            "Create an approval workflow — what should the process be for a new AI tool request?",
+            "Identify which tools might violate GDPR or HIPAA and explain why",
+        ],
     },
     {
         "num": "13",
-        "title": "AI Tools, Dependency, and Vendor Risk",
-        "subtitle": "Compare LLM providers and benchmark for vendor independence",
-        "tool": "Claude Code + Ollama",
+        "title": "Your 90-Day AI Leadership Roadmap",
+        "subtitle": "Build an interactive 90-day plan from all your findings",
+        "tool": "Claude Code",
         "time": "~8 min",
+        "folder": "advanced/lecture-13-roadmap",
+        "description": (
+            "You paste one prompt. Claude Code reads a JSON summary of findings from "
+            "previous lectures — legacy systems, shadow IT, SaaS spend, team skills — "
+            "and builds an interactive 90-Day AI Roadmap with a Gantt-style timeline, "
+            "phases, milestones, dependencies, risk flags, and a progress tracker."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC does everything else",
+            "Watch CC synthesize findings from legacy systems, shadow IT, SaaS, and team data",
+            "CC builds an interactive 90-Day Roadmap and opens it in your browser",
+            "Paste follow-up prompts to add budget tracking and RACI matrices",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "advanced/lecture-13-roadmap. Read current-state.json (summary of findings "
+            "from previous lectures — legacy systems, shadow IT, SaaS spend, team "
+            "skills). Build a visual 90-Day AI Roadmap as roadmap.html — a Gantt-style "
+            "timeline with phases (Assess, Pilot, Prove ROI, Scale), milestones, "
+            "dependencies, risk flags, and a progress tracker. Make it interactive — "
+            "click milestones to expand details. Open in browser."
+        ),
+        "takeaway": (
+            "A roadmap nobody follows is just decoration. This one connects every "
+            "action to a finding you already validated."
+        ),
+        "followups": [
+            "Add a budget burn-down chart showing how the $850K discretionary budget gets allocated across phases",
+            "Create a RACI matrix for the first 30 days — who owns what?",
+            "Generate a one-page executive summary of the 90-day plan for the board",
+        ],
+    },
+    {
+        "num": "14",
+        "title": "Building Your AI-Era IT Team",
+        "subtitle": "See how one person with AI replaces a 3-person L1 support team",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "advanced/lecture-14-ai-era-team",
+        "description": (
+            "You paste one prompt. Claude Code reads a 15-person IT org chart and a set "
+            "of real support emails, then builds an AI-powered email triage workflow "
+            "visualization showing how one person with AI can handle L1 support that "
+            "previously took three. Includes current vs future org chart, cost savings, "
+            "and a role-by-role transition plan."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC does everything else",
+            "Watch CC analyze the org chart and triage 10 sample support emails",
+            "CC builds a Team Transformation dashboard and opens it in your browser",
+            "Paste follow-up prompts to calculate savings and draft communication plans",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "advanced/lecture-14-ai-era-team.\n\n"
+            "Try to fetch the org chart data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/14\n"
+            "If the API is not running or returns an error, fall back to the CSV file "
+            "in this folder: org-chart.csv\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build an AI-powered email triage "
+            "workflow demo: create a simple n8n-style workflow visualization that shows "
+            "how one person with AI can do L1 support that previously took 3 people. "
+            "Use sample-support-emails.json as test data. Generate "
+            "team-transformation.html showing current vs future org chart, cost savings, "
+            "and a role-by-role transition plan. Open in browser."
+        ),
+        "takeaway": (
+            "The hardest part of AI transformation isn't the technology — it's the "
+            "conversation with your team. This demo gives you the data to have that "
+            "conversation honestly."
+        ),
+        "followups": [
+            "Show me the cost savings if we transform 3 L1 roles into 1 AI-augmented role — include retraining costs",
+            "Draft a communication plan for announcing the team restructure — empathetic, honest, opportunity-focused",
+            "Create a skills transition matrix showing where each displaced person could move within IT",
+        ],
+    },
+    {
+        "num": "15",
+        "title": "AI Tools, Dependency, and Vendor Risk",
+        "subtitle": "Score your vendors on lock-in, portability, and switching cost",
+        "tool": "Claude Code",
+        "time": "~8 min",
+        "folder": "advanced/lecture-15-vendor-risk",
+        "description": (
+            "You paste one prompt. Claude Code reads 5 AI vendor contracts, scores each "
+            "on lock-in, data portability, pricing risk, capability, and support, then "
+            "simulates a vendor-down scenario and calculates switching costs. Generates "
+            "a Vendor Risk Dashboard with radar charts, a comparison table, and "
+            "mitigation recommendations."
+        ),
+        "prerequisites": [
+            "Claude Code installed with Claude Pro/Max subscription ($20/month)",
+            "cio-ai-demos repo cloned (use the Master Setup prompt above)",
+        ],
+        "steps": [
+            "Open any terminal and type: claude",
+            "Paste the prompt below — CC does everything else",
+            "Watch CC analyze 5 vendor contracts and score them on 5 risk dimensions",
+            "CC builds a Vendor Risk Dashboard and opens it in your browser",
+            "Paste follow-up prompts to simulate price hikes and draft contract clauses",
+        ],
+        "cc_prompt": (
+            "Find the cio-ai-demos repo on my machine. Inside it, go to "
+            "advanced/lecture-15-vendor-risk.\n\n"
+            "Try to fetch the vendor contract data from the course workbook API:\n"
+            "curl -s http://localhost:18801/api/workbook/15\n"
+            "If the API is not running or returns an error, fall back to the CSV file "
+            "in this folder: vendor-contracts.csv\n\n"
+            "The workbook has test data already loaded for Meridian Engineering — use that. "
+            "Build a Vendor Risk "
+            "Dashboard — score each vendor on 5 dimensions (lock-in, data portability, "
+            "pricing risk, capability, support), simulate a vendor-down scenario, show "
+            "the cost of switching. Generate vendor-risk-dashboard.html with a radar "
+            "chart per vendor, a risk comparison table, and mitigation recommendations. "
+            "Open in browser."
+        ),
+        "takeaway": (
+            "The best time to negotiate your exit terms is before you sign. The second "
+            "best time is now — with data."
+        ),
+        "followups": [
+            "Simulate: Salesforce doubles their price at renewal. What's our playbook?",
+            "Draft a vendor risk clause we should add to all future AI contracts",
+            "Create a vendor diversification strategy — how do we reduce single-vendor dependency?",
+        ],
     },
 ]
 
 
 SERVICE_MGMT_DEMOS = [
     {
-        "num": "14",
+        "num": "16",
         "title": "The Help Desk is Broken",
         "subtitle": "Build an analytics dashboard that reveals the real cost of your help desk",
         "tool": "Claude Code",
@@ -466,7 +809,7 @@ SERVICE_MGMT_DEMOS = [
             "CIO AI Demos app running (for workbook data)",
         ],
         "steps": [
-            "Open http://localhost:18802 → Workbook tab → expand Lecture 14 to review ticket data",
+            "Open http://localhost:18802 → Workbook tab → expand Lecture 16 to review ticket data",
             "Open any terminal and type: claude",
             "Paste the prompt below",
             "CC fetches your ticket data and builds the analytics dashboard",
@@ -476,9 +819,9 @@ SERVICE_MGMT_DEMOS = [
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
             "course-03-service-mgmt/lecture-01-helpdesk-broken.\n\n"
             "Fetch my help desk ticket data from the course workbook API:\n"
-            "curl -s http://localhost:18801/api/workbook/14/helpdesk_tickets\n\n"
+            "curl -s http://localhost:18801/api/workbook/16/helpdesk_tickets\n\n"
             "Also fetch my baseline metrics:\n"
-            "curl -s http://localhost:18801/api/workbook/14/helpdesk_baseline\n\n"
+            "curl -s http://localhost:18801/api/workbook/16/helpdesk_baseline\n\n"
             "Build a Help Desk Analytics Dashboard as index.html using Tailwind CSS and "
             "Chart.js from CDN (no build step):\n\n"
             "1. KPI cards: Total Tickets, Avg Resolution Time, SLA Compliance Rate, "
@@ -506,7 +849,7 @@ SERVICE_MGMT_DEMOS = [
         ],
     },
     {
-        "num": "15",
+        "num": "17",
         "title": "AI Triage — How Machines Read Tickets",
         "subtitle": "Build a live ticket classifier that categorizes, prioritizes, and routes in real-time",
         "tool": "Claude Code + Ollama",
@@ -567,7 +910,7 @@ SERVICE_MGMT_DEMOS = [
         ],
     },
     {
-        "num": "16",
+        "num": "18",
         "title": "Auto-Resolution — The 70% Rule",
         "subtitle": "Build a simulation showing which tickets AI resolves vs. escalates",
         "tool": "Claude Code + Ollama",
@@ -593,7 +936,7 @@ SERVICE_MGMT_DEMOS = [
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
             "course-03-service-mgmt/lecture-03-auto-resolution.\n\n"
-            "Fetch ticket data: curl -s http://localhost:18801/api/workbook/14/helpdesk_tickets\n\n"
+            "Fetch ticket data: curl -s http://localhost:18801/api/workbook/16/helpdesk_tickets\n\n"
             "Build an Auto-Resolution Pipeline Simulator:\n\n"
             "1. For each ticket, use Ollama (llama3.2:3b) to:\n"
             "   - Classify the ticket\n"
@@ -626,7 +969,7 @@ SERVICE_MGMT_DEMOS = [
         ],
     },
     {
-        "num": "17",
+        "num": "19",
         "title": "Knowledge Base That Builds Itself",
         "subtitle": "Watch AI turn resolved tickets into searchable KB articles",
         "tool": "Claude Code + Ollama",
@@ -651,7 +994,7 @@ SERVICE_MGMT_DEMOS = [
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
             "course-03-service-mgmt/lecture-04-knowledge-base.\n\n"
-            "Fetch resolved tickets: curl -s http://localhost:18801/api/workbook/14/helpdesk_tickets\n\n"
+            "Fetch resolved tickets: curl -s http://localhost:18801/api/workbook/16/helpdesk_tickets\n\n"
             "Build a Self-Generating Knowledge Base:\n\n"
             "1. For each resolved ticket (status = Resolved), use Ollama to generate a KB article:\n"
             "   - Title (clear, searchable)\n"
@@ -683,7 +1026,7 @@ SERVICE_MGMT_DEMOS = [
         ],
     },
     {
-        "num": "18",
+        "num": "20",
         "title": "Escalation Intelligence",
         "subtitle": "Build the 'talk to a human' flow with full context handoff",
         "tool": "Claude Code",
@@ -745,7 +1088,7 @@ SERVICE_MGMT_DEMOS = [
         ],
     },
     {
-        "num": "19",
+        "num": "21",
         "title": "SLA Prediction and Breach Prevention",
         "subtitle": "Build a dashboard that predicts SLA breaches before they happen",
         "tool": "Claude Code",
@@ -770,7 +1113,7 @@ SERVICE_MGMT_DEMOS = [
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
             "course-03-service-mgmt/lecture-06-sla-prediction.\n\n"
-            "Fetch ticket data: curl -s http://localhost:18801/api/workbook/14/helpdesk_tickets\n\n"
+            "Fetch ticket data: curl -s http://localhost:18801/api/workbook/16/helpdesk_tickets\n\n"
             "Build an SLA Prediction Dashboard (index.html):\n\n"
             "SLA targets: Critical=2hr, High=4hr, Medium=24hr, Low=48hr\n\n"
             "1. KPI cards: Open Tickets, At Risk (>75% of SLA elapsed), Breached, "
@@ -801,7 +1144,7 @@ SERVICE_MGMT_DEMOS = [
         ],
     },
     {
-        "num": "20",
+        "num": "22",
         "title": "Integrating with Your Stack",
         "subtitle": "Build a multi-channel ticket ingestion demo — Slack, Teams, email, and portal",
         "tool": "Claude Code",
@@ -858,7 +1201,7 @@ SERVICE_MGMT_DEMOS = [
         ],
     },
     {
-        "num": "21",
+        "num": "23",
         "title": "The Transition Plan",
         "subtitle": "Build an interactive ROI calculator and 90-day implementation roadmap",
         "tool": "Claude Code",
@@ -884,7 +1227,7 @@ SERVICE_MGMT_DEMOS = [
         "cc_prompt": (
             "Find the cio-ai-demos repo on my machine. Inside it, go to "
             "course-03-service-mgmt/lecture-08-transition-plan.\n\n"
-            "Fetch baseline data: curl -s http://localhost:18801/api/workbook/14/helpdesk_baseline\n\n"
+            "Fetch baseline data: curl -s http://localhost:18801/api/workbook/16/helpdesk_baseline\n\n"
             "Build an AI Help Desk ROI Calculator & Transition Roadmap (index.html):\n\n"
             "SECTION 1 — ROI Calculator:\n"
             "- Input sliders: Company Size (100-5000), IT Support Staff (1-50), "
